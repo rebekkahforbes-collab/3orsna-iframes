@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Venue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://static.wixstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Mulish:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Pixel Pals build standards ─────────────────────────────────────
+   No visible scrollbars anywhere (everything still scrolls), media never
+   wider than its box, 16px form text on phones so iOS doesn't zoom, and a
+   little side padding on phones so nothing touches the screen edge.
+   Height: the reporter at the end of this file (setHeight → site-wide listener). */
+*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{width:0;height:0;display:none}
+img,video,canvas{max-width:100%}
+@media (max-width:760px){input,select,textarea{font-size:16px!important}}
+@media (max-width:600px){.wrap,.page{padding-left:14px!important;padding-right:14px!important}}
+
+  :root {
+    color-scheme: dark;
+    --bg:          #0C0C0B;
+    --surface:     #141413;
+    --field:       #181713;
+    --border:      #262625;
+    --border-quiet:#201F1E;
+    --gold:        #AA936F;
+    --gold-tint:   rgba(170,147,111,0.10);
+    --gold-line:   rgba(170,147,111,0.28);
+    --gold-soft:   #C4B091;
+    --text:        #FFFFFF;
+    --body:        #ADADAD;
+    --placeholder: #8C8C8B;
+    --danger:      #C4705A;
+    --danger-tint: #241713;
+    --r-field:     8px;
+    --r-card:      12px;
+    --font-display:"Playfair Display", Georgia, serif;
+    --font-body:   "Mulish", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page { max-width: 1050px; margin: 0 auto; }
+
+  .eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--gold); margin: 0 0 8px;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    border-radius: var(--r-card);
+    overflow: hidden;
+    min-height: 360px;
+    display: flex; align-items: flex-end;
+    background: var(--surface);
+  }
+  .hero img {
+    position: absolute; inset: 0; z-index: 0;
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  /* Two scrims, because vendors upload whatever they like and half of these
+     photos are bright white villas in full sun. The horizontal one protects the
+     text column; the vertical one grounds the card into the page below it.
+     Explicit z-index because ::after is the last child of .hero and would
+     otherwise paint over the text. */
+  .hero::after {
+    content: ""; position: absolute; inset: 0; z-index: 1;
+    background:
+      linear-gradient(to right,  rgba(8,8,7,0.88) 0%, rgba(8,8,7,0.62) 38%, rgba(8,8,7,0.20) 78%, rgba(8,8,7,0.10) 100%),
+      linear-gradient(to bottom, rgba(8,8,7,0.30) 0%, rgba(8,8,7,0.34) 38%, rgba(12,12,11,0.96) 100%);
+  }
+  .hero-in { position: relative; z-index: 2; padding: 32px 30px; width: 100%; }
+  @media (max-width: 600px) { .hero-in { padding: 24px 18px; } .hero { min-height: 300px; } }
+
+  /* Belt and braces: a soft shadow keeps the type legible even if a photo
+     defeats the scrims entirely. */
+  .hero h1, .hero .tagline, .hero .herometa, .hero .back {
+    text-shadow: 0 1px 3px rgba(0,0,0,0.55), 0 2px 22px rgba(0,0,0,0.5);
+  }
+
+  .back {
+    display: inline-block;
+    color: #D2D2D0; font-size: 14px; text-decoration: none;
+    margin: 0 0 14px; transition: color 140ms ease;
+  }
+  .back:hover { color: var(--gold); }
+
+  .hero h1 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(28px, 4.6vw, 44px); line-height: 1.1;
+    margin: 0 0 6px; max-width: 20ch; overflow-wrap: anywhere;
+  }
+  .tagline { color: var(--gold); font-size: 16px; margin: 0 0 12px; }
+
+  .herometa { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; font-size: 14px; color: #D2D2D0; }
+  .herometa .rating { color: var(--gold); font-weight: 600; }
+  .herometa svg { width: 14px; height: 14px; vertical-align: -2px; margin-right: 5px; stroke: var(--gold); fill: none; stroke-width: 1.6; }
+  .herometa .star { fill: var(--gold); stroke: none; }
+
+  /* ---------- Layout ---------- */
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 26px; margin: 30px 0 0; }
+  @media (min-width: 820px) {
+    .cols { grid-template-columns: minmax(0, 1.55fr) minmax(280px, 1fr); gap: 30px; }
+    .aside { position: sticky; top: 20px; align-self: start; }
+  }
+
+  .lede { font-size: 16px; line-height: 1.75; color: var(--body); margin: 0 0 22px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; margin: 0 0 26px; }
+  .chips span {
+    background: var(--field); border: 1px solid var(--gold-line);
+    border-radius: 999px; color: var(--gold);
+    font-size: 13px; padding: 7px 15px; white-space: nowrap;
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-card); padding: 22px;
+  }
+  @media (max-width: 600px) { .card { padding: 18px; } }
+  .card + .card { margin-top: 18px; }
+
+  .tickrow { display: flex; align-items: flex-start; gap: 12px; font-size: 15px; color: var(--body); line-height: 1.6; }
+  .tickrow + .tickrow { margin-top: 14px; }
+  .tickrow svg { flex: 0 0 auto; width: 15px; height: 15px; margin-top: 3px; stroke: var(--gold); fill: none; stroke-width: 1.6; }
+  .tickrow b { color: var(--text); font-weight: 600; }
+
+  /* ---------- Aside panel ---------- */
+  .price { font-family: var(--font-display); font-size: 26px; line-height: 1.2; margin: 0 0 20px; }
+  .price small { display: block; font-family: var(--font-body); font-size: 13px; color: var(--placeholder); font-weight: 400; margin-top: 6px; }
+
+  .btn {
+    border-radius: var(--r-card);
+    cursor: pointer; display: block; width: 100%;
+    font-family: var(--font-body); font-size: 15px; font-weight: 600;
+    padding: 14px 20px; text-align: center; text-decoration: none;
+    transition: filter 140ms ease, background 140ms ease;
+  }
+  .btn.solid { background: var(--gold); border: 1px solid var(--gold); color: var(--text); }
+  .btn.solid:hover { filter: brightness(1.08); }
+  .btn.plain { background: transparent; border: 1px solid var(--border); color: var(--body); }
+  .btn.plain:hover { border-color: var(--gold); color: var(--gold); }
+  .btn[disabled] { opacity: 0.5; cursor: not-allowed; filter: none; }
+  .btn + .btn { margin-top: 10px; }
+
+
+  .rule { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  .contact { display: grid; gap: 10px; margin: 0 0 20px; }
+  .contact a, .contact span {
+    color: var(--body); font-size: 14px; text-decoration: none;
+    display: flex; align-items: center; gap: 9px; word-break: break-word;
+  }
+  .contact a:hover { color: var(--gold); }
+  .contact svg { flex: 0 0 auto; width: 15px; height: 15px; stroke: var(--gold); fill: none; stroke-width: 1.6; }
+
+  /* ---------- Sections ---------- */
+  .sect { margin: 44px 0 0; }
+  .sect > h2 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: 26px; margin: 0 0 4px;
+  }
+  .sect > p.sub { font-size: 14px; color: var(--placeholder); margin: 0 0 20px; line-height: 1.6; }
+
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); gap: 14px; }
+  .fact {
+    background: var(--surface); border: 1px solid var(--border-quiet);
+    border-radius: var(--r-field); padding: 15px 16px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .fact img { flex: 0 0 auto; width: 22px; height: 22px; object-fit: contain; margin-top: 1px; opacity: 0.9; }
+  .fact .k { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin: 0 0 4px; font-weight: 600; }
+  .fact .v { font-size: 15px; color: var(--text); line-height: 1.5; word-break: break-word; }
+
+  /* ---------- Gallery ---------- */
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 16px; }
+  .shot {
+    position: relative; border-radius: var(--r-card); overflow: hidden;
+    aspect-ratio: 4 / 3; background: var(--field);
+    border: 1px solid var(--border-quiet);
+  }
+  .shot img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 620ms cubic-bezier(0.22,0.61,0.36,1); }
+  .shot:hover img { transform: scale(1.05); }
+  .shot figcaption {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to top, rgba(12,12,11,0.92), rgba(12,12,11,0));
+    color: var(--text); font-size: 13px; padding: 26px 14px 12px;
+  }
+  /* A missing file must not leave giant alt text sprawling across the grid. */
+  .shot img[data-broken] { display: none; }
+  .shot.broken { display: grid; place-items: center; }
+  .shot.broken::before {
+    content: "Photo unavailable";
+    color: var(--border); font-size: 12px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+
+  .vidwrap {
+    position: relative; aspect-ratio: 16 / 9;
+    background: var(--field); border: 1px solid var(--border-quiet);
+    border-radius: var(--r-card); overflow: hidden;
+  }
+  .vidwrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+  /* ---------- Offer cards ---------- */
+  .offers { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 16px; }
+  .offer {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-card); overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: border-color 200ms ease;
+  }
+  .offer:hover { border-color: var(--gold-line); }
+  .offer-media { aspect-ratio: 16 / 9; background: var(--field); overflow: hidden; }
+  .offer-media img {
+    display: block; width: 100%; height: 100%; object-fit: cover;
+    transition: transform 620ms cubic-bezier(0.22,0.61,0.36,1);
+  }
+  .offer:hover .offer-media img { transform: scale(1.05); }
+  .offer-body { display: flex; flex-direction: column; gap: 9px; padding: 18px; flex: 1 1 auto; }
+  .offer h3 { font-family: var(--font-display); font-weight: 400; font-size: 19px; margin: 0; line-height: 1.3; }
+  .offer p { font-size: 14px; color: var(--body); line-height: 1.6; margin: 0; }
+  .offer .amt { color: var(--gold); font-weight: 600; font-size: 16px; margin-top: auto; }
+  .offer .when { font-size: 12px; color: var(--placeholder); line-height: 1.5; }
+  .offer .when.urgent { color: var(--gold-soft); font-weight: 600; }
+
+  .offer .incl { border-top: 1px solid var(--border-quiet); margin: 4px 0 0; padding: 12px 0 0; }
+  .offer .incl p {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--gold); margin: 0 0 7px;
+  }
+  .offer .incl ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+  .offer .incl li { font-size: 13px; color: var(--body); padding-left: 15px; position: relative; line-height: 1.45; }
+  .offer .incl li::before {
+    content: ""; position: absolute; left: 0; top: 7px;
+    width: 5px; height: 5px; border-radius: 50%; background: var(--gold);
+  }
+
+  /* ---------- Inquiry form ---------- */
+  label.f { display: block; margin: 0 0 16px; }
+  label.f > span {
+    display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--body); margin: 0 0 8px;
+  }
+  .req { color: var(--gold); margin-left: 3px; font-style: normal; }
+
+  input[type="text"], input[type="tel"], input[type="email"], input[type="number"], input[type="date"], input[type="url"], input[type="search"], textarea {
+    width: 100%; background: var(--field);
+    border: 1px solid var(--border); border-radius: var(--r-field);
+    color: var(--text); font-family: var(--font-body); font-size: 15px;
+    padding: 12px 14px; min-height: 45px;
+    transition: border-color 140ms ease, background 140ms ease;
+  }
+  input::placeholder { color: var(--placeholder); }
+  input:hover { background: #1E1C19; }
+  input:focus-visible, button:focus-visible, .cal td button:focus-visible {
+    outline: none; border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(170,147,111,0.22);
+  }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); gap: 0 18px; }
+
+  /* Calendar */
+  .cal { background: var(--field); border: 1px solid var(--border); border-radius: var(--r-field); padding: 14px; }
+  @media (max-width: 400px) { .cal { padding: 10px 6px; } }
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin: 0 0 12px; }
+  .cal-head .m { font-family: var(--font-display); font-size: 17px; }
+  .cal-nav { background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--body); cursor: pointer; font-size: 15px; line-height: 1; padding: 7px 11px; }
+  .cal-nav:hover:not([disabled]) { border-color: var(--gold); color: var(--gold); }
+  .cal-nav[disabled] { opacity: 0.35; cursor: not-allowed; }
+  .cal table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+  .cal th { color: var(--placeholder); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0 0 8px; }
+  .cal td { padding: 2px; text-align: center; }
+  .cal td button {
+    background: transparent; border: 1px solid transparent; border-radius: 7px;
+    color: var(--text); cursor: pointer; font-family: var(--font-body);
+    font-size: 14px; height: 36px; width: 100%; padding: 0;
+    transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+  }
+  .cal td button:hover:not([disabled]) { background: var(--gold-tint); border-color: var(--gold-line); }
+  .cal td button[disabled] { color: #3A3A38; cursor: not-allowed; }
+  .cal td button[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #1A1509; font-weight: 700; }
+
+  .picked { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+  .picked button {
+    background: var(--gold-tint); border: 1px solid var(--gold-line); border-radius: 999px;
+    color: var(--gold); cursor: pointer; font-family: var(--font-body);
+    font-size: 13px; padding: 6px 12px;
+  }
+  .picked button:hover { background: rgba(170,147,111,0.2); }
+  .picked button::after { content: " \00d7"; font-weight: 700; }
+  .picked-note { font-size: 13px; color: var(--placeholder); margin: 12px 0 0; }
+
+  .msg { border-radius: var(--r-field); font-size: 14px; line-height: 1.6; margin: 16px 0 0; padding: 12px 15px; }
+  .msg.ok   { background: var(--gold-tint); border: 1px solid var(--gold-line); color: var(--gold-soft); }
+  .msg.err  { background: var(--danger-tint); border: 1px solid rgba(196,112,90,0.45); color: var(--danger); }
+  .msg.busy { background: var(--surface); border: 1px solid var(--border); color: var(--body); }
+
+  .err-msg { font-style: normal; display: block; font-size: 13px; color: var(--danger); margin: 7px 0 0; }
+  .invalid input { border-color: var(--danger); }
+  .invalid .cal { border-color: var(--danger); }
+
+  .skel { background: var(--surface); border: 1px solid var(--border-quiet); border-radius: var(--r-card); }
+  #loading .skel + .skel { margin-top: 16px; }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes riseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    @keyframes pulse  { 0%,100% { opacity: 0.45; } 50% { opacity: 0.75; } }
+    .anim { opacity: 0; animation: riseIn 520ms cubic-bezier(0.22,0.61,0.36,1) forwards; }
+    .skel { animation: pulse 1.5s ease-in-out infinite; }
+  }
+  @media (prefers-reduced-motion: reduce) { .anim { opacity: 1; } }
+</style>
+<style id="pp-layout">
+/* ── Pixel Pals layout safeguards ─────────────────────────────────────
+   Transparent page so the Wix section shows through seamlessly, sturdy form
+   controls on phones, long words wrap instead of widening the page, and a
+   safety space at the end so nothing is ever cut off. */
+html,body{background:transparent!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-wrap:break-word}
+input,select,textarea,button{max-width:100%}
+table{max-width:100%}
+/* iOS draws date fields wider and taller than other inputs; make them behave. */
+input[type=date],input[type=time],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;display:block}
+input[type=date]::-webkit-date-and-time-value{text-align:start;min-height:1.4em}
+/* Save bars sit in the flow: a sticky bar needs a solid background, and the page has none. */
+.savebar{position:static!important;background:transparent!important}
+/* Width: 80% of the frame on wide screens, never narrower than before (1050px). */
+.page{width:max(80%, min(100%, 1050px))!important;max-width:none!important;margin-left:auto!important;margin-right:auto!important}
+@media (max-width:1100px){.page{padding-left:20px!important;padding-right:20px!important}}
+@media (max-width:600px){.page{padding-left:14px!important;padding-right:14px!important}}
+/* Safety space under the content (counted by the height reporter). */
+.pp-safe-space{display:block;height:140px}
+@media (max-width:760px){.pp-safe-space{height:calc(180px + env(safe-area-inset-bottom, 0px))}}
+</style>
+<style id="couples-gate">
+  /* ---------- couples-only pop-up (over the enquiry form) ---------- */
+  .gate-host { position: relative; }
+  .gate {
+    position: absolute; inset: 0; z-index: 20; display: flex; justify-content: center; align-items: flex-start;
+    padding: 40px 16px; background: rgba(12,12,11,0.78); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    border-radius: var(--r-card);
+  }
+  .gate[hidden] { display: none; }
+  .gate-card {
+    width: 100%; max-width: 460px; background: var(--surface); border: 1px solid var(--gold-line);
+    border-radius: var(--r-card); padding: 26px 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  }
+  .gate-card h3 { font-family: var(--font-display); font-weight: 400; font-size: 23px; line-height: 1.25; margin: 0 0 10px; color: var(--text); }
+  .gate-card p { font-size: 15px; line-height: 1.65; color: var(--body); margin: 0 0 20px; }
+  .gate-acts { display: flex; flex-direction: column; gap: 10px; }
+  .gate-acts button {
+    font-family: var(--font-body); font-size: 15px; font-weight: 600; border-radius: var(--r-field);
+    padding: 12px 18px; cursor: pointer; width: 100%;
+  }
+  .gate-go { background: var(--gold); border: 1px solid var(--gold); color: #1A1509; }
+  .gate-go:hover { filter: brightness(1.08); }
+  .gate-alt { background: transparent; border: 1px solid var(--gold-line); color: var(--gold-soft); }
+  .gate-x { background: none; border: 0 !important; color: var(--placeholder); font-weight: 500 !important; padding: 6px !important; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div id="loading">
+    <div class="skel" style="min-height:360px"></div>
+    <div class="skel" style="height:150px"></div>
+  </div>
+
+  <div id="content" hidden>
+
+    <div class="hero anim" id="hero">
+      <img id="heroImg" alt="" hidden>
+      <div class="hero-in">
+        <a class="back" id="backLink" href="#">&larr; Back to venues</a>
+        <h1 id="vName">Venue</h1>
+        <p class="tagline" id="vTagline" hidden></p>
+        <div class="herometa">
+          <span class="rating" id="vRating" hidden></span>
+          <span id="vCity" hidden></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div class="main">
+        <p class="lede" id="vNotes" hidden></p>
+        <div class="chips" id="vChips" hidden></div>
+
+        <div class="card" id="highlightsCard" hidden>
+          <p class="eyebrow">Highlights</p>
+          <div id="highlights"></div>
+        </div>
+      </div>
+
+      <aside class="aside">
+        <div class="card">
+          <p class="eyebrow" id="priceLabel">Starting from</p>
+          <p class="price" id="vPrice">On request</p>
+
+          <button type="button" class="btn solid" id="inquiryJump">Send an inquiry</button>
+
+          <hr class="rule" id="contactRule" hidden>
+          <div class="contact" id="vContact"></div>
+
+          <button type="button" class="btn plain" id="claimBtn" hidden>Claim this profile</button>
+        </div>
+      </aside>
+    </div>
+
+    <section class="sect" id="videoSect" hidden>
+      <h2>Walkthrough</h2>
+      <div class="vidwrap"><iframe id="video" title="Venue walkthrough" allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
+    </section>
+
+    <section class="sect" id="gallerySect" hidden>
+      <h2>Portfolio</h2>
+      <div class="gallery" id="gallery"></div>
+    </section>
+
+    <section class="sect" id="factsSect" hidden>
+      <h2>The specifics</h2>
+      <div class="facts" id="facts"></div>
+    </section>
+
+    <section class="sect" id="amenSect" hidden>
+      <h2>Facilities</h2>
+      <div class="facts" id="amenities"></div>
+    </section>
+
+    <section class="sect" id="priceSect" hidden>
+      <h2>Pricing and terms</h2>
+      <div class="facts" id="priceFacts"></div>
+    </section>
+
+    <section class="sect" id="cateringSect" hidden>
+      <h2>Catering and cuisine</h2>
+      <div class="offers" id="catering"></div>
+    </section>
+
+    <section class="sect" id="packageSect" hidden>
+      <h2>Special packages</h2>
+      <div class="offers" id="packages"></div>
+    </section>
+
+    <section class="sect" id="promoSect" hidden>
+      <h2>Promotions</h2>
+      <div class="offers" id="promotions"></div>
+    </section>
+
+    <section class="sect" id="vendorSect" hidden>
+      <h2>About the vendor</h2>
+      <div class="card" id="vendorCard"></div>
+    </section>
+
+    <section class="sect gate-host" id="inquirySect">
+      <h2>Check availability</h2>
+      <p class="sub">Pick up to five dates that could work. The venue replies to you directly.</p>
+
+      <div class="card">
+        <form id="inquiryForm" novalidate>
+          <div class="grid2">
+            <label class="f" data-for="name">
+              <span>Your name<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="text" id="name" maxlength="90" autocomplete="name" placeholder="Layla Haddad">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="f" data-for="email">
+              <span>Email<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="email" id="email" autocomplete="email" placeholder="you@example.com">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="f" data-for="phone">
+              <span>Phone<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="tel" id="phone" autocomplete="tel" placeholder="+962 79 000 0000">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="f" data-for="guests">
+              <span>Guests<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="number" id="guests" min="1" max="10000" step="1" placeholder="220">
+              <em class="err-msg" hidden></em>
+            </label>
+          </div>
+
+          <div class="f" id="datesField">
+            <span style="display:block;font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--body);margin:0 0 8px">Preferred dates<em class="req" aria-hidden="true">*</em></span>
+            <div class="cal" id="cal">
+              <div class="cal-head">
+                <button type="button" class="cal-nav" id="prevM" aria-label="Previous month">&larr;</button>
+                <span class="m" id="calMonth"></span>
+                <button type="button" class="cal-nav" id="nextM" aria-label="Next month">&rarr;</button>
+              </div>
+              <table role="grid">
+                <thead><tr id="calDow"></tr></thead>
+                <tbody id="calBody"></tbody>
+              </table>
+            </div>
+            <div class="picked" id="picked"></div>
+            <p class="picked-note" id="pickedNote">No dates chosen yet. Pick up to five.</p>
+            <em class="err-msg" hidden></em>
+          </div>
+
+          <button type="submit" class="btn solid" id="submitBtn" style="margin-top:8px">Send inquiry</button>
+          <div class="msg" id="formMsg" hidden></div>
+        </form>
+      </div>
+    
+      <div class="gate" id="gate" hidden role="dialog" aria-modal="true" aria-labelledby="gateT">
+        <div class="gate-card">
+          <h3 id="gateT"></h3>
+          <p id="gateB"></p>
+          <div class="gate-acts">
+            <button type="button" class="gate-go" id="gateGo"></button>
+            <button type="button" class="gate-alt" id="gateAlt"></button>
+            <button type="button" class="gate-x" id="gateX">Not now</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var D = null;                 // venue payload
+  var picked = [];              // ISO date strings
+  var MAX_DATES = 5;
+  var view = new Date();
+  view.setDate(1);
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  function post(m) { try { window.parent.postMessage(m, "*"); } catch (e) {} }
+  /* Height: the Pixel Pals reporter at the end of this file (setHeight → site-wide listener). */
+
+  /* The body is the scroll box (see the reporter at the end). While the iframe
+     is a fixed height it scrolls itself; once the site-wide listener sizes it to
+     its content there is nothing to scroll inside, so the page scrolls instead. */
+  function scrollToEl(node, gap) {
+    var b = document.body;
+    var top = Math.max(0, Math.round(node.getBoundingClientRect().top - b.getBoundingClientRect().top + b.scrollTop - (gap || 24)));
+    if (b.scrollHeight > b.clientHeight + 2) b.scrollTo({ top: top, behavior: "smooth" });
+    else post({ type: "detail:scrollTo", y: top });
+  }
+
+  /* A Wix HTML component is a sandboxed iframe on a different origin to your
+     site. A plain anchor pointing at a path on your site tries to load the site
+     INTO that box,
+     the browser blocks it, and the blocked response body renders as the word
+     "Forbidden". Same-site links have to navigate the parent window instead. */
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a) return;
+    var href = a.getAttribute("href");
+    if (!href || href.charAt(0) === "#") return;
+    if (/^(mailto:|tel:|sms:)/i.test(href)) return;
+    if (a.target === "_blank") return;                 // new tab is top-level already
+    if (e.defaultPrevented || e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;  // let modified clicks through
+    e.preventDefault();
+    post({ type: "iframe:navigate", url: href });
+  });
+
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+  function svg(paths, cls) {
+    var s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    s.setAttribute("viewBox", "0 0 24 24");
+    s.setAttribute("stroke-linecap", "round");
+    s.setAttribute("stroke-linejoin", "round");
+    s.setAttribute("aria-hidden", "true");
+    if (cls) s.setAttribute("class", cls);
+    var p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", paths);
+    s.appendChild(p);
+    return s;
+  }
+  var ICON_TICK  = "M4 12.5 9.5 18 20 6.5";
+  var ICON_PHONE = "M4 5a2 2 0 0 1 2-2h2l2 4-2 1.5a11 11 0 0 0 5.5 5.5L15 12l4 2v2a2 2 0 0 1-2 2A13 13 0 0 1 4 5Z";
+  var ICON_MAIL  = "M3 6.5h18v11H3zM3 7l9 6 9-6";
+  var ICON_PIN   = "M12 21s-6.5-6-6.5-10.5A6.5 6.5 0 0 1 18.5 10.5C18.5 15 12 21 12 21Z M12 8.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z";
+  var ICON_LINK  = "M10 13.5a4 4 0 0 0 5.7 0l2.8-2.8a4 4 0 0 0-5.7-5.7L11.4 6.4M14 10.5a4 4 0 0 0-5.7 0l-2.8 2.8a4 4 0 0 0 5.7 5.7l1.4-1.4";
+
+  /* ---------- helpers ---------- */
+  function iso(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function pretty(isoStr) {
+    var p = isoStr.split("-");
+    var d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2], 12));
+    return d.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+  }
+  function todayISO() { return iso(new Date()); }
+
+  /* ---------- calendar ---------- */
+  function drawDow() {
+    var row = $("calDow");
+    if (row.children.length) return;
+    var probe = new Date(2024, 0, 7);   // a Sunday
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(probe); d.setDate(probe.getDate() + i);
+      row.appendChild(el("th", null, d.toLocaleDateString(undefined, { weekday: "narrow" })));
+    }
+  }
+
+  function drawCal() {
+    drawDow();
+    $("calMonth").textContent = view.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+
+    var now = new Date(); now.setDate(1); now.setHours(0,0,0,0);
+    $("prevM").disabled = (view.getFullYear() === now.getFullYear() && view.getMonth() === now.getMonth());
+
+    var body = $("calBody");
+    body.innerHTML = "";
+
+    var first = new Date(view.getFullYear(), view.getMonth(), 1);
+    var lead = first.getDay();
+    var days = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
+    var min = todayISO();
+
+    var tr = document.createElement("tr");
+    for (var i = 0; i < lead; i++) tr.appendChild(document.createElement("td"));
+
+    for (var day = 1; day <= days; day++) {
+      if (tr.children.length === 7) { body.appendChild(tr); tr = document.createElement("tr"); }
+      var td = document.createElement("td");
+      var val = iso(new Date(view.getFullYear(), view.getMonth(), day));
+      var b = el("button", null, String(day));
+      b.type = "button";
+      b.dataset.iso = val;
+      b.setAttribute("aria-pressed", String(picked.indexOf(val) !== -1));
+      if (val < min) b.disabled = true;
+      b.setAttribute("aria-label", pretty(val));
+      td.appendChild(b);
+      tr.appendChild(td);
+    }
+    while (tr.children.length < 7) tr.appendChild(document.createElement("td"));
+    body.appendChild(tr);
+  }
+
+  function drawPicked() {
+    var wrap = $("picked");
+    wrap.innerHTML = "";
+    picked.slice().sort().forEach(function (v) {
+      var b = el("button", null, pretty(v));
+      b.type = "button";
+      b.dataset.iso = v;
+      b.setAttribute("aria-label", "Remove " + pretty(v));
+      wrap.appendChild(b);
+    });
+    $("pickedNote").textContent = picked.length === 0
+      ? "No dates chosen yet. Pick up to five."
+      : picked.length + " of " + MAX_DATES + " chosen." + (picked.length === MAX_DATES ? " Remove one to swap it." : "");
+  }
+
+  $("calBody").addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b || b.disabled) return;
+    var v = b.dataset.iso;
+    var at = picked.indexOf(v);
+    if (at !== -1) {
+      picked.splice(at, 1);
+    } else if (picked.length >= MAX_DATES) {
+      showMsg("You can pick up to " + MAX_DATES + " dates. Remove one first.", "err");
+      return;
+    } else {
+      picked.push(v);
+    }
+    b.setAttribute("aria-pressed", String(picked.indexOf(v) !== -1));
+    clearErr($("datesField"));
+    drawPicked();
+  });
+
+  $("picked").addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    var v = b.dataset.iso;
+    picked = picked.filter(function (x) { return x !== v; });
+    drawCal(); drawPicked();
+  });
+
+  $("prevM").addEventListener("click", function () { view.setMonth(view.getMonth() - 1); drawCal(); });
+  $("nextM").addEventListener("click", function () { view.setMonth(view.getMonth() + 1); drawCal(); });
+
+  /* ---------- errors ---------- */
+  function wrapOf(n) { return n.closest("label.f") || n.closest(".f") || n.parentNode; }
+  function setErr(n, msg) {
+    var w = wrapOf(n); w.classList.add("invalid");
+    var s = w.querySelector(".err-msg");
+    if (s) { s.textContent = msg; s.hidden = false; }
+  }
+  function clearErr(n) {
+    var w = wrapOf(n); w.classList.remove("invalid");
+    var s = w.querySelector(".err-msg");
+    if (s) { s.hidden = true; s.textContent = ""; }
+  }
+  function clearAllErrs() {
+    var f = $("inquiryForm");
+    Array.prototype.forEach.call(f.querySelectorAll(".invalid"), function (w) { w.classList.remove("invalid"); });
+    Array.prototype.forEach.call(f.querySelectorAll(".err-msg"), function (s) { s.hidden = true; s.textContent = ""; });
+  }
+  function showMsg(text, kind) {
+    var m = $("formMsg");
+    m.textContent = text;
+    m.className = "msg " + kind;
+    m.hidden = false;
+  }
+
+  /* ---------- render ---------- */
+  function fact(key, value, iconUrl) {
+    var f = el("div", "fact");
+    if (iconUrl) {
+      var img = document.createElement("img");
+      img.src = iconUrl; img.alt = ""; img.loading = "lazy";
+      img.addEventListener("error", function () { img.remove(); });
+      f.appendChild(img);
+    }
+    var t = el("div");
+    t.appendChild(el("p", "k", key));
+    t.appendChild(el("div", "v", value));
+    f.appendChild(t);
+    return f;
+  }
+
+  function render(d) {
+    try { renderAll(d); }
+    catch (err) { console.error("[venue] part of the page could not be drawn:", err); }
+    finally { drawCal(); drawPicked(); }
+  }
+  function renderAll(d) {
+    D = d;
+    $("loading").hidden = true;
+    $("content").hidden = false;
+
+    /* hero */
+    if (d.heroImage) {
+      var hi = $("heroImg");
+      hi.src = d.heroImage; hi.alt = d.name; hi.hidden = false;
+      hi.addEventListener("error", function () { hi.hidden = true; });
+    }
+    $("vName").textContent = d.name;
+    if (d.backUrl) $("backLink").href = d.backUrl;
+
+    if (d.tagline) { $("vTagline").textContent = d.tagline; $("vTagline").hidden = false; }
+
+    if (d.rating != null) {
+      var r = $("vRating");
+      r.textContent = "";
+      var st = svg("M12 3.6l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 10l6-.8z", "star");
+      r.appendChild(st);
+      r.appendChild(document.createTextNode(" " + d.rating + (d.reviewCount ? "  ·  " + d.reviewCount + " reviews" : "")));
+      r.hidden = false;
+    }
+    if (d.city) {
+      var c = $("vCity");
+      c.textContent = "";
+      c.appendChild(svg(ICON_PIN));
+      c.appendChild(document.createTextNode(d.city));
+      c.hidden = false;
+    }
+
+    /* description + chips */
+    if (d.notes) { $("vNotes").textContent = d.notes; $("vNotes").hidden = false; }
+
+    var chipVals = (d.venueTypes || []).concat(d.eventTypes || []);
+    if (chipVals.length) {
+      var cw = $("vChips");
+      chipVals.slice(0, 10).forEach(function (t) { cw.appendChild(el("span", null, t)); });
+      cw.hidden = false;
+    }
+
+    /* highlights */
+    if (d.highlights && d.highlights.length) {
+      var hw = $("highlights");
+      d.highlights.forEach(function (h) {
+        var row = el("div", "tickrow");
+        row.appendChild(svg(ICON_TICK));
+        row.appendChild(el("span", null, h));
+        hw.appendChild(row);
+      });
+      $("highlightsCard").hidden = false;
+    }
+
+    /* price panel */
+    $("vPrice").textContent = d.priceHeadline || "On request";
+    if (d.priceCaption) {
+      var s = el("small", null, d.priceCaption);
+      $("vPrice").appendChild(s);
+    }
+
+    var cw2 = $("vContact");
+    var any = false;
+    if (d.phone) {
+      var a1 = el("a"); a1.href = "tel:" + d.phone.replace(/\s+/g, "");
+      a1.appendChild(svg(ICON_PHONE)); a1.appendChild(document.createTextNode(d.phone));
+      cw2.appendChild(a1); any = true;
+    }
+    if (d.email) {
+      var a2 = el("a"); a2.href = "mailto:" + d.email;
+      a2.appendChild(svg(ICON_MAIL)); a2.appendChild(document.createTextNode(d.email));
+      cw2.appendChild(a2); any = true;
+    }
+    if (d.website) {
+      var a3 = el("a"); a3.href = d.website;
+      // _blank only when absolute — see the note in the click interceptor.
+      if (/^https?:/i.test(d.website)) { a3.target = "_blank"; a3.rel = "noopener"; }
+      a3.appendChild(svg(ICON_LINK)); a3.appendChild(document.createTextNode("Website"));
+      cw2.appendChild(a3); any = true;
+    }
+    $("contactRule").hidden = !any;
+    if (d.claimable) $("claimBtn").hidden = false;
+
+    /* video */
+    if (d.videoUrl) {
+      $("video").src = d.videoUrl;
+      $("videoSect").hidden = false;
+    }
+
+    /* gallery */
+    if (d.gallery && d.gallery.length) {
+      var g = $("gallery");
+      d.gallery.forEach(function (item) {
+        var fig = el("figure", "shot");
+        fig.style.margin = "0";
+        var img = document.createElement("img");
+        img.src = item.src;
+        /* Never a filename in alt text — a screen reader would read the whole
+           stock-library slug aloud. */
+        img.alt = item.alt || item.caption || d.name;
+        img.loading = "lazy"; img.decoding = "async";
+        img.addEventListener("error", function () {
+          img.dataset.broken = "1";
+          fig.classList.add("broken");
+        });
+        fig.appendChild(img);
+        if (item.caption) fig.appendChild(el("figcaption", null, item.caption));
+        g.appendChild(fig);
+      });
+      $("gallerySect").hidden = false;
+    }
+
+    /* fact grids */
+    function fillFacts(hostId, sectId, rows) {
+      if (!rows || !rows.length) return;
+      var host = $(hostId);
+      rows.forEach(function (r) { host.appendChild(fact(r.key, r.value, r.icon)); });
+      $(sectId).hidden = false;
+    }
+    fillFacts("facts", "factsSect", d.facts);
+    fillFacts("amenities", "amenSect", d.amenities);
+    fillFacts("priceFacts", "priceSect", d.pricing);
+
+    /* offers */
+    function fillOffers(hostId, sectId, rows) {
+      if (!rows || !rows.length) return;
+      var host = $(hostId);
+      rows.forEach(function (o) {
+        var card = el("div", "offer");
+
+        if (o.image) {
+          var m = el("div", "offer-media");
+          var im = document.createElement("img");
+          im.src = o.image; im.alt = o.title;
+          im.loading = "lazy"; im.decoding = "async";
+          im.addEventListener("error", function () { m.remove(); });
+          m.appendChild(im);
+          card.appendChild(m);
+        }
+
+        var body = el("div", "offer-body");
+        body.appendChild(el("h3", null, o.title));
+        if (o.description) body.appendChild(el("p", null, o.description));
+
+        if (o.includes && o.includes.length) {
+          var inc = el("div", "incl");
+          inc.appendChild(el("p", null, "Catering included"));
+          var ul = document.createElement("ul");
+          o.includes.forEach(function (t) { ul.appendChild(el("li", null, t)); });
+          inc.appendChild(ul);
+          body.appendChild(inc);
+        }
+
+        if (o.amount) body.appendChild(el("div", "amt", o.amount));
+        if (o.when) body.appendChild(el("div", "when" + (o.urgent ? " urgent" : ""), o.when));
+
+        card.appendChild(body);
+        host.appendChild(card);
+      });
+      $(sectId).hidden = false;
+    }
+    fillOffers("catering", "cateringSect", d.catering);
+    fillOffers("packages", "packageSect", d.packages);
+    fillOffers("promotions", "promoSect", d.promotions);
+
+    /* vendor */
+    if (d.vendor) {
+      var vc = $("vendorCard");
+      if (d.vendor.image) {
+        var vi = document.createElement("img");
+        vi.src = d.vendor.image; vi.alt = d.vendor.name || "";
+        vi.style.cssText = "width:64px;height:64px;border-radius:50%;object-fit:cover;margin:0 0 14px";
+        vi.addEventListener("error", function () { vi.remove(); });
+        vc.appendChild(vi);
+      }
+      if (d.vendor.name) {
+        var h3 = el("h3", null, d.vendor.name);
+        h3.style.cssText = "font-family:var(--font-display);font-weight:400;font-size:20px;margin:0 0 4px";
+        vc.appendChild(h3);
+      }
+      if (d.vendor.position) {
+        var pos = el("p", null, d.vendor.position);
+        pos.style.cssText = "color:var(--gold);font-size:14px;margin:0 0 12px";
+        vc.appendChild(pos);
+      }
+      if (d.vendor.about) {
+        var ab = el("p", null, d.vendor.about);
+        ab.style.cssText = "color:var(--body);font-size:15px;line-height:1.7;margin:0";
+        vc.appendChild(ab);
+      }
+      /* Phone and email — only arrive if the vendor chose to show them. */
+      if (d.vendor.phone || d.vendor.email) {
+        var row = el("div");
+        row.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;margin-top:16px";
+        function contactLink(href, text, blank) {
+          var a = el("a", null, text);
+          a.href = href; if (blank) { a.target = "_blank"; a.rel = "noopener"; }
+          a.style.cssText = "border:1px solid var(--border);border-radius:var(--r-field);color:var(--gold-soft);font-size:14px;font-weight:600;padding:9px 14px;text-decoration:none;overflow-wrap:anywhere";
+          row.appendChild(a);
+        }
+        if (d.vendor.phone) {
+          contactLink("tel:" + d.vendor.phone.replace(/\s+/g, ""), "Call " + d.vendor.phone);
+          var wa = d.vendor.phone.replace(/[^\d+]/g, "").replace(/^00/, "+").replace(/^0/, "+962").replace(/^\+/, "");
+          if (wa) contactLink("https://wa.me/" + wa, "WhatsApp", true);
+        }
+        if (d.vendor.email) contactLink("mailto:" + d.vendor.email, "Email " + d.vendor.email, true);
+        vc.appendChild(row);
+      }
+      $("vendorSect").hidden = false;
+    }
+
+    drawCal();
+    drawPicked();
+  }
+
+  /* ---------- actions ---------- */
+  $("inquiryJump").addEventListener("click", function () {
+    scrollToEl($("inquirySect"));
+    setTimeout(function () { $("name").focus({ preventScroll: true }); }, 500);
+  });
+  $("claimBtn").addEventListener("click", function () { post({ type: "detail:claim" }); });
+  $("backLink").addEventListener("click", function (e) {
+    if (!D || !D.backUrl) { e.preventDefault(); post({ type: "detail:back" }); }
+  });
+
+  /* ---------- submit ---------- */
+
+  /* ---------- couples-only enquiries ----------
+     The page tells us who is viewing ({loggedIn, role, admin}). Only couples
+     (and admins) can send; anyone else gets the pop-up instead. The backend
+     enforces the same rule and answers with a code if it ever gets this far. */
+  var VIEWER = null;
+  var GATE = {
+    login: { t: "Create a couple account to send enquiries",
+             b: "Enquiries are for couples planning their wedding. It\u2019s free and takes a minute \u2014 then you can contact venues and talent, and keep track of every reply on your dashboard.",
+             go: "Create a couple account", alt: "I already have an account \u2014 log in" },
+    type:  { t: "Choose Couple to send enquiries",
+             b: "Your account doesn\u2019t have a type yet. Choose Couple and you can send enquiries straight away.",
+             go: "Choose Couple" },
+    other: { t: "Enquiries are for couples",
+             b: "You\u2019re signed in with a {role} account. To send enquiries, sign out and create a couple account." }
+  };
+  function gateKind(code) {
+    if (code === "LOGIN_REQUIRED") return "login";
+    if (code === "NEEDS_TYPE") return "type";
+    if (code === "COUPLE_ONLY") return "other";
+    if (code) return "";
+    if (!VIEWER || VIEWER.admin || VIEWER.role === "couple") return "";
+    return !VIEWER.loggedIn ? "login" : !VIEWER.role ? "type" : "other";
+  }
+  function openGate(kind) {
+    var g = GATE[kind]; if (!g) return;
+    var roleName = VIEWER && VIEWER.role === "vendor" ? "vendor" : VIEWER && VIEWER.role === "talent" ? "talent" : "business";
+    $("gateT").textContent = g.t;
+    $("gateB").textContent = g.b.replace("{role}", roleName);
+    $("gateGo").hidden = !g.go;  $("gateGo").textContent = g.go || "";
+    $("gateAlt").hidden = !g.alt; $("gateAlt").textContent = g.alt || "";
+    $("gateX").textContent = g.go ? "Not now" : "OK";
+    $("gate").hidden = false;
+    scrollToEl($("inquirySect"));
+    setTimeout(function () { ($(g.go ? "gateGo" : "gateX")).focus({ preventScroll: true }); }, 50);
+  }
+  function closeGate() { $("gate").hidden = true; }
+  $("gateGo").addEventListener("click", function () { post({ type: "detail:signup" }); });
+  $("gateAlt").addEventListener("click", function () { closeGate(); post({ type: "detail:login" }); });
+  $("gateX").addEventListener("click", closeGate);
+  $("gate").addEventListener("click", function (e) { if (e.target === $("gate")) closeGate(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("gate").hidden) closeGate(); });
+
+  $("inquiryForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var gk = gateKind("");
+    if (gk) { openGate(gk); return; }
+    clearAllErrs();
+    var first = null;
+    function bad(node, msg) { setErr(node, msg); if (!first) first = node; }
+
+    var name = $("name").value.trim();
+    var email = $("email").value.trim();
+    var phone = $("phone").value.trim();
+    var guests = $("guests").value.trim();
+
+    if (!name) bad($("name"), "We need a name to pass on.");
+    if (!email) bad($("email"), "The venue replies to this address.");
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) bad($("email"), "That does not look like a working email.");
+    if (!phone) bad($("phone"), "Most venues call back rather than email.");
+    if (!guests || Number(guests) < 1) bad($("guests"), "Roughly how many people?");
+    if (picked.length === 0) bad($("datesField"), "Pick at least one date.");
+
+    if (first) {
+      showMsg("A few fields need attention before this can be sent.", "err");
+      var f2 = first.matches("input") ? first : first.querySelector("button:not([disabled])");
+      if (f2) f2.focus({ preventScroll: true });
+      scrollToEl(first, 120);
+      return;
+    }
+
+    $("submitBtn").disabled = true;
+    showMsg("Sending your inquiry\u2026", "busy");
+
+    post({
+      type: "detail:inquiry",
+      payload: {
+        name: name,
+        email: email,
+        phone: phone,
+        guests: Number(guests),
+        dates: picked.slice().sort()      // ISO strings, not locale text
+      }
+    });
+  });
+
+  $("inquiryForm").addEventListener("input", function (e) {
+    if (e.target.matches("input")) clearErr(e.target);
+  });
+
+  /* ---------- from Velo ---------- */
+  var answered = false;
+  window.addEventListener("message", function (event) {
+    var d = event.data;
+    if (!d || typeof d !== "object") return;
+
+    if (d.type === "detail:data") { answered = true; render(d.venue); }
+
+    if (d.type === "detail:error") {
+      answered = true;
+      $("loading").hidden = true;
+      $("content").hidden = false;
+      $("vName").textContent = "We could not load this venue";
+    }
+
+    if (d.type === "detail:viewer") { VIEWER = d.viewer || null; if (!gateKind("")) closeGate(); }
+
+    if (d.type === "detail:inquiryResult") {
+      if (!d.ok && gateKind(d.code)) { $("formMsg").hidden = true; $("submitBtn").disabled = false; openGate(gateKind(d.code)); return; }
+      if (d.ok) {
+        showMsg(d.message || "Sent. The venue will be in touch shortly.", "ok");
+        $("inquiryForm").reset();
+        picked = [];
+        drawCal(); drawPicked();
+        $("submitBtn").textContent = "Send another inquiry";
+        $("submitBtn").disabled = false;
+      } else {
+        showMsg(d.message || "That did not send. Try again in a moment.", "err");
+        $("submitBtn").disabled = false;
+      }
+    }
+  });
+
+  drawCal();                       // the calendar is ready before the venue arrives
+  drawPicked();
+
+  /* Say "ready" every second until the page answers — its listener may attach
+     after this iframe loads, and a single message would be lost. */
+  (function ping(n) {
+    if (answered) return;
+    post({ type: "detail:ready" });
+    if (n < 30) setTimeout(function () { ping(n + 1); }, 1000);
+  })(0);
+})();
+</script>
+<div class="pp-safe-space" aria-hidden="true"></div>
+<!-- Pixel Pals iframe auto-height reporter v3 (body is the scroll box).
+     Scrolls inside the iframe until the site-wide listener sizes it.
+     Once the site-wide listener sizes the iframe, there is nothing left to scroll. -->
+<script>
+(function () {
+  if (window.__ppReporter) return;
+  window.__ppReporter = true;
+
+  var s = document.createElement('style');
+  s.textContent =
+    'html{height:100%!important;min-height:0!important;overflow:hidden!important}' +
+    'body{height:100%!important;min-height:0!important;margin:0;overflow-x:hidden!important;overflow-y:auto!important;' +
+      '-webkit-overflow-scrolling:touch;overscroll-behavior:auto;scrollbar-width:none;-ms-overflow-style:none;display:flow-root}' +
+    'html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0;display:none}';
+  document.head.appendChild(s);
+
+  var body = document.body, last = -1, raf = 0;
+
+  // Height of the content itself, not the scroll box (so the iframe can shrink as well as grow)
+  function measure() {
+    var top = body.getBoundingClientRect().top - body.scrollTop;
+    var bottom = 0, kids = body.children;
+    for (var i = 0; i < kids.length; i++) {
+      var r = kids[i].getBoundingClientRect();
+      if (!r.height && !r.width) continue; // hidden, scripts, styles
+      var mb = parseFloat(getComputedStyle(kids[i]).marginBottom) || 0;
+      bottom = Math.max(bottom, r.bottom + mb);
+    }
+    var pb = parseFloat(getComputedStyle(body).paddingBottom) || 0;
+    return Math.ceil(bottom - top + pb);
+  }
+
+  function send(force) {
+    var h = measure();
+    if (!force && h === last) return;
+    last = h;
+    window.parent.postMessage({ type: 'setHeight', height: h }, '*');
+  }
+
+  function schedule() {
+    if (raf) return;
+    raf = requestAnimationFrame(function () { raf = 0; send(false); });
+  }
+
+  // Watch the content (the body itself is now a fixed-size scroll box)
+  var ro = 'ResizeObserver' in window ? new ResizeObserver(schedule) : null;
+  function watchKids() {
+    if (!ro) return;
+    ro.observe(body);
+    for (var i = 0; i < body.children.length; i++) ro.observe(body.children[i]);
+  }
+  watchKids();
+  if ('MutationObserver' in window) {
+    new MutationObserver(function () { watchKids(); schedule(); })
+      .observe(body, { childList: true, subtree: true, attributes: true, characterData: true });
+  }
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', function () { send(true); });
+  document.addEventListener('load', schedule, true);
+  document.addEventListener('transitionend', schedule, true);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { send(true); });
+
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'requestHeight') send(true);
+  });
+
+  [0, 300, 1000, 2500, 5000].forEach(function (t) { setTimeout(function () { send(true); }, t); });
+})();
+</script>
+</body>
+</html>

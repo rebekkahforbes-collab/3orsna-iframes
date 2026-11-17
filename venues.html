@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Our Venues</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://static.wixstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Mulish:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Pixel Pals build standards ─────────────────────────────────────
+   No visible scrollbars anywhere (everything still scrolls), media never
+   wider than its box, 16px form text on phones so iOS doesn't zoom, and a
+   little side padding on phones so nothing touches the screen edge.
+   Height: the reporter at the end of this file (setHeight → site-wide listener). */
+*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{width:0;height:0;display:none}
+img,video,canvas{max-width:100%}
+@media (max-width:760px){input,select,textarea{font-size:16px!important}}
+@media (max-width:600px){.wrap,.page{padding-left:14px!important;padding-right:14px!important}}
+
+  :root {
+    color-scheme: dark;
+    --bg:            #111009;
+    --surface:       #181711;
+    --field:         #1D1C16;
+    --field-hover:   #221F19;
+    --border:        #383732;
+    --border-quiet:  #302F29;
+    --gold:          #AA936F;
+    --gold-tint:     #242015;
+    --gold-soft:     #C4B091;
+    --text:          #FFFFFF;
+    --label:         #A8A7A3;
+    --placeholder:   #8E8E8B;
+    --danger:        #C4705A;
+    --danger-tint:   #241713;
+    --r-field:       8px;
+    --r-card:        10px;
+    --font-display:  "Playfair Display", Georgia, serif;
+    --font-body:     "Mulish", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1050px; margin: 0 auto; padding: 4px 0 40px; }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 34px;
+    line-height: 1.15;
+    margin: 0 0 6px;
+  }
+
+  .lede { font-size: 15px; line-height: 1.7; color: var(--placeholder); margin: 0 0 34px; }
+
+  fieldset { border: 0; margin: 0 0 34px; padding: 0; min-width: 0; }
+
+  legend, .group-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--label);
+    margin: 0 0 14px;
+    padding: 0;
+  }
+
+  .req { color: var(--gold); margin-left: 3px; font-style: normal; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px 20px; }
+  .span-all { grid-column: 1 / -1; }
+
+  label.field { display: block; }
+
+  label.field > span.txt {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--label);
+    margin: 0 0 8px;
+  }
+
+  input[type="text"], input[type="tel"], input[type="email"], input[type="number"], input[type="date"], input[type="url"], input[type="search"], textarea {
+    width: 100%;
+    background: var(--field);
+    border: 1px solid var(--border);
+    border-radius: var(--r-field);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    padding: 12px 14px;
+    min-height: 45px;
+    transition: border-color 140ms ease, background 140ms ease;
+  }
+
+  textarea { min-height: 108px; resize: vertical; line-height: 1.65; }
+
+  input::placeholder, textarea::placeholder { color: var(--placeholder); }
+
+  input:hover, textarea:hover { background: var(--field-hover); }
+
+  input::-webkit-calendar-picker-indicator {
+    filter: invert(64%) sepia(18%) saturate(520%) hue-rotate(2deg) brightness(94%);
+    cursor: pointer;
+  }
+
+  input:focus-visible, textarea:focus-visible,
+  .chip:focus-visible, button:focus-visible {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(170,147,111,0.22);
+  }
+
+  .hint { font-style: normal; display: block; font-size: 13px; color: var(--placeholder); margin: 7px 0 0; line-height: 1.5; }
+
+  /* Chips — multi-select, and single-select where data-single is set */
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; }
+  .chip {
+    background: var(--field);
+    border: 1px solid var(--border-quiet);
+    border-radius: 999px;
+    color: var(--placeholder);
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 8px 16px;
+    transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+  }
+  .chip:hover { color: var(--gold-soft); border-color: var(--border); }
+  .chip[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #1A1509; font-weight: 600; }
+
+  .count { font-size: 13px; color: var(--placeholder); margin: 12px 0 0; }
+
+  /* Skeleton, shaped like the chips it becomes */
+  .skel { display: flex; flex-wrap: wrap; gap: 9px; }
+  .skel i {
+    display: block;
+    height: 35px;
+    width: 132px;
+    background: var(--field);
+    border: 1px solid var(--border-quiet);
+    border-radius: 999px;
+    opacity: 0.6;
+  }
+  .skel i:nth-child(2) { width: 104px; }
+  .skel i:nth-child(3) { width: 148px; }
+  @media (prefers-reduced-motion: no-preference) {
+    .skel i { animation: pulse 1.5s ease-in-out infinite; }
+    .skel i:nth-child(2) { animation-delay: 0.15s; }
+    .skel i:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes pulse { 0%,100% { opacity: 0.45; } 50% { opacity: 0.8; } }
+  }
+
+  /* Blocked / empty state */
+  .empty {
+    background: var(--surface);
+    border: 1px solid var(--border-quiet);
+    border-radius: var(--r-card);
+    padding: 22px;
+  }
+  .empty h2 {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 400;
+    margin: 0 0 8px;
+  }
+  .empty p { font-size: 15px; line-height: 1.65; color: var(--placeholder); margin: 0 0 16px; }
+  .empty a {
+    background: rgba(170,147,111,0.12);
+    border: 1px solid rgba(170,147,111,0.40);
+    border-radius: var(--r-field);
+    color: var(--gold);
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 13px 30px;
+    text-decoration: none;
+  }
+  .empty a:hover { background: rgba(170,147,111,0.18); }
+
+  /* Actions */
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 34px; }
+
+  button.primary, button.ghost {
+    border-radius: var(--r-field);
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    padding: 13px 30px;
+    transition: filter 140ms ease, background 140ms ease;
+  }
+  button.primary { background: var(--gold); border: 1px solid var(--gold); color: var(--text); }
+  button.primary:hover { filter: brightness(1.08); }
+  button.primary[disabled] { opacity: 0.55; cursor: not-allowed; filter: none; }
+  button.ghost {
+    background: rgba(170,147,111,0.12);
+    border: 1px solid rgba(170,147,111,0.40);
+    color: var(--gold);
+  }
+  button.ghost:hover { background: rgba(170,147,111,0.18); }
+
+  /* Status + errors */
+  .status {
+    border-radius: var(--r-card);
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 22px 0 0;
+    padding: 13px 16px;
+  }
+  .status[hidden] { display: none; }
+  .status.ok   { background: rgba(170,147,111,0.12); border: 1px solid rgba(170,147,111,0.40); color: var(--gold-soft); }
+  .status.err  { background: var(--danger-tint); border: 1px solid rgba(196,112,90,0.45); color: var(--danger); }
+  .status.busy { background: var(--surface); border: 1px solid var(--border-quiet); color: var(--label); }
+
+  .err-msg { font-style: normal; display: block; font-size: 13px; color: var(--danger); margin: 7px 0 0; }
+  .err-msg[hidden] { display: none; }
+  .invalid input, .invalid textarea { border-color: var(--danger); }
+  .invalid .chip { border-color: var(--danger); }
+
+  .sr {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  [hidden] { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+  .wrap > h1, .wrap > .lede { text-align: center; }
+  .wrap > .lede { max-width: 620px; margin-left: auto; margin-right: auto; margin-bottom: 30px; }
+
+  /* Select */
+  select {
+    width: 100%; background: var(--field);
+    border: 1px solid var(--border); border-radius: var(--r-field);
+    color: var(--text); font-family: var(--font-body); font-size: 15px;
+    padding: 12px 38px 12px 14px; min-height: 45px; appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238E8E8B' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+    transition: border-color 140ms ease, background-color 140ms ease;
+  }
+  select:hover { background-color: var(--field-hover); }
+  select:focus-visible { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(170,147,111,0.22); }
+
+  /* Filter bar */
+  .bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px 16px; }
+  .bar .field { min-width: 0; }
+  .toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+    margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--border-quiet);
+  }
+  .toolbar .spacer { flex: 1 1 auto; }
+  .activecount { font-size: 13px; color: var(--placeholder); }
+  .activecount b { color: var(--gold); font-weight: 600; }
+
+  .resultline { font-size: 15px; line-height: 1.6; margin: 26px 0 18px; min-height: 24px; color: var(--label); }
+  .resultline b { color: var(--text); font-weight: 600; }
+  .resultline.none { color: var(--gold-soft); }
+
+  button.primary .spin {
+    display: none; width: 14px; height: 14px; margin-right: 9px;
+    border: 2px solid rgba(255,255,255,0.35); border-top-color: var(--text);
+    border-radius: 50%; vertical-align: -2px;
+  }
+  button.primary.busy .spin { display: inline-block; }
+  button.primary.busy { pointer-events: none; }
+
+  /* ---- Venue cards ---- */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr)); gap: 22px; }
+
+  a.card {
+    background: var(--surface);
+    border: 1px solid var(--border-quiet);
+    border-radius: var(--r-card);
+    color: inherit;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    text-decoration: none;
+    transition: border-color 200ms ease, transform 200ms ease;
+  }
+  a.card:hover { border-color: rgba(170,147,111,0.45); }
+  a.card:focus-visible {
+    outline: none; border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(170,147,111,0.22);
+  }
+
+  .card-media { aspect-ratio: 4 / 3; background: var(--field); overflow: hidden; }
+  .card-media img {
+    display: block; width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 620ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .card-media.empty {
+    display: grid; place-items: center;
+    color: var(--border); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;
+  }
+
+  .card-body { display: flex; flex-direction: column; gap: 9px; padding: 18px; flex: 1 1 auto; }
+  .card-name { font-family: var(--font-display); font-size: 20px; font-weight: 400; line-height: 1.25; }
+  .card-meta { font-size: 13px; color: var(--placeholder); line-height: 1.5; }
+  .card-price { color: var(--gold); font-size: 15px; font-weight: 600; margin-top: auto; }
+  .card-price span { color: var(--placeholder); font-weight: 400; font-size: 13px; }
+
+  .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .card-tags span {
+    background: var(--field); border: 1px solid var(--border-quiet);
+    border-radius: 999px; color: var(--placeholder);
+    font-size: 12px; padding: 4px 10px; white-space: nowrap;
+  }
+
+  /* Skeleton cards */
+  .cards.loading a.card { pointer-events: none; }
+  .skelcard {
+    background: var(--surface); border: 1px solid var(--border-quiet);
+    border-radius: var(--r-card); overflow: hidden; opacity: 0.6;
+  }
+  .skelcard .m { aspect-ratio: 4 / 3; background: var(--field); }
+  .skelcard .b { padding: 18px; display: grid; gap: 10px; }
+  .skelcard .b i { display: block; height: 12px; border-radius: 4px; background: var(--field); }
+  .skelcard .b i:first-child { height: 18px; width: 70%; }
+  .skelcard .b i:last-child { width: 40%; }
+
+  /* ---- Pages ---- */
+  .pager { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-top: 34px; }
+  .pager button {
+    min-width: 42px; height: 42px; padding: 0 12px; border-radius: var(--r-field);
+    border: 1px solid var(--border-quiet); background: var(--surface); color: var(--label);
+    font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
+  }
+  .pager button:hover:not([disabled]):not([aria-current]) { border-color: var(--gold); color: var(--gold); }
+  .pager button[aria-current="page"] { background: var(--gold); border-color: var(--gold); color: #1A1509; cursor: default; }
+  .pager button[disabled] { opacity: 0.35; cursor: not-allowed; }
+  .pager .gap { color: var(--placeholder); padding: 0 4px; }
+  .pager[aria-busy="true"] { opacity: 0.55; pointer-events: none; }
+  @media (max-width: 420px) { .pager { gap: 4px; } .pager .lbl { display: none; } .pager .gap { padding: 0 2px; } .pager button { min-width: 34px; height: 38px; padding: 0 6px; font-size: 14px; } }
+
+  /* ---- Motion ---- */
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes riseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    @keyframes spin   { to { transform: rotate(360deg); } }
+    @keyframes countIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+    @keyframes pulseCard { 0%,100% { opacity: 0.45; } 50% { opacity: 0.75; } }
+
+    .anim { opacity: 0; animation: riseIn 460ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards; }
+    .anim:nth-child(1) { animation-delay: 0ms; }
+    .anim:nth-child(2) { animation-delay: 45ms; }
+    .anim:nth-child(3) { animation-delay: 90ms; }
+    .anim:nth-child(4) { animation-delay: 135ms; }
+    .anim:nth-child(5) { animation-delay: 180ms; }
+
+    a.card { opacity: 0; animation: riseIn 520ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards; }
+    a.card:hover { transform: translateY(-3px); }
+    a.card:hover .card-media img { transform: scale(1.055); }
+
+    .skelcard { animation: pulseCard 1.5s ease-in-out infinite; }
+    button.primary .spin { animation: spin 700ms linear infinite; }
+    .resultline.flash { animation: countIn 320ms cubic-bezier(0.22, 0.61, 0.36, 1); }
+    .chip { transition: background 140ms ease, color 140ms ease, border-color 140ms ease, transform 90ms ease; }
+    .chip:active { transform: scale(0.96); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a.card, .anim { opacity: 1; }
+  }
+</style>
+<style id="pp-layout">
+/* ── Pixel Pals layout safeguards ─────────────────────────────────────
+   Transparent page so the Wix section shows through seamlessly, sturdy form
+   controls on phones, long words wrap instead of widening the page, and a
+   safety space at the end so nothing is ever cut off. */
+html,body{background:transparent!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-wrap:break-word}
+input,select,textarea,button{max-width:100%}
+table{max-width:100%}
+/* iOS draws date fields wider and taller than other inputs; make them behave. */
+input[type=date],input[type=time],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;display:block}
+input[type=date]::-webkit-date-and-time-value{text-align:start;min-height:1.4em}
+/* Save bars sit in the flow: a sticky bar needs a solid background, and the page has none. */
+.savebar{position:static!important;background:transparent!important}
+/* Width: 80% of the frame on wide screens, never narrower than before (1050px). */
+.wrap{width:max(80%, min(100%, 1050px))!important;max-width:none!important;margin-left:auto!important;margin-right:auto!important}
+@media (max-width:1100px){.wrap{padding-left:20px!important;padding-right:20px!important}}
+@media (max-width:600px){.wrap{padding-left:14px!important;padding-right:14px!important}}
+/* The wider frame would fit 4–5 cards a row; 9 per page reads best as 3 × 3. */
+.cards{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+@media (max-width:900px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media (max-width:560px){.cards{grid-template-columns:minmax(0,1fr)!important}}
+/* Safety space under the content (counted by the height reporter). */
+.pp-safe-space{display:block;height:140px}
+@media (max-width:760px){.pp-safe-space{height:calc(180px + env(safe-area-inset-bottom, 0px))}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Our Venues</h1>
+  <p class="lede">Every venue below is available to book. Narrow the list to what fits your day.</p>
+
+  <form id="filterForm" novalidate>
+    <fieldset>
+      <legend>Narrow it down</legend>
+      <div class="bar">
+        <label class="field anim" data-for="city">
+          <span class="txt">City</span>
+          <select id="city"><option value="">Any city</option></select>
+        </label>
+        <label class="field anim" data-for="locationType">
+          <span class="txt">Location type</span>
+          <select id="locationType"><option value="">Indoor or outdoor</option></select>
+        </label>
+        <label class="field anim" data-for="guestsFrom">
+          <span class="txt">Guests from</span>
+          <input type="number" id="guestsFrom" min="1" max="10000" step="1" placeholder="Any">
+          <em class="err-msg" hidden></em>
+        </label>
+        <label class="field anim" data-for="guestsTo">
+          <span class="txt">Guests up to</span>
+          <input type="number" id="guestsTo" min="1" max="10000" step="1" placeholder="Any">
+          <em class="err-msg" hidden></em>
+        </label>
+        <label class="field anim" data-for="budget">
+          <span class="txt">Budget per guest (JOD)</span>
+          <input type="number" id="budget" min="0" step="1" placeholder="Any">
+          <em class="err-msg" hidden></em>
+        </label>
+      </div>
+      <em class="hint">Guest numbers are your party size. We show venues that can seat it.</em>
+    </fieldset>
+
+    <fieldset>
+      <legend>Venue type</legend>
+      <div class="chips" id="venueTypes" role="group" aria-label="Venue type"></div>
+    </fieldset>
+
+    <div class="toolbar">
+      <button type="submit" class="primary" id="applyBtn"><span class="spin" aria-hidden="true"></span>Filter results</button>
+      <button type="button" class="ghost" id="resetBtn" hidden>Clear filters</button>
+      <span class="spacer"></span>
+      <span class="activecount" id="activeCount"></span>
+    </div>
+  </form>
+
+  <p class="resultline" id="resultLine" role="status" aria-live="polite"></p>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="empty" id="noResults" hidden>
+    <h2>Nothing matches all of those</h2>
+    <p>Try widening the guest range, raising the budget, or clearing a venue type.</p>
+  </div>
+
+  <nav class="pager" id="pager" aria-label="Venue pages" hidden></nav>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var form        = document.getElementById("filterForm");
+  var applyBtn    = document.getElementById("applyBtn");
+  var resetBtn    = document.getElementById("resetBtn");
+  var chipGroup   = document.getElementById("venueTypes");
+  var resultLine  = document.getElementById("resultLine");
+  var activeCount = document.getElementById("activeCount");
+  var cards       = document.getElementById("cards");
+  var noResults   = document.getElementById("noResults");
+
+
+  function post(m) { try { window.parent.postMessage(m, "*"); } catch (e) {} }
+  /* Height: the Pixel Pals reporter at the end of this file (setHeight → site-wide listener). */
+
+  /* A Wix HTML component is a sandboxed iframe on a different origin to your
+     site. A plain anchor pointing at a path on your site tries to load the site
+     INTO that box,
+     the browser blocks it, and the blocked response body renders as the word
+     "Forbidden". Same-site links have to navigate the parent window instead. */
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a) return;
+    var href = a.getAttribute("href");
+    if (!href || href.charAt(0) === "#") return;
+    if (/^(mailto:|tel:|sms:)/i.test(href)) return;
+    if (a.target === "_blank") return;                 // new tab is top-level already
+    if (e.defaultPrevented || e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;  // let modified clicks through
+    e.preventDefault();
+    post({ type: "iframe:navigate", url: href });
+  });
+
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
+  function val(id) { return document.getElementById(id).value.trim(); }
+  function numOf(id) {
+    var raw = val(id);
+    if (raw === "") return null;
+    var n = Number(raw);
+    return isNaN(n) ? null : n;
+  }
+
+  /* ---------- chips ---------- */
+  chipGroup.addEventListener("click", function (e) {
+    var chip = e.target.closest(".chip");
+    if (!chip) return;
+    chip.setAttribute("aria-pressed", chip.getAttribute("aria-pressed") === "true" ? "false" : "true");
+    syncActive();
+  });
+  function readChips() {
+    return Array.prototype.slice.call(chipGroup.querySelectorAll('.chip[aria-pressed="true"]'))
+      .map(function (c) { return c.textContent.trim(); });
+  }
+
+  function collect() {
+    return {
+      city:         val("city"),
+      locationType: val("locationType"),
+      guestsFrom:   numOf("guestsFrom"),
+      guestsTo:     numOf("guestsTo"),
+      budget:       numOf("budget"),
+      venueTypes:   readChips()
+    };
+  }
+  function countActive(f) {
+    var n = 0;
+    if (f.city) n++;
+    if (f.locationType) n++;
+    if (f.guestsFrom !== null) n++;
+    if (f.guestsTo !== null) n++;
+    if (f.budget !== null) n++;
+    if (f.venueTypes.length) n++;
+    return n;
+  }
+  function syncActive() {
+    var n = countActive(collect());
+    activeCount.innerHTML = n === 0 ? "" : "<b>" + n + "</b> filter" + (n === 1 ? "" : "s") + " applied";
+    resetBtn.hidden = n === 0;
+  }
+
+  /* ---------- validation ---------- */
+  function wrapOf(el2) { return el2.closest("label.field") || el2.parentNode; }
+  function setError(el2, msg) {
+    var w = wrapOf(el2); w.classList.add("invalid");
+    var s = w.querySelector(".err-msg");
+    if (s) { s.textContent = msg; s.hidden = false; }
+  }
+  function clearError(el2) {
+    var w = wrapOf(el2); w.classList.remove("invalid");
+    var s = w.querySelector(".err-msg");
+    if (s) { s.hidden = true; s.textContent = ""; }
+  }
+  function clearAll() {
+    Array.prototype.forEach.call(form.querySelectorAll(".invalid"), function (w) { w.classList.remove("invalid"); });
+    Array.prototype.forEach.call(form.querySelectorAll(".err-msg"), function (s) { s.hidden = true; s.textContent = ""; });
+  }
+  function validate() {
+    clearAll();
+    var bad = null;
+    ["guestsFrom", "guestsTo", "budget"].forEach(function (id) {
+      var raw = val(id);
+      if (raw !== "" && (isNaN(Number(raw)) || Number(raw) < 0)) {
+        setError(document.getElementById(id), "Numbers only.");
+        if (!bad) bad = document.getElementById(id);
+      }
+    });
+    var a = numOf("guestsFrom"), b = numOf("guestsTo");
+    if (a !== null && b !== null && a > b) {
+      setError(document.getElementById("guestsTo"), "Upper limit is below " + a + ".");
+      if (!bad) bad = document.getElementById("guestsTo");
+    }
+    return bad;
+  }
+
+  function say(text, none) {
+    resultLine.innerHTML = text;
+    resultLine.className = "resultline" + (none ? " none" : "");
+    void resultLine.offsetWidth;
+    resultLine.classList.add("flash");
+  }
+
+  /* ---------- skeletons ---------- */
+  function showSkeletons(n) {
+    cards.innerHTML = "";
+    noResults.hidden = true;
+    for (var i = 0; i < n; i++) {
+      var s = el("div", "skelcard");
+      s.appendChild(el("div", "m"));
+      var b = el("div", "b");
+      b.appendChild(el("i")); b.appendChild(el("i")); b.appendChild(el("i"));
+      s.appendChild(b);
+      cards.appendChild(s);
+    }
+  }
+
+  /* ---------- cards ---------- */
+  function buildCard(v, index) {
+    var a = el("a", "card");
+    a.href = v.url || "#";
+    a.setAttribute("aria-label", v.name);
+    /* Stagger is set here because the count is dynamic. Capped so a page of 12
+       never makes the last card wait. */
+    a.style.animationDelay = Math.min(index * 55, 440) + "ms";
+
+    var media = el("div", "card-media");
+    if (v.image) {
+      var img = document.createElement("img");
+      img.src = v.image;
+      img.alt = v.name;
+      img.loading = "lazy";
+      img.decoding = "async";
+      img.addEventListener("error", function () {
+        media.className = "card-media empty";
+        media.textContent = "No photo yet";
+      });
+      media.appendChild(img);
+    } else {
+      media.className = "card-media empty";
+      media.textContent = "No photo yet";
+    }
+    a.appendChild(media);
+
+    var body = el("div", "card-body");
+    body.appendChild(el("div", "card-name", v.name));
+
+    var bits = [];
+    if (v.city) bits.push(v.city);
+    if (v.locationType) bits.push(v.locationType);
+    if (v.minGuests && v.maxGuests) bits.push(v.minGuests + "\u2013" + v.maxGuests + " guests");
+    else if (v.maxGuests) bits.push("Up to " + v.maxGuests + " guests");
+    if (bits.length) body.appendChild(el("div", "card-meta", bits.join("  \u00b7  ")));
+
+    if (v.tags && v.tags.length) {
+      var tw = el("div", "card-tags");
+      v.tags.slice(0, 3).forEach(function (t) { tw.appendChild(el("span", null, t)); });
+      body.appendChild(tw);
+    }
+
+    if (v.pricePerGuest != null) {
+      var p = el("div", "card-price", "JOD " + v.pricePerGuest + " ");
+      p.appendChild(el("span", null, "per guest"));
+      body.appendChild(p);
+    } else if (v.startingPrice != null) {
+      var p2 = el("div", "card-price", "From JOD " + v.startingPrice);
+      body.appendChild(p2);
+    }
+
+    a.appendChild(body);
+    return a;
+  }
+
+  function render(items) {
+    cards.innerHTML = "";
+    items.forEach(function (v, i) { cards.appendChild(buildCard(v, i)); });
+  }
+
+  /* ---------- pages ---------- */
+  var PAGE_SIZE = 9;              // the page code sends its own size with each result; this is the fallback
+  var page = 1, pages = 1;
+  var pager = document.getElementById("pager");
+
+  /* The body is the scroll box (see the reporter at the end). While the iframe is
+     a fixed height it scrolls itself; once the site-wide listener sizes it to its
+     content, the page scrolls instead. */
+  function scrollToResults() {
+    var b = document.body;
+    var top = Math.max(0, Math.round(resultLine.getBoundingClientRect().top - b.getBoundingClientRect().top + b.scrollTop - 24));
+    if (b.scrollHeight > b.clientHeight + 2) b.scrollTo({ top: top, behavior: "smooth" });
+    else post({ type: "venues:scrollTo", y: top });
+  }
+
+  /* 1 2 3 4 5 6 7, or 1 … 4 5 6 … 12 once there are more than seven pages. */
+  function pageList(cur, total) {
+    var out = [], i;
+    if (total <= 7) { for (i = 1; i <= total; i++) out.push(i); return out; }
+    var a = Math.max(2, cur - 1), z = Math.min(total - 1, cur + 1);
+    if (cur <= 3) { a = 2; z = 4; }
+    if (cur >= total - 2) { a = total - 3; z = total - 1; }
+    out.push(1);
+    if (a > 2) out.push("gap");
+    for (i = a; i <= z; i++) out.push(i);
+    if (z < total - 1) out.push("gap");
+    out.push(total);
+    return out;
+  }
+
+  function drawPager() {
+    pager.innerHTML = "";
+    pager.removeAttribute("aria-busy");
+    pager.hidden = pages <= 1;
+    if (pages <= 1) return;
+    function btn(html, target, label, current) {
+      var b = el("button");
+      b.type = "button";
+      b.innerHTML = html;
+      b.dataset.page = target;
+      b.setAttribute("aria-label", label);
+      if (current) b.setAttribute("aria-current", "page");
+      if (target < 1 || target > pages) b.disabled = true;
+      pager.appendChild(b);
+    }
+    btn("&larr; <span class=\"lbl\">Previous</span>", page - 1, "Previous page");
+    pageList(page, pages).forEach(function (n) {
+      if (n === "gap") { pager.appendChild(el("span", "gap", "\u2026")); return; }
+      btn(String(n), n, "Page " + n, n === page);
+    });
+    btn("<span class=\"lbl\">Next</span> &rarr;", page + 1, "Next page");
+  }
+
+  pager.addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b || b.disabled || b.hasAttribute("aria-current")) return;
+    apply(Number(b.dataset.page));
+    scrollToResults();
+  });
+
+  function showRange(total, noun) {
+    var from = (page - 1) * PAGE_SIZE + 1, to = Math.min(total, page * PAGE_SIZE);
+    say("Showing <b>" + from + "\u2013" + to + "</b> of <b>" + total + "</b> " + noun + (total === 1 ? "" : "s") +
+        (pages > 1 ? " \u00b7 page " + page + " of " + pages : "") + ".", false);
+  }
+
+  /* ---------- requests ---------- */
+  function apply(n) {
+    var bad = validate();
+    if (bad) { bad.focus(); return; }
+    var p = Math.max(1, Math.floor(n || 1));
+    applyBtn.classList.add("busy");
+    pager.setAttribute("aria-busy", "true");
+    say("Searching\u2026", false);
+    showSkeletons(PAGE_SIZE);
+    post({ type: "venues:apply", filters: collect(), skip: (p - 1) * PAGE_SIZE });
+  }
+
+  form.addEventListener("submit", function (e) { e.preventDefault(); apply(); });
+  form.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && e.target.matches("input")) { e.preventDefault(); apply(); }
+  });
+
+  resetBtn.addEventListener("click", function () {
+    form.reset();
+    clearAll();
+    Array.prototype.forEach.call(chipGroup.querySelectorAll(".chip"), function (c) {
+      c.setAttribute("aria-pressed", "false");
+    });
+    syncActive();
+    apply(1);
+  });
+
+  form.addEventListener("input", function (e) {
+    if (e.target.matches("input, select")) { clearError(e.target); syncActive(); }
+  });
+  form.addEventListener("change", function (e) {
+    if (e.target.matches("select")) syncActive();
+  });
+
+  /* ---------- from Velo ---------- */
+  function fillSelect(id, values, anyLabel) {
+    var sel = document.getElementById(id);
+    var keep = sel.value;
+    sel.innerHTML = "";
+    var any = document.createElement("option");
+    any.value = ""; any.textContent = anyLabel;
+    sel.appendChild(any);
+    values.forEach(function (v) {
+      var o = document.createElement("option");
+      o.value = v; o.textContent = v;
+      sel.appendChild(o);
+    });
+    if (keep) sel.value = keep;
+  }
+
+  var answered = false;
+  window.addEventListener("message", function (event) {
+    var d = event.data;
+    if (!d || typeof d !== "object") return;
+
+    if (d.type === "venues:setup") {
+      answered = true;
+      if (d.cities) fillSelect("city", d.cities, "Any city");
+      if (d.locationTypes) fillSelect("locationType", d.locationTypes, "Indoor or outdoor");
+
+      if (d.venueTypes) {
+        chipGroup.innerHTML = "";
+        d.venueTypes.forEach(function (t) {
+          var b = document.createElement("button");
+          b.type = "button"; b.className = "chip";
+          b.setAttribute("aria-pressed", "false");
+          b.textContent = t;
+          chipGroup.appendChild(b);
+        });
+      }
+
+      if (d.initial) {
+        var i = d.initial;
+        if (i.city) document.getElementById("city").value = i.city;
+        if (i.locationType) document.getElementById("locationType").value = i.locationType;
+        if (i.guestsFrom != null) document.getElementById("guestsFrom").value = i.guestsFrom;
+        if (i.guestsTo != null) document.getElementById("guestsTo").value = i.guestsTo;
+        if (i.budget != null) document.getElementById("budget").value = i.budget;
+        if (i.venueTypes && i.venueTypes.length) {
+          Array.prototype.forEach.call(chipGroup.querySelectorAll(".chip"), function (c) {
+            if (i.venueTypes.indexOf(c.textContent.trim()) !== -1) c.setAttribute("aria-pressed", "true");
+          });
+        }
+      }
+      syncActive();
+      apply((d.initial && d.initial.page) || 1);   // the page in the address, or the first
+    }
+
+    if (d.type === "venues:results") {
+      applyBtn.classList.remove("busy");
+      if (d.pageSize) PAGE_SIZE = d.pageSize;
+      page = Math.floor((d.skip || 0) / PAGE_SIZE) + 1;
+      pages = Math.max(1, Math.ceil((d.total || 0) / PAGE_SIZE));
+      // An old link to a page that no longer exists → show the last real page instead.
+      if (d.total > 0 && !(d.items || []).length && page > pages) { apply(pages); return; }
+
+      render(d.items || []);
+
+      if (d.total === 0) {
+        noResults.hidden = false;
+        say(countActive(collect()) > 0
+          ? "No venues match all of those."
+          : "No venues are published yet.", true);
+      } else {
+        noResults.hidden = true;
+        showRange(d.total, "venue");
+      }
+      drawPager();
+      syncActive();
+    }
+
+    if (d.type === "venues:error") {
+      applyBtn.classList.remove("busy");
+      pager.removeAttribute("aria-busy");
+      Array.prototype.forEach.call(cards.querySelectorAll(".skelcard"), function (s) { s.remove(); });
+      say("We could not load the venues. Try again in a moment.", true);
+    }
+  });
+
+  syncActive();
+  /* Say "ready" every second until the page answers — its listener may attach
+     after this iframe loads, and a single message would be lost. */
+  (function ping(n) {
+    if (answered) return;
+    post({ type: "venues:ready" });
+    if (n < 30) setTimeout(function () { ping(n + 1); }, 1000);
+  })(0);
+})();
+</script>
+<div class="pp-safe-space" aria-hidden="true"></div>
+<!-- Pixel Pals iframe auto-height reporter v3 (body is the scroll box).
+     Scrolls inside the iframe until the site-wide listener sizes it.
+     Once the site-wide listener sizes the iframe, there is nothing left to scroll. -->
+<script>
+(function () {
+  if (window.__ppReporter) return;
+  window.__ppReporter = true;
+
+  var s = document.createElement('style');
+  s.textContent =
+    'html{height:100%!important;min-height:0!important;overflow:hidden!important}' +
+    'body{height:100%!important;min-height:0!important;margin:0;overflow-x:hidden!important;overflow-y:auto!important;' +
+      '-webkit-overflow-scrolling:touch;overscroll-behavior:auto;scrollbar-width:none;-ms-overflow-style:none;display:flow-root}' +
+    'html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0;display:none}';
+  document.head.appendChild(s);
+
+  var body = document.body, last = -1, raf = 0;
+
+  // Height of the content itself, not the scroll box (so the iframe can shrink as well as grow)
+  function measure() {
+    var top = body.getBoundingClientRect().top - body.scrollTop;
+    var bottom = 0, kids = body.children;
+    for (var i = 0; i < kids.length; i++) {
+      var r = kids[i].getBoundingClientRect();
+      if (!r.height && !r.width) continue; // hidden, scripts, styles
+      var mb = parseFloat(getComputedStyle(kids[i]).marginBottom) || 0;
+      bottom = Math.max(bottom, r.bottom + mb);
+    }
+    var pb = parseFloat(getComputedStyle(body).paddingBottom) || 0;
+    return Math.ceil(bottom - top + pb);
+  }
+
+  function send(force) {
+    var h = measure();
+    if (!force && h === last) return;
+    last = h;
+    window.parent.postMessage({ type: 'setHeight', height: h }, '*');
+  }
+
+  function schedule() {
+    if (raf) return;
+    raf = requestAnimationFrame(function () { raf = 0; send(false); });
+  }
+
+  // Watch the content (the body itself is now a fixed-size scroll box)
+  var ro = 'ResizeObserver' in window ? new ResizeObserver(schedule) : null;
+  function watchKids() {
+    if (!ro) return;
+    ro.observe(body);
+    for (var i = 0; i < body.children.length; i++) ro.observe(body.children[i]);
+  }
+  watchKids();
+  if ('MutationObserver' in window) {
+    new MutationObserver(function () { watchKids(); schedule(); })
+      .observe(body, { childList: true, subtree: true, attributes: true, characterData: true });
+  }
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', function () { send(true); });
+  document.addEventListener('load', schedule, true);
+  document.addEventListener('transitionend', schedule, true);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { send(true); });
+
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'requestHeight') send(true);
+  });
+
+  [0, 300, 1000, 2500, 5000].forEach(function (t) { setTimeout(function () { send(true); }, t); });
+})();
+</script>
+</body>
+</html>

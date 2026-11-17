@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wedding Talent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://static.wixstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Mulish:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Pixel Pals build standards ─────────────────────────────────────
+   No visible scrollbars anywhere (everything still scrolls), media never
+   wider than its box, 16px form text on phones so iOS doesn't zoom, and a
+   little side padding on phones so nothing touches the screen edge.
+   Height: the reporter at the end of this file (setHeight → site-wide listener). */
+*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{width:0;height:0;display:none}
+img,video,canvas{max-width:100%}
+@media (max-width:760px){input,select,textarea{font-size:16px!important}}
+@media (max-width:600px){.wrap,.page{padding-left:14px!important;padding-right:14px!important}}
+
+  :root {
+    color-scheme: dark;
+    --bg:            #0C0C0B;
+    --surface:       #141413;
+    --field:         #181713;
+    --field-hover:   #1E1C19;
+    --border:        #383733;
+    --border-quiet:  #262625;
+    --gold:          #AA936F;
+    --gold-tint:     rgba(170,147,111,0.10);
+    --gold-line:     rgba(170,147,111,0.28);
+    --gold-soft:     #C4B091;
+    --text:          #FFFFFF;
+    --body:          #ADADAD;
+    --label:         #A8A7A3;
+    --placeholder:   #8C8C8B;
+    --danger:        #C4705A;
+    --danger-tint:   #241713;
+    --r-field:       8px;
+    --r-card:        12px;
+    --font-display:  "Playfair Display", Georgia, serif;
+    --font-body:     "Mulish", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1050px; margin: 0 auto; padding: 4px 0 40px; }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 34px;
+    line-height: 1.15;
+    margin: 0 0 6px;
+  }
+
+  .lede { font-size: 15px; line-height: 1.7; color: var(--placeholder); margin: 0 0 34px; }
+
+  fieldset { border: 0; margin: 0 0 34px; padding: 0; min-width: 0; }
+
+  legend {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--label);
+    margin: 0 0 14px;
+    padding: 0;
+  }
+
+  label.field { display: block; }
+
+  label.field > span.txt {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--label);
+    margin: 0 0 8px;
+  }
+
+  input[type="text"], input[type="number"], input[type="search"] {
+    width: 100%;
+    background: var(--field);
+    border: 1px solid var(--border);
+    border-radius: var(--r-field);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    padding: 12px 14px;
+    min-height: 45px;
+    transition: border-color 140ms ease, background 140ms ease;
+  }
+
+  input::placeholder { color: var(--placeholder); }
+  input:hover { background: var(--field-hover); }
+
+  input:focus-visible, .chip:focus-visible, button:focus-visible {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(170,147,111,0.22);
+  }
+
+  .chip {
+    background: var(--field);
+    border: 1px solid var(--border-quiet);
+    border-radius: 999px;
+    color: var(--placeholder);
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 8px 16px;
+    transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+  }
+  .chip:hover { color: var(--gold-soft); border-color: var(--border); }
+  .chip[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #1A1509; font-weight: 600; }
+
+  /* Empty state */
+  .empty {
+    background: var(--surface);
+    border: 1px solid var(--border-quiet);
+    border-radius: var(--r-card);
+    padding: 22px;
+  }
+  .empty h2 {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 400;
+    margin: 0 0 8px;
+  }
+  .empty p { font-size: 15px; line-height: 1.65; color: var(--placeholder); margin: 0 0 16px; }
+
+  button.primary, button.ghost {
+    border-radius: var(--r-field);
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    padding: 13px 30px;
+    transition: filter 140ms ease, background 140ms ease;
+  }
+  button.primary { background: var(--gold); border: 1px solid var(--gold); color: var(--text); }
+  button.primary:hover { filter: brightness(1.08); }
+  button.primary[disabled] { opacity: 0.55; cursor: not-allowed; filter: none; }
+  button.ghost {
+    background: rgba(170,147,111,0.12);
+    border: 1px solid rgba(170,147,111,0.40);
+    color: var(--gold);
+  }
+  button.ghost:hover { background: rgba(170,147,111,0.18); }
+
+  .err-msg { font-style: normal; display: block; font-size: 13px; color: var(--danger); margin: 7px 0 0; }
+  .err-msg[hidden] { display: none; }
+  .invalid input { border-color: var(--danger); }
+
+  [hidden] { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+
+  /* ---------- category menu (first view) ---------- */
+  .catgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  @media (max-width: 900px) { .catgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .catgrid { grid-template-columns: minmax(0, 1fr); } }
+  .catbox {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 14px; text-align: left;
+    background: var(--surface); border: 1px solid var(--border-quiet); border-radius: var(--r-card);
+    padding: 22px 20px; cursor: pointer; color: var(--text); font-family: var(--font-body);
+    transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+  }
+  .catbox:hover { border-color: var(--gold-line); background: var(--field-hover); transform: translateY(-2px); }
+  .catbox:focus-visible { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(170,147,111,0.22); }
+  .catbox .ic {
+    width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--gold-tint); border: 1px solid var(--gold-line); color: var(--gold);
+  }
+  .catbox .ic svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .catbox .nm { font-family: var(--font-display); font-size: 21px; line-height: 1.25; }
+  .catbox .ct { font-size: 13px; color: var(--placeholder); margin-top: -8px; }
+  .catbox.all { border-style: dashed; }
+  .backcats {
+    background: none; border: 0; padding: 0; margin: 0 0 18px; cursor: pointer;
+    color: var(--gold-soft); font-family: var(--font-body); font-size: 14px; font-weight: 600;
+  }
+  .backcats:hover { color: var(--gold); text-decoration: underline; }
+  .wrap > h1, .wrap > .lede { text-align: center; }
+  .wrap > .lede { max-width: 620px; margin-left: auto; margin-right: auto; margin-bottom: 30px; }
+
+  /* Select */
+  select {
+    width: 100%; background: var(--field);
+    border: 1px solid var(--border); border-radius: var(--r-field);
+    color: var(--text); font-family: var(--font-body); font-size: 15px;
+    padding: 12px 38px 12px 14px; min-height: 45px; appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238E8E8B' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+    transition: border-color 140ms ease, background-color 140ms ease;
+  }
+  select:hover { background-color: var(--field-hover); }
+  select:focus-visible { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(170,147,111,0.22); }
+
+  /* Filter bar */
+  .bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px 16px; }
+  .bar .field { min-width: 0; }
+  .toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+    margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--border-quiet);
+  }
+  .toolbar .spacer { flex: 1 1 auto; }
+  .activecount { font-size: 13px; color: var(--placeholder); }
+  .activecount b { color: var(--gold); font-weight: 600; }
+
+  .resultline { font-size: 15px; line-height: 1.6; margin: 26px 0 18px; min-height: 24px; color: var(--label); }
+  .resultline b { color: var(--text); font-weight: 600; }
+  .resultline.none { color: var(--gold-soft); }
+
+  button.primary .spin {
+    display: none; width: 14px; height: 14px; margin-right: 9px;
+    border: 2px solid rgba(255,255,255,0.35); border-top-color: var(--text);
+    border-radius: 50%; vertical-align: -2px;
+  }
+  button.primary.busy .spin { display: inline-block; }
+  button.primary.busy { pointer-events: none; }
+
+  /* ---- Cards ---- */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr)); gap: 22px; }
+
+  a.card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border-quiet);
+    border-radius: var(--r-card);
+    color: inherit;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    text-decoration: none;
+    transition: border-color 200ms ease, transform 200ms ease;
+  }
+  a.card:hover { border-color: rgba(170,147,111,0.45); }
+  a.card:focus-visible {
+    outline: none; border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(170,147,111,0.22);
+  }
+
+  .card-media { aspect-ratio: 4 / 3; background: var(--field); overflow: hidden; }
+  .card-media img {
+    display: block; width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 620ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .card-media.empty {
+    display: grid; place-items: center;
+    color: var(--border); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;
+  }
+
+  .card-body { display: flex; flex-direction: column; gap: 9px; padding: 18px; flex: 1 1 auto; }
+  .card-name { font-family: var(--font-display); font-size: 20px; font-weight: 400; line-height: 1.25; }
+  .card-meta { font-size: 13px; color: var(--placeholder); line-height: 1.5; }
+  .card-price { color: var(--gold); font-size: 15px; font-weight: 600; margin-top: auto; }
+  .card-price span { color: var(--placeholder); font-weight: 400; font-size: 13px; }
+  .card-cat {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--gold);
+  }
+  .card-rating { font-size: 13px; color: var(--body); }
+  .card-rating svg { width: 12px; height: 12px; fill: var(--gold); vertical-align: -1px; margin-right: 4px; }
+  .card-badge {
+    position: absolute; top: 12px; left: 12px;
+    background: var(--gold); color: #1A1509;
+    border-radius: 999px; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 11px;
+  }
+
+  /* Skeleton cards */
+  .skelcard {
+    background: var(--surface); border: 1px solid var(--border-quiet);
+    border-radius: var(--r-card); overflow: hidden; opacity: 0.6;
+  }
+  .skelcard .m { aspect-ratio: 4 / 3; background: var(--field); }
+  .skelcard .b { padding: 18px; display: grid; gap: 10px; }
+  .skelcard .b i { display: block; height: 12px; border-radius: 4px; background: var(--field); }
+  .skelcard .b i:first-child { height: 18px; width: 70%; }
+  .skelcard .b i:last-child { width: 40%; }
+
+  /* ---- Pages ---- */
+  .pager { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-top: 34px; }
+  .pager button {
+    min-width: 42px; height: 42px; padding: 0 12px; border-radius: var(--r-field);
+    border: 1px solid var(--border-quiet); background: var(--surface); color: var(--label);
+    font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
+  }
+  .pager button:hover:not([disabled]):not([aria-current]) { border-color: var(--gold); color: var(--gold); }
+  .pager button[aria-current="page"] { background: var(--gold); border-color: var(--gold); color: #1A1509; cursor: default; }
+  .pager button[disabled] { opacity: 0.35; cursor: not-allowed; }
+  .pager .gap { color: var(--placeholder); padding: 0 4px; }
+  .pager[aria-busy="true"] { opacity: 0.55; pointer-events: none; }
+  @media (max-width: 420px) { .pager { gap: 4px; } .pager .lbl { display: none; } .pager .gap { padding: 0 2px; } .pager button { min-width: 34px; height: 38px; padding: 0 6px; font-size: 14px; } }
+
+  /* Search box */
+  .searchrow { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 22px; }
+  .searchrow .box { flex: 1 1 260px; position: relative; min-width: 0; }
+  .searchrow input { width: 100%; padding-left: 42px; }
+  .searchrow .box svg {
+    position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px; stroke: var(--placeholder); fill: none; stroke-width: 1.8;
+    pointer-events: none;
+  }
+
+  /* Category strip — the primary filter for a directory */
+  .cats { display: flex; flex-wrap: wrap; gap: 9px; margin: 0 0 8px; }
+  .cats .chip { font-size: 14px; padding: 9px 17px; }
+
+  .sortrow { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .sortrow label { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--placeholder); }
+  .sortrow select { width: auto; min-width: 168px; min-height: 40px; padding: 8px 36px 8px 12px; font-size: 14px; }
+
+  /* ---- Motion ---- */
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes riseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    @keyframes spin   { to { transform: rotate(360deg); } }
+    @keyframes countIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+    @keyframes pulseCard { 0%,100% { opacity: 0.45; } 50% { opacity: 0.75; } }
+
+    .anim { opacity: 0; animation: riseIn 460ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards; }
+    .anim:nth-child(1) { animation-delay: 0ms; }
+    .anim:nth-child(2) { animation-delay: 45ms; }
+    .anim:nth-child(3) { animation-delay: 90ms; }
+    .anim:nth-child(4) { animation-delay: 135ms; }
+
+    a.card { opacity: 0; animation: riseIn 520ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards; }
+    a.card:hover { transform: translateY(-3px); }
+    a.card:hover .card-media img { transform: scale(1.055); }
+
+    .skelcard { animation: pulseCard 1.5s ease-in-out infinite; }
+    button.primary .spin { animation: spin 700ms linear infinite; }
+    .resultline.flash { animation: countIn 320ms cubic-bezier(0.22, 0.61, 0.36, 1); }
+    .chip { transition: background 140ms ease, color 140ms ease, border-color 140ms ease, transform 90ms ease; }
+    .chip:active { transform: scale(0.96); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a.card, .anim { opacity: 1; }
+  }
+</style>
+<style id="pp-layout">
+/* ── Pixel Pals layout safeguards ─────────────────────────────────────
+   Transparent page so the Wix section shows through seamlessly, sturdy form
+   controls on phones, long words wrap instead of widening the page, and a
+   safety space at the end so nothing is ever cut off. */
+html,body{background:transparent!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-wrap:break-word}
+input,select,textarea,button{max-width:100%}
+table{max-width:100%}
+/* iOS draws date fields wider and taller than other inputs; make them behave. */
+input[type=date],input[type=time],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;display:block}
+input[type=date]::-webkit-date-and-time-value{text-align:start;min-height:1.4em}
+/* Save bars sit in the flow: a sticky bar needs a solid background, and the page has none. */
+.savebar{position:static!important;background:transparent!important}
+/* Width: 80% of the frame on wide screens, never narrower than before (1050px). */
+.wrap{width:max(80%, min(100%, 1050px))!important;max-width:none!important;margin-left:auto!important;margin-right:auto!important}
+@media (max-width:1100px){.wrap{padding-left:20px!important;padding-right:20px!important}}
+@media (max-width:600px){.wrap{padding-left:14px!important;padding-right:14px!important}}
+/* The wider frame would fit 4–5 cards a row; 9 per page reads best as 3 × 3. */
+.cards{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+@media (max-width:900px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media (max-width:560px){.cards{grid-template-columns:minmax(0,1fr)!important}}
+/* Safety space under the content (counted by the height reporter). */
+.pp-safe-space{display:block;height:140px}
+@media (max-width:760px){.pp-safe-space{height:calc(180px + env(safe-area-inset-bottom, 0px))}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Wedding Talent</h1>
+  <p class="lede">Photographers, musicians, planners and more, ready to book for your wedding.</p>
+
+  <!-- First view: one box per service; picking one opens the directory below. -->
+  <div id="catView" hidden>
+    <div class="catgrid" id="catGrid" role="list"></div>
+  </div>
+
+  <div id="dirView">
+  <button type="button" class="backcats" id="toCats">&larr; All categories</button>
+
+  <form id="filterForm" novalidate>
+
+    <div class="searchrow">
+      <div class="box">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.2-4.2"/></svg>
+        <input type="text" id="q" placeholder="Search by name" autocomplete="off" aria-label="Search by name">
+      </div>
+    </div>
+
+    <fieldset>
+      <legend>Category</legend>
+      <div class="cats" id="cats" role="group" aria-label="Category"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Narrow it down</legend>
+      <div class="bar">
+        <label class="field anim" data-for="city">
+          <span class="txt">City</span>
+          <select id="city"><option value="">Anywhere</option></select>
+        </label>
+        <label class="field anim" data-for="budget">
+          <span class="txt">Budget from (JOD)</span>
+          <input type="number" id="budget" min="0" step="10" placeholder="Any">
+          <em class="err-msg" hidden></em>
+        </label>
+        <label class="field anim" data-for="language">
+          <span class="txt">Language</span>
+          <select id="language"><option value="">Any</option></select>
+        </label>
+        <label class="field anim" data-for="experience">
+          <span class="txt">Years experience</span>
+          <select id="experience">
+            <option value="">Any</option>
+            <option value="2">2 or more</option>
+            <option value="5">5 or more</option>
+            <option value="10">10 or more</option>
+          </select>
+        </label>
+      </div>
+    </fieldset>
+
+    <div class="toolbar">
+      <button type="submit" class="primary" id="applyBtn"><span class="spin" aria-hidden="true"></span>Show results</button>
+      <button type="button" class="ghost" id="resetBtn" hidden>Clear filters</button>
+      <span class="spacer"></span>
+      <div class="sortrow">
+        <label for="sort">Sort
+          <select id="sort">
+            <option value="featured">Featured first</option>
+            <option value="priceAsc">Price, low to high</option>
+            <option value="priceDesc">Price, high to low</option>
+            <option value="rating">Highest rated</option>
+            <option value="newest">Newest</option>
+          </select>
+        </label>
+        <span class="activecount" id="activeCount"></span>
+      </div>
+    </div>
+  </form>
+
+  <p class="resultline" id="resultLine" role="status" aria-live="polite"></p>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="empty" id="noResults" hidden>
+    <h2>Nothing matches all of those</h2>
+    <p>Try clearing a category, widening the budget, or searching a different name.</p>
+  </div>
+
+  <nav class="pager" id="pager" aria-label="Talent pages" hidden></nav>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var form        = document.getElementById("filterForm");
+  var applyBtn    = document.getElementById("applyBtn");
+  var resetBtn    = document.getElementById("resetBtn");
+  var catStrip    = document.getElementById("cats");
+  var resultLine  = document.getElementById("resultLine");
+  var activeCount = document.getElementById("activeCount");
+  var cards       = document.getElementById("cards");
+  var noResults   = document.getElementById("noResults");
+  var sortSel     = document.getElementById("sort");
+  var qInput      = document.getElementById("q");
+
+  var debounce = null;
+
+  function post(m) { try { window.parent.postMessage(m, "*"); } catch (e) {} }
+  /* Height: the Pixel Pals reporter at the end of this file (setHeight → site-wide listener). */
+
+  /* A Wix HTML component is a sandboxed iframe on a different origin to your
+     site. Same-site links have to navigate the parent window instead. */
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a) return;
+    var href = a.getAttribute("href");
+    if (!href || href.charAt(0) === "#") return;
+    if (/^(mailto:|tel:|sms:)/i.test(href)) return;
+    if (a.target === "_blank") return;                 // new tab is top-level already
+    if (e.defaultPrevented || e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;  // let modified clicks through
+    e.preventDefault();
+    post({ type: "iframe:navigate", url: href });
+  });
+
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+  function star() {
+    var s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    s.setAttribute("viewBox", "0 0 24 24");
+    s.setAttribute("aria-hidden", "true");
+    var p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", "M12 3.6l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 10l6-.8z");
+    s.appendChild(p);
+    return s;
+  }
+
+  function val(id) { return document.getElementById(id).value.trim(); }
+  function numOf(id) {
+    var raw = val(id);
+    if (raw === "") return null;
+    var n = Number(raw);
+    return isNaN(n) ? null : n;
+  }
+
+  /* ---------- category strip (single select, All is the cleared state) ---------- */
+  catStrip.addEventListener("click", function (e) {
+    var chip = e.target.closest(".chip");
+    if (!chip) return;
+    var already = chip.getAttribute("aria-pressed") === "true";
+    Array.prototype.forEach.call(catStrip.querySelectorAll(".chip"), function (c) {
+      c.setAttribute("aria-pressed", "false");
+    });
+    if (!already) chip.setAttribute("aria-pressed", "true");
+    syncActive();
+    apply();
+  });
+  function currentCategory() {
+    var on = catStrip.querySelector('.chip[aria-pressed="true"]');
+    return on ? on.dataset.value : "";
+  }
+
+  /* ---------- filter state ---------- */
+  function collect() {
+    return {
+      q:          val("q"),
+      category:   currentCategory(),
+      city:       val("city"),
+      budget:     numOf("budget"),
+      language:   val("language"),
+      experience: numOf("experience"),
+      sort:       sortSel.value
+    };
+  }
+  function countActive(f) {
+    var n = 0;
+    if (f.q) n++;
+    if (f.category) n++;
+    if (f.city) n++;
+    if (f.budget !== null) n++;
+    if (f.language) n++;
+    if (f.experience !== null) n++;
+    return n;
+  }
+  function syncActive() {
+    var n = countActive(collect());
+    activeCount.innerHTML = n === 0 ? "" : "<b>" + n + "</b> filter" + (n === 1 ? "" : "s");
+    resetBtn.hidden = n === 0;
+  }
+
+  /* ---------- errors ---------- */
+  function wrapOf(n) { return n.closest("label.field") || n.parentNode; }
+  function setErr(n, msg) {
+    var w = wrapOf(n); w.classList.add("invalid");
+    var s = w.querySelector(".err-msg");
+    if (s) { s.textContent = msg; s.hidden = false; }
+  }
+  function clearErr(n) {
+    var w = wrapOf(n); w.classList.remove("invalid");
+    var s = w.querySelector(".err-msg");
+    if (s) { s.hidden = true; s.textContent = ""; }
+  }
+  function validate() {
+    var b = document.getElementById("budget");
+    clearErr(b);
+    var raw = b.value.trim();
+    if (raw !== "" && (isNaN(Number(raw)) || Number(raw) < 0)) {
+      setErr(b, "Numbers only.");
+      return b;
+    }
+    return null;
+  }
+
+  function say(text, none) {
+    resultLine.innerHTML = text;
+    resultLine.className = "resultline" + (none ? " none" : "");
+    void resultLine.offsetWidth;
+    resultLine.classList.add("flash");
+  }
+
+  /* ---------- skeletons ---------- */
+  function showSkeletons(n) {
+    cards.innerHTML = "";
+    noResults.hidden = true;
+    for (var i = 0; i < n; i++) {
+      var s = el("div", "skelcard");
+      s.appendChild(el("div", "m"));
+      var b = el("div", "b");
+      b.appendChild(el("i")); b.appendChild(el("i")); b.appendChild(el("i"));
+      s.appendChild(b);
+      cards.appendChild(s);
+    }
+  }
+
+  /* ---------- cards ---------- */
+  function buildCard(t, index) {
+    var a = el("a", "card");
+    a.href = t.url || "#";
+    a.setAttribute("aria-label", t.title + ", " + t.category);
+    a.style.animationDelay = Math.min(index * 55, 440) + "ms";
+
+    var media = el("div", "card-media");
+    if (t.image) {
+      var img = document.createElement("img");
+      img.src = t.image; img.alt = t.title;
+      img.loading = "lazy"; img.decoding = "async";
+      img.addEventListener("error", function () {
+        media.className = "card-media empty";
+        media.textContent = "No photo yet";
+      });
+      media.appendChild(img);
+    } else {
+      media.className = "card-media empty";
+      media.textContent = "No photo yet";
+    }
+    a.appendChild(media);
+
+    if (t.featured) a.appendChild(el("span", "card-badge", "Featured"));
+
+    var body = el("div", "card-body");
+    body.appendChild(el("div", "card-cat", t.category));
+    body.appendChild(el("div", "card-name", t.title));
+
+    if (t.headline) body.appendChild(el("div", "card-meta", t.headline));
+
+    var bits = [];
+    if (t.city) bits.push(t.city);
+    if (t.yearsExperience) bits.push(t.yearsExperience + " yrs experience");
+    if (bits.length) body.appendChild(el("div", "card-meta", bits.join("  \u00b7  ")));
+
+    if (t.rating != null) {
+      var r = el("div", "card-rating");
+      r.appendChild(star());
+      r.appendChild(document.createTextNode(t.rating + (t.reviewCount ? "  ·  " + t.reviewCount + " reviews" : "")));
+      body.appendChild(r);
+    }
+
+    if (t.priceFrom != null) {
+      var p = el("div", "card-price", "From JOD " + t.priceFrom + " ");
+      if (t.priceUnit) p.appendChild(el("span", null, t.priceUnit));
+      body.appendChild(p);
+    } else {
+      body.appendChild(el("div", "card-price", "Price on request"));
+    }
+
+    a.appendChild(body);
+    return a;
+  }
+
+  function render(items) {
+    cards.innerHTML = "";
+    items.forEach(function (t, i) { cards.appendChild(buildCard(t, i)); });
+  }
+
+  /* ---------- pages ---------- */
+  var PAGE_SIZE = 9;              // the page code sends its own size with each result; this is the fallback
+  var page = 1, pages = 1;
+  var pager = document.getElementById("pager");
+
+  /* The body is the scroll box (see the reporter at the end). While the iframe is
+     a fixed height it scrolls itself; once the site-wide listener sizes it to its
+     content, the page scrolls instead. */
+  function scrollToResults() {
+    var b = document.body;
+    var top = Math.max(0, Math.round(resultLine.getBoundingClientRect().top - b.getBoundingClientRect().top + b.scrollTop - 24));
+    if (b.scrollHeight > b.clientHeight + 2) b.scrollTo({ top: top, behavior: "smooth" });
+    else post({ type: "talent:scrollTo", y: top });
+  }
+
+  /* 1 2 3 4 5 6 7, or 1 … 4 5 6 … 12 once there are more than seven pages. */
+  function pageList(cur, total) {
+    var out = [], i;
+    if (total <= 7) { for (i = 1; i <= total; i++) out.push(i); return out; }
+    var a = Math.max(2, cur - 1), z = Math.min(total - 1, cur + 1);
+    if (cur <= 3) { a = 2; z = 4; }
+    if (cur >= total - 2) { a = total - 3; z = total - 1; }
+    out.push(1);
+    if (a > 2) out.push("gap");
+    for (i = a; i <= z; i++) out.push(i);
+    if (z < total - 1) out.push("gap");
+    out.push(total);
+    return out;
+  }
+
+  function drawPager() {
+    pager.innerHTML = "";
+    pager.removeAttribute("aria-busy");
+    pager.hidden = pages <= 1;
+    if (pages <= 1) return;
+    function btn(html, target, label, current) {
+      var b = el("button");
+      b.type = "button";
+      b.innerHTML = html;
+      b.dataset.page = target;
+      b.setAttribute("aria-label", label);
+      if (current) b.setAttribute("aria-current", "page");
+      if (target < 1 || target > pages) b.disabled = true;
+      pager.appendChild(b);
+    }
+    btn("&larr; <span class=\"lbl\">Previous</span>", page - 1, "Previous page");
+    pageList(page, pages).forEach(function (n) {
+      if (n === "gap") { pager.appendChild(el("span", "gap", "\u2026")); return; }
+      btn(String(n), n, "Page " + n, n === page);
+    });
+    btn("<span class=\"lbl\">Next</span> &rarr;", page + 1, "Next page");
+  }
+
+  pager.addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b || b.disabled || b.hasAttribute("aria-current")) return;
+    apply(Number(b.dataset.page));
+    scrollToResults();
+  });
+
+  function showRange(total, noun) {
+    var from = (page - 1) * PAGE_SIZE + 1, to = Math.min(total, page * PAGE_SIZE);
+    say("Showing <b>" + from + "\u2013" + to + "</b> of <b>" + total + "</b> " + noun + (total === 1 ? "" : "s") +
+        (pages > 1 ? " \u00b7 page " + page + " of " + pages : "") + ".", false);
+  }
+
+  /* ---------- requests ---------- */
+  /* apply(n) loads page n; filters, search and sort all call apply(1). */
+  function apply(n) {
+    var bad = validate();
+    if (bad) { bad.focus(); return; }
+    var p = Math.max(1, Math.floor(n || 1));
+    applyBtn.classList.add("busy");
+    pager.setAttribute("aria-busy", "true");
+    say("Searching\u2026", false);
+    showSkeletons(PAGE_SIZE);
+    post({ type: "talent:search", filters: collect(), skip: (p - 1) * PAGE_SIZE });
+  }
+
+  form.addEventListener("submit", function (e) { e.preventDefault(); apply(1); });
+  form.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && e.target.matches("input")) { e.preventDefault(); apply(1); }
+  });
+
+  /* Typing searches on its own after a beat — a name search that needs a button
+     press feels broken. */
+  qInput.addEventListener("input", function () {
+    syncActive();
+    clearTimeout(debounce);
+    debounce = setTimeout(function () { apply(1); }, 420);
+  });
+
+  sortSel.addEventListener("change", function () { apply(1); });
+
+  resetBtn.addEventListener("click", function () {
+    form.reset();
+    Array.prototype.forEach.call(catStrip.querySelectorAll(".chip"), function (c) {
+      c.setAttribute("aria-pressed", "false");
+    });
+    syncActive();
+    apply(1);
+  });
+
+  form.addEventListener("input", function (e) {
+    if (e.target.matches("input, select")) { clearErr(e.target); syncActive(); }
+  });
+  form.addEventListener("change", function (e) {
+    if (e.target.matches("select") && e.target.id !== "sort") { syncActive(); apply(1); }
+  });
+
+  /* ---------- from Velo ---------- */
+  function fillSelect(id, values, anyLabel) {
+    var sel = document.getElementById(id);
+    var keep = sel.value;
+    sel.innerHTML = "";
+    var any = document.createElement("option");
+    any.value = ""; any.textContent = anyLabel;
+    sel.appendChild(any);
+    values.forEach(function (v) {
+      var o = document.createElement("option");
+      o.value = v; o.textContent = v;
+      sel.appendChild(o);
+    });
+    if (keep) sel.value = keep;
+  }
+
+
+  /* ---------- category menu ---------- */
+  var ICONS = [
+    [/photo/i,    '<rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l1.5-2.5h5L16 7"/>'],
+    [/video|film/i,'<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3"/>'],
+    [/\bdj\b|disc/i,'<path d="M4 15v-3a8 8 0 0116 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>'],
+    [/band|music/i,'<path d="M9 18V6l11-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>'],
+    [/sing|vocal/i,'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4M9 21h6"/>'],
+    [/zaff|drum/i, '<ellipse cx="12" cy="8" rx="8" ry="3"/><path d="M4 8v8c0 1.7 3.6 3 8 3s8-1.3 8-3V8"/><path d="M7 3l3 5M17 3l-3 5"/>'],
+    [/plan/i,      '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/>'],
+    [/flor|flower/i,'<circle cx="12" cy="9" r="2.5"/><path d="M12 6.5C12 4 14 3 15.5 4s1 3.5-1.2 4.5M12 6.5C12 4 10 3 8.5 4S7.5 7.5 9.7 8.5M14.4 10.2c2.3.8 3.1 3 2 4.2s-3.3.3-3.9-1.8M9.6 10.2c-2.3.8-3.1 3-2 4.2s3.3.3 3.9-1.8M12 11.5V21M12 17c-2-1-4-1-5 0"/>'],
+    [/make ?up|beauty/i,'<path d="M9 21V11h6v10zM10 11V7l4-3v7"/>'],
+    [/hair/i,      '<circle cx="6" cy="7" r="3"/><circle cx="6" cy="17" r="3"/><path d="M8.5 8.5L20 19M8.5 15.5L20 5"/>'],
+    [/henna/i,     '<path d="M8 21v-7l-3-3a1.5 1.5 0 012-2l2 2V5a1.5 1.5 0 013 0v6-8a1.5 1.5 0 013 0v8-6a1.5 1.5 0 013 0v9c0 4-2 7-6 7z"/>'],
+    [/cake|sweet|dessert/i,'<path d="M4 21h16v-8H4zM4 16c2 1.5 4 1.5 6 0s4-1.5 6 0 4 1.5 4 0M12 13V9M12 6.5a1.5 1.5 0 01-1.5-1.5c0-1 1.5-2.5 1.5-2.5s1.5 1.5 1.5 2.5A1.5 1.5 0 0112 6.5z"/>']
+  ];
+  var SPARK = '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>';
+  function iconFor(name) { for (var i = 0; i < ICONS.length; i++) if (ICONS[i][0].test(name)) return ICONS[i][1]; return SPARK; }
+
+  var catView = document.getElementById("catView"), dirView = document.getElementById("dirView");
+  function showCats() { catView.hidden = false; dirView.hidden = true; toTop(); }
+  function showDir()  { catView.hidden = true;  dirView.hidden = false; }
+  function toTop() { try { document.body.scrollTop = 0; window.scrollTo(0, 0); } catch (e) {} }
+
+  function drawCatGrid(categories) {
+    var grid = document.getElementById("catGrid");
+    grid.innerHTML = "";
+    var total = 0, counted = true;
+    categories.concat([{ name: "", all: true }]).forEach(function (c) {
+      if (!c.all) { if (c.count == null) counted = false; else total += c.count; }
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "catbox" + (c.all ? " all" : "");
+      b.setAttribute("role", "listitem");
+      var label = c.all ? "All talent" : c.name;
+      var count = c.all ? (counted ? total : null) : c.count;
+      b.innerHTML = '<span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">' + (c.all ? SPARK : iconFor(c.name)) + '</svg></span>' +
+        '<span class="nm"></span>' + (count != null ? '<span class="ct"></span>' : "");
+      b.querySelector(".nm").textContent = label;
+      if (count != null) b.querySelector(".ct").textContent = count + (count === 1 ? " listed" : " listed");
+      b.addEventListener("click", function () { openCategory(c.all ? "" : c.name); });
+      grid.appendChild(b);
+    });
+  }
+  function openCategory(name) {
+    Array.prototype.forEach.call(catStrip.querySelectorAll(".chip"), function (ch) {
+      ch.setAttribute("aria-pressed", String(!!name && ch.dataset.value === name));
+    });
+    showDir(); toTop(); syncActive(); apply(1);
+  }
+  document.getElementById("toCats").addEventListener("click", function () {
+    form.reset();
+    Array.prototype.forEach.call(catStrip.querySelectorAll(".chip"), function (ch) { ch.setAttribute("aria-pressed", "false"); });
+    syncActive();
+    showCats();
+    post({ type: "talent:search", filters: collect(), skip: 0 });   // keeps the address in step (no category)
+  });
+
+  var answered = false;
+  window.addEventListener("message", function (event) {
+    var d = event.data;
+    if (!d || typeof d !== "object") return;
+
+    if (d.type === "talent:setup") {
+      answered = true;
+      if (d.categories) {
+        catStrip.innerHTML = "";
+        d.categories.forEach(function (c) {
+          var b = document.createElement("button");
+          b.type = "button"; b.className = "chip";
+          b.setAttribute("aria-pressed", "false");
+          b.dataset.value = c.name;
+          b.textContent = c.count != null ? c.name + " (" + c.count + ")" : c.name;
+          catStrip.appendChild(b);
+        });
+      }
+      if (d.cities) fillSelect("city", d.cities, "Anywhere");
+      if (d.languages) fillSelect("language", d.languages, "Any");
+
+      if (d.initial) {
+        var i = d.initial;
+        if (i.q) qInput.value = i.q;
+        if (i.city) document.getElementById("city").value = i.city;
+        if (i.language) document.getElementById("language").value = i.language;
+        if (i.budget != null) document.getElementById("budget").value = i.budget;
+        if (i.experience != null) document.getElementById("experience").value = i.experience;
+        if (i.sort) sortSel.value = i.sort;
+        if (i.category) {
+          Array.prototype.forEach.call(catStrip.querySelectorAll(".chip"), function (c) {
+            if (c.dataset.value === i.category) c.setAttribute("aria-pressed", "true");
+          });
+        }
+      }
+      syncActive();
+      if (d.categories) drawCatGrid(d.categories);
+      // Arriving with nothing chosen → the category menu. A link with a category
+      // or any other filter (or a page number) → straight to the directory.
+      var i0 = d.initial || {};
+      var chosen = i0.category || i0.q || i0.city || i0.language || i0.budget != null || i0.experience != null || (i0.page && i0.page > 1);
+      if (!chosen && d.categories && d.categories.length) { showCats(); return; }
+      showDir();
+      apply((d.initial && d.initial.page) || 1);   // the page in the address, or the first
+    }
+
+    if (d.type === "talent:results") {
+      applyBtn.classList.remove("busy");
+      if (d.pageSize) PAGE_SIZE = d.pageSize;
+      page = Math.floor((d.skip || 0) / PAGE_SIZE) + 1;
+      pages = Math.max(1, Math.ceil((d.total || 0) / PAGE_SIZE));
+      // An old link to a page that no longer exists → show the last real page instead.
+      if (d.total > 0 && !(d.items || []).length && page > pages) { apply(pages); return; }
+
+      render(d.items || []);
+
+      if (d.total === 0) {
+        noResults.hidden = false;
+        say(countActive(collect()) > 0
+          ? "No profiles match all of those."
+          : "No profiles are published yet.", true);
+      } else {
+        noResults.hidden = true;
+        showRange(d.total, "profile");
+      }
+      drawPager();
+      syncActive();
+    }
+
+    if (d.type === "talent:error") {
+      applyBtn.classList.remove("busy");
+      pager.removeAttribute("aria-busy");
+      Array.prototype.forEach.call(cards.querySelectorAll(".skelcard"), function (s) { s.remove(); });
+      say("We could not load the directory. Try again in a moment.", true);
+    }
+  });
+
+  syncActive();
+  /* Say "ready" every second until the page answers — its listener may attach
+     after this iframe loads, and a single message would be lost. */
+  (function ping(n) {
+    if (answered) return;
+    post({ type: "talent:ready" });
+    if (n < 30) setTimeout(function () { ping(n + 1); }, 1000);
+  })(0);
+})();
+</script>
+<div class="pp-safe-space" aria-hidden="true"></div>
+<!-- Pixel Pals iframe auto-height reporter v3 (body is the scroll box).
+     Scrolls inside the iframe until the site-wide listener sizes it.
+     Once the site-wide listener sizes the iframe, there is nothing left to scroll. -->
+<script>
+(function () {
+  if (window.__ppReporter) return;
+  window.__ppReporter = true;
+
+  var s = document.createElement('style');
+  s.textContent =
+    'html{height:100%!important;min-height:0!important;overflow:hidden!important}' +
+    'body{height:100%!important;min-height:0!important;margin:0;overflow-x:hidden!important;overflow-y:auto!important;' +
+      '-webkit-overflow-scrolling:touch;overscroll-behavior:auto;scrollbar-width:none;-ms-overflow-style:none;display:flow-root}' +
+    'html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0;display:none}';
+  document.head.appendChild(s);
+
+  var body = document.body, last = -1, raf = 0;
+
+  // Height of the content itself, not the scroll box (so the iframe can shrink as well as grow)
+  function measure() {
+    var top = body.getBoundingClientRect().top - body.scrollTop;
+    var bottom = 0, kids = body.children;
+    for (var i = 0; i < kids.length; i++) {
+      var r = kids[i].getBoundingClientRect();
+      if (!r.height && !r.width) continue; // hidden, scripts, styles
+      var mb = parseFloat(getComputedStyle(kids[i]).marginBottom) || 0;
+      bottom = Math.max(bottom, r.bottom + mb);
+    }
+    var pb = parseFloat(getComputedStyle(body).paddingBottom) || 0;
+    return Math.ceil(bottom - top + pb);
+  }
+
+  function send(force) {
+    var h = measure();
+    if (!force && h === last) return;
+    last = h;
+    window.parent.postMessage({ type: 'setHeight', height: h }, '*');
+  }
+
+  function schedule() {
+    if (raf) return;
+    raf = requestAnimationFrame(function () { raf = 0; send(false); });
+  }
+
+  // Watch the content (the body itself is now a fixed-size scroll box)
+  var ro = 'ResizeObserver' in window ? new ResizeObserver(schedule) : null;
+  function watchKids() {
+    if (!ro) return;
+    ro.observe(body);
+    for (var i = 0; i < body.children.length; i++) ro.observe(body.children[i]);
+  }
+  watchKids();
+  if ('MutationObserver' in window) {
+    new MutationObserver(function () { watchKids(); schedule(); })
+      .observe(body, { childList: true, subtree: true, attributes: true, characterData: true });
+  }
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', function () { send(true); });
+  document.addEventListener('load', schedule, true);
+  document.addEventListener('transitionend', schedule, true);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { send(true); });
+
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'requestHeight') send(true);
+  });
+
+  [0, 300, 1000, 2500, 5000].forEach(function (t) { setTimeout(function () { send(true); }, t); });
+})();
+</script>
+</body>
+</html>

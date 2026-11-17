@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edit Your Listing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://static.wixstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Mulish:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Pixel Pals build standards ─────────────────────────────────────
+   No visible scrollbars anywhere (everything still scrolls), media never
+   wider than its box, 16px form text on phones so iOS doesn't zoom, and a
+   little side padding on phones so nothing touches the screen edge.
+   Height: the reporter at the end of this file (setHeight → site-wide listener). */
+*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{width:0;height:0;display:none}
+img,video,canvas{max-width:100%}
+@media (max-width:760px){input,select,textarea{font-size:16px!important}}
+@media (max-width:600px){.wrap,.page{padding-left:14px!important;padding-right:14px!important}}
+
+  :root {
+    color-scheme: dark;
+    --bg:            #0C0C0B;
+    --surface:       #141413;
+    --field:         #181713;
+    --field-hover:   #1E1C19;
+    --border:        #383733;
+    --border-quiet:  #262625;
+    --gold:          #AA936F;
+    --gold-tint:     rgba(170,147,111,0.10);
+    --gold-line:     rgba(170,147,111,0.28);
+    --gold-soft:     #C4B091;
+    --text:          #FFFFFF;
+    --body:          #ADADAD;
+    --label:         #A8A7A3;
+    --placeholder:   #8C8C8B;
+    --danger:        #C4705A;
+    --danger-tint:   #241713;
+    --r-field:       8px;
+    --r-card:        12px;
+    --font-display:  "Playfair Display", Georgia, serif;
+    --font-body:     "Mulish", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1050px; margin: 0 auto; padding: 4px 0 40px; }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 34px;
+    line-height: 1.15;
+    margin: 0 0 6px;
+  }
+
+  .lede { font-size: 15px; line-height: 1.7; color: var(--placeholder); margin: 0 0 34px; }
+
+  fieldset { border: 0; margin: 0 0 34px; padding: 0; min-width: 0; }
+
+  legend, .group-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--label);
+    margin: 0 0 14px;
+    padding: 0;
+  }
+
+  .req { color: var(--gold); margin-left: 3px; font-style: normal; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 18px 20px; }
+  .span-all { grid-column: 1 / -1; }
+
+  label.field { display: block; min-width: 0; }
+
+  label.field > span.txt {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--label);
+    margin: 0 0 8px;
+  }
+
+  input[type="text"], input[type="tel"], input[type="email"], input[type="number"], input[type="date"], input[type="url"], input[type="search"], textarea {
+    width: 100%;
+    background: var(--field);
+    border: 1px solid var(--border);
+    border-radius: var(--r-field);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    padding: 12px 14px;
+    min-height: 45px;
+    transition: border-color 140ms ease, background 140ms ease;
+  }
+
+  textarea { min-height: 108px; resize: vertical; line-height: 1.65; }
+
+  input::placeholder, textarea::placeholder { color: var(--placeholder); }
+
+  input:hover, textarea:hover { background: var(--field-hover); }
+
+  input:focus-visible, textarea:focus-visible,
+  .chip:focus-visible, button:focus-visible {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(170,147,111,0.22);
+  }
+
+  .hint { font-style: normal; display: block; font-size: 13px; color: var(--placeholder); margin: 7px 0 0; line-height: 1.5; }
+
+  /* Chips — multi-select, and single-select where data-single is set */
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; }
+  .chip {
+    background: var(--field);
+    border: 1px solid var(--border-quiet);
+    border-radius: 999px;
+    color: var(--placeholder);
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 8px 16px;
+    transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+  }
+  .chip:hover { color: var(--gold-soft); border-color: var(--border); }
+  .chip[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #1A1509; font-weight: 600; }
+
+  /* Blocked / empty state */
+  .empty {
+    background: var(--surface);
+    border: 1px solid var(--border-quiet);
+    border-radius: var(--r-card);
+    padding: 22px;
+  }
+  .empty h2 {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 400;
+    margin: 0 0 8px;
+  }
+  .empty p { font-size: 15px; line-height: 1.65; color: var(--placeholder); margin: 0 0 16px; }
+  .empty a {
+    background: rgba(170,147,111,0.12);
+    border: 1px solid rgba(170,147,111,0.40);
+    border-radius: var(--r-field);
+    color: var(--gold);
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 13px 30px;
+    text-decoration: none;
+  }
+  .empty a:hover { background: rgba(170,147,111,0.18); }
+
+  button.primary, button.ghost {
+    border-radius: var(--r-field);
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    padding: 13px 30px;
+    transition: filter 140ms ease, background 140ms ease;
+  }
+  button.primary { background: var(--gold); border: 1px solid var(--gold); color: var(--text); }
+  button.primary:hover { filter: brightness(1.08); }
+  button.primary[disabled] { opacity: 0.55; cursor: not-allowed; filter: none; }
+  button.ghost {
+    background: rgba(170,147,111,0.12);
+    border: 1px solid rgba(170,147,111,0.40);
+    color: var(--gold);
+  }
+  button.ghost:hover { background: rgba(170,147,111,0.18); }
+
+  /* Status + errors */
+  .status {
+    border-radius: var(--r-card);
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 22px 0 0;
+    padding: 13px 16px;
+  }
+  .status[hidden] { display: none; }
+  .status.ok   { background: rgba(170,147,111,0.12); border: 1px solid rgba(170,147,111,0.40); color: var(--gold-soft); }
+  .status.err  { background: var(--danger-tint); border: 1px solid rgba(196,112,90,0.45); color: var(--danger); }
+  .status.busy { background: var(--surface); border: 1px solid var(--border-quiet); color: var(--label); }
+
+  .err-msg { font-style: normal; display: block; font-size: 13px; color: var(--danger); margin: 7px 0 0; }
+  .err-msg[hidden] { display: none; }
+  .invalid input, .invalid textarea { border-color: var(--danger); }
+  .invalid .chip { border-color: var(--danger); }
+
+  .sr {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  [hidden] { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+  /* Select */
+  select {
+    width: 100%; background: var(--field);
+    border: 1px solid var(--border); border-radius: var(--r-field);
+    color: var(--text); font-family: var(--font-body); font-size: 15px;
+    padding: 12px 38px 12px 14px; min-height: 45px; appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238E8E8B' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+    transition: border-color 140ms ease, background-color 140ms ease;
+  }
+  select:hover { background-color: var(--field-hover); }
+  select:focus-visible { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(170,147,111,0.22); }
+
+  /* Switches */
+  .switches { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); gap: 10px; }
+  button.sw {
+    background: var(--field); border: 1px solid var(--border-quiet);
+    border-radius: var(--r-field); cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--font-body); font-size: 15px; color: var(--text);
+    padding: 12px 14px; text-align: left; width: 100%;
+    transition: background 140ms ease, border-color 140ms ease;
+  }
+  button.sw:hover { background: var(--field-hover); }
+  button.sw .track {
+    flex: 0 0 auto; width: 38px; height: 21px; border-radius: 999px;
+    background: #2C2B27; border: 1px solid var(--border); position: relative;
+    transition: background 140ms ease, border-color 140ms ease;
+  }
+  button.sw .track::after {
+    content: ""; position: absolute; top: 3px; left: 3px;
+    width: 13px; height: 13px; border-radius: 50%;
+    background: var(--placeholder);
+    transition: transform 140ms ease, background 140ms ease;
+  }
+  button.sw[aria-checked="true"] .track { background: var(--gold-tint); border-color: var(--gold); }
+  button.sw[aria-checked="true"] .track::after { transform: translateX(17px); background: var(--gold); }
+  button.sw .lbl { flex: 1 1 auto; }
+  button.sw .state { font-size: 12px; color: var(--placeholder); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  button.sw[aria-checked="true"] .state { color: var(--gold); }
+  button.sw:focus-visible { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(170,147,111,0.22); }
+
+  /* Sticky save bar */
+  .savebar {
+    position: sticky; bottom: 0; z-index: 5;
+    background: var(--bg);
+    border-top: 1px solid var(--border-quiet);
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+    margin-top: 34px; padding: 16px 0;
+  }
+  .savebar .spacer { flex: 1 1 auto; }
+  .dirty { font-size: 13px; color: var(--placeholder); }
+  .dirty b { color: var(--gold); font-weight: 600; }
+
+  button.primary .spin {
+    display: none; width: 14px; height: 14px; margin-right: 9px;
+    border: 2px solid rgba(255,255,255,0.35); border-top-color: var(--text);
+    border-radius: 50%; vertical-align: -2px;
+  }
+  button.primary.busy .spin { display: inline-block; }
+  button.primary.busy { pointer-events: none; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes spin { to { transform: rotate(360deg); } }
+    button.primary .spin { animation: spin 700ms linear infinite; }
+  }
+
+  /* Single-select chips read the same as multi, so mark the difference */
+  .chips[data-single="true"] .chip[aria-pressed="true"]::before {
+    content: "\2713\00a0"; font-weight: 700;
+  }
+
+  /* ---- In-iframe image picker ---- */
+  .drop {
+    background: var(--field);
+    border: 1.5px dashed var(--border);
+    border-radius: var(--r-card);
+    cursor: pointer;
+    display: block; width: 100%;
+    padding: 28px 20px;
+    text-align: center;
+    transition: background 140ms ease, border-color 140ms ease;
+  }
+  .drop:hover, .drop.over { background: var(--field-hover); border-color: var(--gold); }
+  .drop.over { border-style: solid; }
+  .drop svg { width: 26px; height: 26px; stroke: var(--gold); fill: none; stroke-width: 1.5; margin: 0 auto 10px; display: block; }
+  .drop .big { display: block; font-size: 15px; font-weight: 600; color: var(--text); }
+  .drop .small { display: block; font-size: 13px; color: var(--placeholder); margin-top: 5px; line-height: 1.5; }
+  .drop:focus-visible { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(170,147,111,0.22); }
+  .invalid .drop { border-color: var(--danger); }
+
+  .shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin: 14px 0 0; }
+  .shots:empty { display: none; }
+
+  .shot-t {
+    position: relative; aspect-ratio: 4 / 3;
+    background: var(--surface); border: 1px solid var(--border-quiet);
+    border-radius: var(--r-field); overflow: hidden;
+  }
+  .shot-t img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .shot-t.cover { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+  .shot-t .tag {
+    position: absolute; top: 6px; left: 6px;
+    background: var(--gold); color: #1A1509;
+    border-radius: 999px; font-size: 9px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px;
+  }
+  .shot-t .bar {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; gap: 2px; padding: 5px;
+    background: linear-gradient(to top, rgba(12,12,11,0.94), rgba(12,12,11,0));
+  }
+  .shot-t .bar button {
+    background: rgba(12,12,11,0.72); border: 1px solid var(--border);
+    border-radius: 5px; color: var(--body); cursor: pointer;
+    font-family: var(--font-body); font-size: 11px; line-height: 1;
+    padding: 5px 7px; flex: 0 0 auto;
+  }
+  .shot-t .bar button:hover { border-color: var(--gold); color: var(--gold); }
+  .shot-t .bar .grow { flex: 1 1 auto; }
+  .shot-t .size {
+    position: absolute; top: 6px; right: 6px;
+    background: rgba(12,12,11,0.78); border-radius: 4px;
+    color: var(--placeholder); font-size: 9px; padding: 3px 6px;
+  }
+  .shot-t .prog {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    background: rgba(12,12,11,0.8); color: var(--gold-soft);
+    font-size: 11px; font-weight: 600;
+  }
+  .shot-t .prog[hidden] { display: none; }
+
+  .savedbytes { font-size: 13px; color: var(--gold-soft); margin: 12px 0 0; }
+  .savedbytes[hidden] { display: none; }
+
+  /* Taken-down banner */
+  .fixme {
+    background: var(--danger-tint); border: 1px solid rgba(196,112,90,0.45);
+    border-radius: var(--r-card); margin: 0 0 26px; padding: 18px 20px;
+  }
+  .fixme h2 { font-family: var(--font-display); font-weight: 400; font-size: 20px; margin: 0 0 8px; color: var(--danger); }
+  .fixme p { font-size: 15px; line-height: 1.65; color: var(--body); margin: 0; }
+  .fixme .quote {
+    border-left: 2px solid rgba(196,112,90,0.5); margin: 12px 0 0;
+    padding-left: 14px; color: var(--text); font-size: 15px; line-height: 1.6;
+  }
+
+  .livebanner {
+    background: var(--surface); border: 1px solid var(--gold-line);
+    border-radius: var(--r-card); margin: 0 0 26px; padding: 16px 18px;
+    font-size: 14px; line-height: 1.65; color: var(--body);
+  }
+  .livebanner b { color: var(--gold-soft); font-weight: 600; }
+  .livebanner a { color: var(--gold); }
+</style>
+<style id="pp-layout">
+/* ── Pixel Pals layout safeguards ─────────────────────────────────────
+   Transparent page so the Wix section shows through seamlessly, sturdy form
+   controls on phones, long words wrap instead of widening the page, and a
+   safety space at the end so nothing is ever cut off. */
+html,body{background:transparent!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-wrap:break-word}
+input,select,textarea,button{max-width:100%}
+table{max-width:100%}
+/* iOS draws date fields wider and taller than other inputs; make them behave. */
+input[type=date],input[type=time],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;display:block}
+input[type=date]::-webkit-date-and-time-value{text-align:start;min-height:1.4em}
+/* Save bars sit in the flow: a sticky bar needs a solid background, and the page has none. */
+.savebar{position:static!important;background:transparent!important}
+/* Width: 80% of the frame on wide screens, never narrower than before (1050px). */
+.wrap{width:max(80%, min(100%, 1050px))!important;max-width:none!important;margin-left:auto!important;margin-right:auto!important}
+@media (max-width:1100px){.wrap{padding-left:20px!important;padding-right:20px!important}}
+@media (max-width:600px){.wrap{padding-left:14px!important;padding-right:14px!important}}
+/* Safety space under the content (counted by the height reporter). */
+.pp-safe-space{display:block;height:140px}
+@media (max-width:760px){.pp-safe-space{height:calc(180px + env(safe-area-inset-bottom, 0px))}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1 id="pageTitle">Edit Your Listing</h1>
+  <p class="lede" id="lede">Loading&hellip;</p>
+
+  <div class="empty" id="blocked" hidden>
+    <h2 id="blockedTitle">One thing first</h2>
+    <p id="blockedBody"></p>
+    <a id="blockedAction" href="#" target="_top">Continue</a>
+  </div>
+
+  <div class="fixme" id="fixme" hidden>
+    <h2>Our team has taken this listing down</h2>
+    <p>The reason they gave:</p>
+    <p class="quote" id="fixmeReason"></p>
+    <p style="margin-top:12px">You can still make changes below and save them. Once it's fixed, get in touch and we'll put it back live.</p>
+  </div>
+
+  <div class="livebanner" id="livebanner" hidden></div>
+
+  <form id="editForm" novalidate hidden>
+
+    <fieldset>
+      <legend>What you do<em class="req" aria-hidden="true">*</em></legend>
+      <div class="chips" id="category" role="group" aria-label="Category" data-single="true"></div>
+      <em class="err-msg" id="categoryErr" hidden></em>
+    </fieldset>
+
+    <fieldset>
+      <legend>Your profile</legend>
+      <div class="grid">
+        <label class="field span-all" data-for="title">
+          <span class="txt">Business or professional name<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+          <input type="text" id="title" maxlength="120" placeholder="Hanin Odeh Photography">
+          <em class="hint" id="slugHint"></em>
+          <em class="err-msg" hidden></em>
+        </label>
+        <label class="field span-all" data-for="headline">
+          <span class="txt">One line about you<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+          <input type="text" id="headline" maxlength="80" placeholder="Documentary wedding photography, no posing">
+          <em class="hint"><span id="headlineCount">0</span> of 80. This is what couples read first.</em>
+          <em class="err-msg" hidden></em>
+        </label>
+        <label class="field span-all" data-for="bio">
+          <span class="txt">The longer version<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+          <textarea id="bio" maxlength="1500" placeholder="How you work, what is included, what makes a booking with you different."></textarea>
+          <em class="hint"><span id="bioCount">0</span> of 1500 characters.</em>
+          <em class="err-msg" hidden></em>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Where you work</legend>
+      <div class="grid">
+        <label class="field" data-for="city">
+          <span class="txt">Base city<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+          <input type="text" id="city" placeholder="Amman">
+          <em class="err-msg" hidden></em>
+        </label>
+      </div>
+      <div class="field span-all" style="margin-top:18px">
+        <span class="group-label" id="lblAreas">Cities you cover</span>
+        <div class="chips" role="group" aria-labelledby="lblAreas" data-multi="serviceAreas"></div>
+      </div>
+      <div class="switches" id="travelSwitch" style="margin-top:18px"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Pricing</legend>
+      <em class="hint" style="margin:0 0 14px">Numbers only &mdash; no &ldquo;JOD&rdquo; in the box. Couples filter by budget, so a listing without a starting price gets skipped.</em>
+      <div class="grid">
+        <label class="field" data-for="priceFrom">
+          <span class="txt">Starting from (JOD)<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+          <input type="number" id="priceFrom" min="0" step="10" placeholder="900">
+          <em class="err-msg" hidden></em>
+        </label>
+        <label class="field" data-for="priceTo">
+          <span class="txt">Up to (JOD)</span>
+          <input type="number" id="priceTo" min="0" step="10" placeholder="1800">
+          <em class="err-msg" hidden></em>
+        </label>
+        <label class="field" data-for="priceUnit">
+          <span class="txt">Priced<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+          <select id="priceUnit">
+            <option value="">Choose one</option>
+            <option value="per event">per event</option>
+            <option value="per hour">per hour</option>
+            <option value="per day">per day</option>
+            <option value="per person">per person</option>
+          </select>
+          <em class="err-msg" hidden></em>
+        </label>
+        <label class="field" data-for="depositPercent">
+          <span class="txt">Deposit (%)</span>
+          <input type="number" id="depositPercent" min="0" max="100" step="5" placeholder="30">
+          <em class="err-msg" hidden></em>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Experience</legend>
+      <div class="grid">
+        <label class="field" data-for="yearsExperience">
+          <span class="txt">Years working</span>
+          <input type="number" id="yearsExperience" min="0" max="70" step="1" placeholder="9">
+          <em class="err-msg" hidden></em>
+        </label>
+        <label class="field" data-for="eventsCompleted">
+          <span class="txt">Weddings so far</span>
+          <input type="number" id="eventsCompleted" min="0" max="100000" step="1" placeholder="214">
+          <em class="err-msg" hidden></em>
+        </label>
+      </div>
+      <div class="field span-all" style="margin-top:18px">
+        <span class="group-label" id="lblLangs">Languages you work in</span>
+        <div class="chips" role="group" aria-labelledby="lblLangs" data-multi="languages"></div>
+      </div>
+    </fieldset>
+
+    <fieldset id="mediaBlock">
+      <legend>Photos<em class="req" aria-hidden="true">*</em></legend>
+
+      <input type="file" id="filePick" accept="image/jpeg,image/png,image/webp" multiple hidden>
+
+      <div class="drop" id="drop" role="button" tabindex="0"
+           aria-label="Choose photos, or drag them here">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+        </svg>
+        <span class="big">Choose photos, or drag them here</span>
+        <span class="small">JPEG, PNG or WebP. At least two: the first becomes your cover photo, the rest are your portfolio. You can reorder them below. Up to 13 in total.</span>
+      </div>
+
+      <div class="shots" id="shots"></div>
+      <p class="savedbytes" id="saved" hidden></p>
+      <em class="err-msg" id="mediaErr" hidden></em>
+    </fieldset>
+
+    <fieldset>
+      <legend>Links and public contact</legend>
+      <div class="grid">
+        <label class="field" data-for="instagram">
+          <span class="txt">Instagram handle</span>
+          <input type="text" id="instagram" placeholder="haninodeh">
+          <em class="hint">Without the @.</em>
+        </label>
+        <label class="field" data-for="website">
+          <span class="txt">Website</span>
+          <input type="text" id="website" placeholder="www.yoursite.jo">
+          <em class="err-msg" hidden></em>
+        </label>
+        <label class="field" data-for="publicPhone">
+          <span class="txt">Public phone number</span>
+          <input type="tel" id="publicPhone" placeholder="+962 79 000 0000">
+          <em class="hint">Only shown if you switch it on below. Can differ from your account number.</em>
+        </label>
+      </div>
+      <div class="switches" id="phoneSwitch" style="margin-top:18px"></div>
+    </fieldset>
+
+    <div class="savebar">
+      <button type="submit" class="primary" id="submitBtn"><span class="spin" aria-hidden="true"></span>Save changes</button>
+      <button type="button" class="ghost" id="cancelBtn" hidden>Discard changes</button>
+      <span class="spacer"></span>
+      <span class="dirty" id="progress"></span>
+    </div>
+
+    <div class="status" id="status" role="status" aria-live="polite" hidden></div>
+  </form>
+</div>
+
+<script>
+
+(function () {
+  "use strict";
+
+  var form     = document.getElementById("editForm");
+  var blocked  = document.getElementById("blocked");
+  var statusEl = document.getElementById("status");
+  var submitBtn = document.getElementById("submitBtn");
+  var catGroup = document.getElementById("category");
+
+  var talentId = null;
+  var baseline = null;
+
+  /* Images live here until submit. Each entry:
+     { id, name, blobUrl, base64, bytes, originalBytes, uploaded } */
+  var shots = [];
+  var MAX_SHOTS = 13;              // one cover + twelve portfolio
+  var MIN_SHOTS = 2;               // cover + at least one portfolio image
+  var MAX_SOURCE_BYTES = 12 * 1024 * 1024;
+  var RESIZE_TO = 1600;            // longest edge
+  var JPEG_Q = 0.82;
+  var nextId = 1;
+
+  var TEXT = ["title","headline","bio","city","instagram","website","publicPhone"];
+  var NUMS = ["priceFrom","priceTo","depositPercent","yearsExperience","eventsCompleted"];
+
+  var CITIES = ["Amman","Zarqa","Irbid","Madaba","Salt","Jerash","Aqaba","Dead Sea","Petra","Ajloun","Mafraq"];
+  var LANGS  = ["Arabic","English","French","Turkish","Russian","German"];
+
+  var $ = function (id) { return document.getElementById(id); };
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
+  function post(m) { try { window.parent.postMessage(m, "*"); } catch (e) {} }
+  /* Height: the Pixel Pals reporter at the end of this file (setHeight → site-wide listener). */
+
+  /* The body is the scroll box (see the reporter at the end). While the iframe
+     is a fixed height it scrolls itself; once the site-wide listener sizes it to
+     its content there is nothing to scroll inside, so the page scrolls instead. */
+  function scrollToEl(node, gap) {
+    var b = document.body;
+    var top = Math.max(0, Math.round(node.getBoundingClientRect().top - b.getBoundingClientRect().top + b.scrollTop - (gap || 24)));
+    if (b.scrollHeight > b.clientHeight + 2) b.scrollTo({ top: top, behavior: "smooth" });
+    else post({ type: "te:scrollTo", y: top });
+  }
+
+  /* A target="_blank" link opens a top-level tab, but a RELATIVE href still
+     resolves against the IFRAME's origin — which is Wix's sandbox domain. Velo
+     sends the real site base so these can be made absolute. */
+  var SITE = "";
+  function abs(u) {
+    if (!u) return u;
+    if (/^[a-z][a-z0-9+.\-]*:/i.test(u)) return u;          // already absolute
+    if (!SITE) return u;                                     // interceptor catches it
+    return SITE.replace(/\/+$/, "") + (u.charAt(0) === "/" ? u : "/" + u);
+  }
+
+  /* A Wix HTML component is a sandboxed iframe on a different origin to your
+     site. Same-site links have to navigate the parent window instead. */
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a) return;
+    var href = a.getAttribute("href");
+    if (!href || href.charAt(0) === "#") return;
+    if (/^(mailto:|tel:|sms:)/i.test(href)) return;
+    // A _blank link is top-level, but a relative href still resolves against the
+    // iframe's origin. Absolute ones are safe to leave to the browser; a
+    // relative one falls through so Velo can navigate rather than break.
+    if (a.target === "_blank" && /^[a-z][a-z0-9+.\-]*:/i.test(href)) return;
+    if (e.defaultPrevented || e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;  // let modified clicks through
+    e.preventDefault();
+    post({ type: "iframe:navigate", url: href });
+  });
+
+
+  /* ---------- chip helpers ---------- */
+  function buildChips(group, values) {
+    group.innerHTML = "";
+    values.forEach(function (v) {
+      var b = el("button", "chip", v);
+      b.type = "button";
+      b.setAttribute("aria-pressed", "false");
+      b.dataset.value = v;
+      group.appendChild(b);
+    });
+    // te:data arrives again after "Discard changes", so wire the click once —
+    // a second listener would toggle every chip twice and nothing would stick.
+    if (group.dataset.wired) return;
+    group.dataset.wired = "1";
+    group.addEventListener("click", function (e) {
+      var chip = e.target.closest(".chip");
+      if (!chip) return;
+      if (group.dataset.single === "true") {
+        var was = chip.getAttribute("aria-pressed") === "true";
+        Array.prototype.forEach.call(group.querySelectorAll(".chip"), function (c) {
+          c.setAttribute("aria-pressed", "false");
+        });
+        if (!was) chip.setAttribute("aria-pressed", "true");
+      } else {
+        chip.setAttribute("aria-pressed", chip.getAttribute("aria-pressed") === "true" ? "false" : "true");
+      }
+      clearErr(group);
+      tick();
+    });
+  }
+  function setChip(group, value) {
+    Array.prototype.forEach.call(group.querySelectorAll(".chip"), function (c) {
+      c.setAttribute("aria-pressed", String(c.dataset.value === value));
+    });
+  }
+  function setChips(group, values) {
+    var want = values || [];
+    Array.prototype.forEach.call(group.querySelectorAll(".chip"), function (c) {
+      c.setAttribute("aria-pressed", String(want.indexOf(c.dataset.value) !== -1));
+    });
+  }
+  function setSwitch(hostId, on) {
+    var b = $(hostId).querySelector(".sw");
+    if (!b) return;
+    b.setAttribute("aria-checked", String(!!on));
+    b.querySelector(".state").textContent = on
+      ? (hostId === "phoneSwitch" ? "Shown" : "Yes")
+      : (hostId === "phoneSwitch" ? "Hidden" : "No");
+  }
+
+  function readChips(group) {
+    return Array.prototype.slice.call(group.querySelectorAll('.chip[aria-pressed="true"]'))
+      .map(function (c) { return c.dataset.value; });
+  }
+  function groupFor(key) { return document.querySelector('[data-multi="' + key + '"]'); }
+
+  /* ---------- switches ---------- */
+  function buildSwitch(hostId, key, label, onText, offText) {
+    var host = $(hostId);
+    if (host.children.length) return;
+    var b = el("button", "sw");
+    b.type = "button";
+    b.dataset.key = key;
+    b.setAttribute("role", "switch");
+    b.setAttribute("aria-checked", "false");
+    b.appendChild(el("span", "track"));
+    b.appendChild(el("span", "lbl", label));
+    b.appendChild(el("span", "state", offText));
+    host.appendChild(b);
+    host.addEventListener("click", function (e) {
+      var t = e.target.closest(".sw");
+      if (!t) return;
+      var on = t.getAttribute("aria-checked") !== "true";
+      t.setAttribute("aria-checked", String(on));
+      t.querySelector(".state").textContent = on ? onText : offText;
+      tick();
+    });
+  }
+  function switchOn(hostId) {
+    var b = $(hostId).querySelector(".sw");
+    return b ? b.getAttribute("aria-checked") === "true" : false;
+  }
+
+  /* ---------- errors ---------- */
+  function wrapOf(n) { return n.closest("label.field") || n.closest("fieldset") || n.parentNode; }
+  function setErr(n, m) {
+    var w = wrapOf(n); w.classList.add("invalid");
+    var s = w.querySelector(".err-msg");
+    if (s) { s.textContent = m; s.hidden = false; }
+  }
+  function clearErr(n) {
+    var w = wrapOf(n); w.classList.remove("invalid");
+    var s = w.querySelector(".err-msg");
+    if (s) { s.hidden = true; s.textContent = ""; }
+  }
+  function clearAll() {
+    Array.prototype.forEach.call(form.querySelectorAll(".invalid"), function (w) { w.classList.remove("invalid"); });
+    Array.prototype.forEach.call(form.querySelectorAll(".err-msg"), function (s) { s.hidden = true; s.textContent = ""; });
+  }
+  function showStatus(text, kind) {
+    statusEl.textContent = text;
+    statusEl.className = "status " + kind;
+    statusEl.hidden = false;
+  }
+
+  function val(id) { return $(id).value.trim(); }
+  function numOf(id) {
+    var raw = val(id);
+    if (raw === "") return null;
+    var n = Number(raw);
+    return isNaN(n) ? null : n;
+  }
+
+  /* ---------- slug preview ---------- */
+  /* Must match backend/talentSubmit.jsw exactly, or the URL preview lies. */
+  var AR_MAP = {
+    "\u0627":"a","\u0623":"a","\u0625":"i","\u0622":"a","\u0621":"","\u0624":"w","\u0626":"y",
+    "\u0628":"b","\u062a":"t","\u062b":"th","\u062c":"j","\u062d":"h","\u062e":"kh",
+    "\u062f":"d","\u0630":"dh","\u0631":"r","\u0632":"z","\u0633":"s","\u0634":"sh",
+    "\u0635":"s","\u0636":"d","\u0637":"t","\u0638":"z","\u0639":"a","\u063a":"gh",
+    "\u0641":"f","\u0642":"q","\u0643":"k","\u0644":"l","\u0645":"m","\u0646":"n",
+    "\u0647":"h","\u0648":"w","\u064a":"y","\u0649":"a","\u0629":"h","\u0640":"",
+    "\u0660":"0","\u0661":"1","\u0662":"2","\u0663":"3","\u0664":"4",
+    "\u0665":"5","\u0666":"6","\u0667":"7","\u0668":"8","\u0669":"9"
+  };
+  function translit(s) {
+    return String(s)
+      .replace(/[\u064b-\u0652\u0670\u0640]/g, "")
+      .split("")
+      .map(function (ch) { return AR_MAP[ch] !== undefined ? AR_MAP[ch] : ch; })
+      .join("");
+  }
+  function slugify(s) {
+    return translit(s).toLowerCase().trim()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+  $("title").addEventListener("input", function () {
+    var s = slugify(val("title"));
+    $("slugHint").textContent = s
+      ? "Your page will be 3orsna.com/talent/" + s
+      : "";
+  });
+
+  /* ---------- counters ---------- */
+  $("headline").addEventListener("input", function () { $("headlineCount").textContent = String($("headline").value.length); });
+  $("bio").addEventListener("input", function () { $("bioCount").textContent = String($("bio").value.length); });
+
+
+  /* ================= image picker =================
+     Everything happens in the browser: validate, resize on a canvas, preview.
+     Nothing is uploaded until save, so abandoning the form costs nothing and
+     reordering is free.
+  ============================================================ */
+
+  function fmtBytes(n) {
+    if (n < 1024) return n + " B";
+    if (n < 1024 * 1024) return Math.round(n / 1024) + " KB";
+    return (n / 1024 / 1024).toFixed(1) + " MB";
+  }
+
+  function readAsDataUrl(file) {
+    return new Promise(function (res, rej) {
+      var r = new FileReader();
+      r.onload = function () { res(r.result); };
+      r.onerror = function () { rej(new Error("read failed")); };
+      r.readAsDataURL(file);
+    });
+  }
+
+  function loadImage(src) {
+    return new Promise(function (res, rej) {
+      var im = new Image();
+      im.onload = function () { res(im); };
+      im.onerror = function () { rej(new Error("decode failed")); };
+      im.src = src;
+    });
+  }
+
+  /* Canvas re-encode. Also strips EXIF (phone photos carry GPS coordinates). */
+  async function shrink(file) {
+    var dataUrl = await readAsDataUrl(file);
+    var img = await loadImage(dataUrl);
+
+    var w = img.naturalWidth, h = img.naturalHeight;
+    var scale = Math.min(1, RESIZE_TO / Math.max(w, h));
+    var cw = Math.max(1, Math.round(w * scale));
+    var ch = Math.max(1, Math.round(h * scale));
+
+    var c = document.createElement("canvas");
+    c.width = cw; c.height = ch;
+    var ctx = c.getContext("2d");
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, 0, 0, cw, ch);
+
+    var out = c.toDataURL("image/jpeg", JPEG_Q);
+    var base64 = out.slice(out.indexOf(",") + 1);
+    var bytes = Math.floor(base64.length * 3 / 4) - (base64.slice(-2) === "==" ? 2 : base64.slice(-1) === "=" ? 1 : 0);
+
+    return { base64: base64, bytes: bytes, blobUrl: out };
+  }
+
+  function drawShots() {
+    var host = $("shots");
+    host.innerHTML = "";
+
+    shots.forEach(function (sh, i) {
+      var t = el("div", "shot-t" + (i === 0 ? " cover" : ""));
+
+      var im = document.createElement("img");
+      im.src = sh.blobUrl;
+      im.alt = i === 0 ? "Cover photo preview" : "Portfolio image " + i + " preview";
+      t.appendChild(im);
+
+      if (i === 0) t.appendChild(el("span", "tag", "Cover"));
+      if (sh.bytes) t.appendChild(el("span", "size", fmtBytes(sh.bytes)));
+
+      var prog = el("div", "prog");
+      prog.hidden = true;
+      t.appendChild(prog);
+
+      var bar = el("div", "bar");
+      if (i > 0) {
+        var mk = el("button", null, "Make cover");
+        mk.type = "button";
+        mk.title = "Use as cover photo";
+        mk.addEventListener("click", function () {
+          shots.unshift(shots.splice(i, 1)[0]);
+          drawShots(); tick();
+        });
+        bar.appendChild(mk);
+      }
+      bar.appendChild(el("span", "grow"));
+      var rm = el("button", null, "\u00d7");
+      rm.type = "button";
+      rm.setAttribute("aria-label", "Remove this photo");
+      rm.addEventListener("click", function () {
+        shots.splice(i, 1);
+        drawShots(); tick(); updateSaved();
+      });
+      bar.appendChild(rm);
+      t.appendChild(bar);
+
+      host.appendChild(t);
+    });
+
+  }
+
+  function updateSaved() {
+    var before = shots.reduce(function (a, s2) { return a + s2.originalBytes; }, 0);
+    var after  = shots.reduce(function (a, s2) { return a + s2.bytes; }, 0);
+    var node = $("saved");
+    if (!shots.length || before <= after) { node.hidden = true; return; }
+    node.textContent = shots.length + (shots.length === 1 ? " photo" : " photos") +
+      ", resized from " + fmtBytes(before) + " to " + fmtBytes(after) +
+      " so your page loads quickly.";
+    node.hidden = false;
+  }
+
+  async function addFiles(fileList) {
+    var files = Array.prototype.slice.call(fileList || []);
+    if (!files.length) return;
+
+    clearErr($("mediaBlock"));
+    var rejected = [];
+
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+
+      if (shots.length >= MAX_SHOTS) { rejected.push("only " + MAX_SHOTS + " photos allowed"); break; }
+      if (!/^image\/(jpeg|png|webp)$/i.test(f.type)) { rejected.push(f.name + " is not a JPEG, PNG or WebP"); continue; }
+      if (f.size > MAX_SOURCE_BYTES) { rejected.push(f.name + " is over " + fmtBytes(MAX_SOURCE_BYTES)); continue; }
+
+      try {
+        var out = await shrink(f);
+        shots.push({
+          id: nextId++,
+          name: f.name,
+          blobUrl: out.blobUrl,
+          base64: out.base64,
+          bytes: out.bytes,
+          originalBytes: f.size,
+          uploaded: null
+        });
+        drawShots();
+      } catch (err) {
+        rejected.push(f.name + " could not be read");
+      }
+    }
+
+    tick();
+    updateSaved();
+
+    if (rejected.length) {
+      setErr($("mediaBlock"), rejected.join(". ") + ".");
+    }
+  }
+
+  /* click, keyboard and drop all reach the same place */
+  $("drop").addEventListener("click", function () { $("filePick").click(); });
+  $("drop").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("filePick").click(); }
+  });
+  $("filePick").addEventListener("change", function (e) {
+    addFiles(e.target.files);
+    e.target.value = "";          // so re-picking the same file fires again
+  });
+
+  ["dragenter", "dragover"].forEach(function (ev) {
+    $("drop").addEventListener(ev, function (e) { e.preventDefault(); $("drop").classList.add("over"); });
+  });
+  ["dragleave", "drop"].forEach(function (ev) {
+    $("drop").addEventListener(ev, function (e) { e.preventDefault(); $("drop").classList.remove("over"); });
+  });
+  $("drop").addEventListener("drop", function (e) {
+    if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files);
+  });
+
+  /* A browser-level drop anywhere else would navigate away and lose the form. */
+  ["dragover", "drop"].forEach(function (ev) {
+    window.addEventListener(ev, function (e) {
+      if (!e.target.closest || !e.target.closest("#drop")) e.preventDefault();
+    });
+  });
+
+  /* ---------- sequential upload at save time ---------- */
+  var uploadIndex = -1;
+
+  function uploadNext() {
+    uploadIndex += 1;
+    while (uploadIndex < shots.length && shots[uploadIndex].uploaded) uploadIndex += 1;
+
+    if (uploadIndex >= shots.length) {
+      sendListing();
+      return;
+    }
+
+    var sh = shots[uploadIndex];
+    var tile = $("shots").children[uploadIndex];
+    if (tile) {
+      var prog = tile.querySelector(".prog");
+      prog.textContent = "Uploading";
+      prog.hidden = false;
+    }
+    showStatus("Uploading photo " + (uploadIndex + 1) + " of " + shots.length + "\u2026", "busy");
+    post({ type: "te:upload", index: uploadIndex, base64: sh.base64, name: sh.name });
+  }
+
+  function collectFields() {
+    return {
+        category:        readChips(catGroup)[0],
+        title:           val("title"),
+        headline:        val("headline"),
+        bio:             val("bio"),
+        city:            val("city"),
+        serviceAreas:    readChips(groupFor("serviceAreas")),
+        willTravel:      switchOn("travelSwitch"),
+        priceFrom:       numOf("priceFrom"),
+        priceTo:         numOf("priceTo"),
+        priceUnit:       val("priceUnit"),
+        depositPercent:  numOf("depositPercent"),
+        yearsExperience: numOf("yearsExperience"),
+        eventsCompleted: numOf("eventsCompleted"),
+        languages:       readChips(groupFor("languages")),
+        instagram:       val("instagram") || null,
+        website:         val("website") || null,
+        publicPhone:     val("publicPhone") || null,
+        showPhone:       switchOn("phoneSwitch")
+    };
+  }
+
+  function sendListing() {
+    showStatus("Saving\u2026", "busy");
+    var patch = collectFields();
+    patch.heroImage = shots[0] ? shots[0].uploaded : null;
+    patch.portfolio = shots.slice(1).map(function (sh, i) {
+      return { type: "image", itemId: String(i), src: sh.uploaded, title: "", description: "" };
+    });
+    post({ type: "te:save", id: talentId, patch: patch });
+  }
+
+  /* ---------- completeness ---------- */
+  function required() {
+    return [
+      ["Category", readChips(catGroup).length > 0],
+      ["Name", !!val("title")],
+      ["One-liner", !!val("headline")],
+      ["Description", !!val("bio")],
+      ["Base city", !!val("city")],
+      ["Starting price", numOf("priceFrom") !== null],
+      ["Pricing unit", !!val("priceUnit")],
+      ["Photos", shots.length >= MIN_SHOTS]
+    ];
+  }
+  function tick() {
+    var missing = required().filter(function (n) { return !n[1]; });
+    if (missing.length) {
+      $("progress").innerHTML = "<b>" + missing.length + "</b> required field" +
+        (missing.length === 1 ? "" : "s") + " still empty";
+      $("cancelBtn").hidden = !dirty();
+      return;
+    }
+    var n = dirty();
+    $("progress").innerHTML = n === 0 ? "No unsaved changes"
+      : "<b>" + n + "</b> unsaved change" + (n === 1 ? "" : "s");
+    $("cancelBtn").hidden = n === 0;
+  }
+
+  /* ---------- dirty tracking ---------- */
+  function snapshot() {
+    return JSON.stringify({
+      fields: collectFields(),
+      images: shots.map(function (s2) { return s2.uploaded || ("new:" + s2.id); })
+    });
+  }
+  function dirty() { return baseline && snapshot() !== baseline ? 1 : 0; }
+
+  /* ---------- validate ---------- */
+  function validate() {
+    clearAll();
+    var first = null;
+    function bad(node, m) { setErr(node, m); if (!first) first = node; }
+    function badId(id, m) { bad($(id), m); }
+
+    if (readChips(catGroup).length === 0) bad(catGroup, "Pick what you do.");
+    if (!val("title")) badId("title", "Give your listing a name.");
+    if (!val("headline")) badId("headline", "One line couples will read first.");
+    if (!val("bio")) badId("bio", "Tell couples how you work.");
+    if (!val("city")) badId("city", "Which city are you based in?");
+
+    if (numOf("priceFrom") === null) badId("priceFrom", "A starting price is required.");
+    if (!val("priceUnit")) badId("priceUnit", "Priced per what?");
+
+    var lo = numOf("priceFrom"), hi = numOf("priceTo");
+    if (lo !== null && hi !== null && lo > hi) badId("priceTo", "Upper figure is below " + lo + ".");
+
+    var dep = numOf("depositPercent");
+    if (dep !== null && (dep < 0 || dep > 100)) badId("depositPercent", "Between 0 and 100.");
+
+    NUMS.forEach(function (k) {
+      var raw = val(k);
+      if (raw !== "" && (isNaN(Number(raw)) || Number(raw) < 0)) badId(k, "Enter a number, or leave it blank.");
+    });
+
+    if (shots.length < MIN_SHOTS) {
+      bad($("mediaBlock"), shots.length === 0
+        ? "Add at least " + MIN_SHOTS + " photos. The first becomes your cover, the rest are your portfolio."
+        : "Add at least one more photo. Couples browse your portfolio before they get in touch.");
+    }
+
+    return first;
+  }
+
+  /* ---------- state banner ---------- */
+  function showState(state, slug, reason) {
+    $("fixme").hidden = state !== "rejected";
+    if (state === "rejected") $("fixmeReason").textContent = reason || "";
+    var view = slug ? ' <a href="' + abs("/talent/" + slug) + '" target="_blank" rel="noopener">View your page</a>' : "";
+    if (state === "live") {
+      $("livebanner").innerHTML = "This listing is <b>live</b>. Your changes go live as soon as you save." + view;
+      $("livebanner").hidden = false;
+    } else if (state === "hidden") {
+      $("livebanner").innerHTML = "This listing is <b>hidden</b>, so couples can't see it. Switch it on from your dashboard when you're ready.";
+      $("livebanner").hidden = false;
+    } else {
+      $("livebanner").hidden = true;
+    }
+  }
+
+  /* ---------- save ---------- */
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var bad = validate();
+    if (bad) {
+      showStatus("A few fields need attention before this can be saved.", "err");
+      var f = bad.matches("input, textarea, select") ? bad : bad.querySelector("input, textarea, select, .chip");
+      if (f) f.focus({ preventScroll: true });
+      scrollToEl(bad, 120);
+      return;
+    }
+
+    submitBtn.classList.add("busy");
+    // Photos go up one at a time, then the row is written. Anything already
+    // uploaded on a previous attempt is skipped, so a retry does not re-send.
+    uploadIndex = -1;
+    uploadNext();
+  });
+
+  form.addEventListener("input", function (e) {
+    if (e.target.matches("input, textarea, select")) { clearErr(e.target); tick(); }
+  });
+  form.addEventListener("change", function (e) {
+    if (e.target.matches("select")) tick();
+  });
+
+  /* ---------- from Velo ---------- */
+  var answered = false;
+  var lastSlug = null;
+  window.addEventListener("message", function (event) {
+    var d = event.data;
+    if (!d || typeof d !== "object") return;
+
+    if (d.type === "te:data") {
+      answered = true;
+      SITE = d.baseUrl || SITE;
+      talentId = d.id;
+      lastSlug = d.slug || null;
+
+      buildChips(catGroup, d.categories || []);
+      catGroup.dataset.single = "true";
+      buildChips(groupFor("serviceAreas"), d.cities || CITIES);
+      buildChips(groupFor("languages"), d.languages || LANGS);
+      buildSwitch("travelSwitch", "willTravel", "I will travel outside those cities", "Yes", "No");
+      buildSwitch("phoneSwitch", "showPhone", "Show my public number on my profile", "Shown", "Hidden");
+
+      var f = d.fields || {};
+
+      TEXT.forEach(function (k) { $(k).value = f[k] == null ? "" : String(f[k]); });
+      NUMS.forEach(function (k) { $(k).value = f[k] == null ? "" : String(f[k]); });
+      $("priceUnit").value = f.priceUnit == null ? "" : String(f.priceUnit);
+
+      setChip(catGroup, f.category);
+      setChips(groupFor("serviceAreas"), f.serviceAreas || []);
+      setChips(groupFor("languages"), f.languages || []);
+      setSwitch("travelSwitch", f.willTravel === true);
+      setSwitch("phoneSwitch", f.showPhone === true);
+
+      // Existing images arrive already uploaded, so they carry a stored URI and a
+      // display URL but no base64 — the upload loop skips them.
+      shots = (d.images || []).map(function (im) {
+        return {
+          id: nextId++, name: "existing", blobUrl: im.preview,
+          base64: null, bytes: 0, originalBytes: 0, uploaded: im.url
+        };
+      });
+      drawShots();
+      updateSaved();
+
+      $("headlineCount").textContent = String($("headline").value.length);
+      $("bioCount").textContent = String($("bio").value.length);
+      $("slugHint").textContent = d.slug ? "Your page is 3orsna.com/talent/" + d.slug : "";
+
+      showState(d.state, d.slug, d.rejectionReason);
+
+      $("pageTitle").textContent = "Edit Your Listing";
+      $("lede").textContent = f.title || "";
+
+      form.hidden = false;
+      blocked.hidden = true;
+      clearAll();
+      statusEl.hidden = true;
+      baseline = snapshot();
+      tick();
+    }
+
+    if (d.type === "te:uploaded") {
+      var tile = $("shots").children[d.index];
+      if (d.ok) {
+        if (shots[d.index]) shots[d.index].uploaded = d.url;
+        if (tile) tile.querySelector(".prog").hidden = true;
+        uploadNext();
+      } else {
+        submitBtn.classList.remove("busy");
+        if (tile) {
+          var pr = tile.querySelector(".prog");
+          pr.textContent = "Failed";
+          pr.hidden = false;
+        }
+        showStatus(d.message ||
+          ("Photo " + (d.index + 1) + " would not upload. Remove it, or press Save to try again."), "err");
+      }
+    }
+
+    if (d.type === "te:blocked") {
+      answered = true;
+      form.hidden = true;
+      blocked.hidden = false;
+      $("blockedTitle").textContent = d.title || "One thing first";
+      $("blockedBody").textContent = d.message || "";
+      var a = $("blockedAction");
+      if (d.actionHref) { a.hidden = false; a.textContent = d.actionLabel || "Continue"; a.href = d.actionHref; }
+      else a.hidden = true;
+    }
+
+    if (d.type === "te:progress") showStatus(d.message || "Working\u2026", "busy");
+
+    if (d.type === "te:saved") {
+      submitBtn.classList.remove("busy");
+      if (d.ok) {
+        baseline = snapshot();
+        tick();
+        showStatus(d.message || "Saved.", "ok");
+        if (d.state) showState(d.state, lastSlug, null);
+      } else {
+        showStatus(d.message || "That did not save. Try again in a moment.", "err");
+      }
+    }
+  });
+
+  $("cancelBtn").addEventListener("click", function () {
+    if (!talentId) return;
+    showStatus("Reloading the saved version\u2026", "busy");
+    post({ type: "te:reload", id: talentId });
+  });
+
+  /* Warn before losing edits. The iframe cannot stop a parent navigation, so
+     this only covers reloads and closes — which is most of the risk. */
+  window.addEventListener("beforeunload", function (e) {
+    if (dirty()) { e.preventDefault(); e.returnValue = ""; }
+  });
+
+  /* Say "ready" every second until the page answers — its listener may attach
+     after this iframe loads, and a single message would be lost. */
+  (function ping(n) {
+    if (answered) return;
+    post({ type: "te:ready" });
+    if (n < 30) setTimeout(function () { ping(n + 1); }, 1000);
+  })(0);
+})();
+
+</script>
+<div class="pp-safe-space" aria-hidden="true"></div>
+<!-- Pixel Pals iframe auto-height reporter v3 (body is the scroll box).
+     Scrolls inside the iframe until the site-wide listener sizes it.
+     Once the site-wide listener sizes the iframe, there is nothing left to scroll. -->
+<script>
+(function () {
+  if (window.__ppReporter) return;
+  window.__ppReporter = true;
+
+  var s = document.createElement('style');
+  s.textContent =
+    'html{height:100%!important;min-height:0!important;overflow:hidden!important}' +
+    'body{height:100%!important;min-height:0!important;margin:0;overflow-x:hidden!important;overflow-y:auto!important;' +
+      '-webkit-overflow-scrolling:touch;overscroll-behavior:auto;scrollbar-width:none;-ms-overflow-style:none;display:flow-root}' +
+    'html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0;display:none}';
+  document.head.appendChild(s);
+
+  var body = document.body, last = -1, raf = 0;
+
+  // Height of the content itself, not the scroll box (so the iframe can shrink as well as grow)
+  function measure() {
+    var top = body.getBoundingClientRect().top - body.scrollTop;
+    var bottom = 0, kids = body.children;
+    for (var i = 0; i < kids.length; i++) {
+      var r = kids[i].getBoundingClientRect();
+      if (!r.height && !r.width) continue; // hidden, scripts, styles
+      var mb = parseFloat(getComputedStyle(kids[i]).marginBottom) || 0;
+      bottom = Math.max(bottom, r.bottom + mb);
+    }
+    var pb = parseFloat(getComputedStyle(body).paddingBottom) || 0;
+    return Math.ceil(bottom - top + pb);
+  }
+
+  function send(force) {
+    var h = measure();
+    if (!force && h === last) return;
+    last = h;
+    window.parent.postMessage({ type: 'setHeight', height: h }, '*');
+  }
+
+  function schedule() {
+    if (raf) return;
+    raf = requestAnimationFrame(function () { raf = 0; send(false); });
+  }
+
+  // Watch the content (the body itself is now a fixed-size scroll box)
+  var ro = 'ResizeObserver' in window ? new ResizeObserver(schedule) : null;
+  function watchKids() {
+    if (!ro) return;
+    ro.observe(body);
+    for (var i = 0; i < body.children.length; i++) ro.observe(body.children[i]);
+  }
+  watchKids();
+  if ('MutationObserver' in window) {
+    new MutationObserver(function () { watchKids(); schedule(); })
+      .observe(body, { childList: true, subtree: true, attributes: true, characterData: true });
+  }
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', function () { send(true); });
+  document.addEventListener('load', schedule, true);
+  document.addEventListener('transitionend', schedule, true);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { send(true); });
+
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'requestHeight') send(true);
+  });
+
+  [0, 300, 1000, 2500, 5000].forEach(function (t) { setTimeout(function () { send(true); }, t); });
+})();
+</script>
+</body>
+</html>

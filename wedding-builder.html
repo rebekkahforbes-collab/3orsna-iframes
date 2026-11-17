@@ -1,0 +1,2185 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3orsna — Wedding page builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Montserrat:wght@400;500;600&family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ── Pixel Pals build standards ─────────────────────────────────────
+   No visible scrollbars anywhere (everything still scrolls), media never
+   wider than its box, 16px form text on phones so iOS doesn't zoom.
+   Height: the reporter at the end of this file (setHeight → site-wide listener). */
+*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{width:0;height:0;display:none}
+img,video,canvas{max-width:100%}
+@media (max-width:760px){input,select,textarea{font-size:16px!important}}
+
+/* ═════ BUILDER CHROME ═════ */
+:root{
+  --ink:#14161A; --panel:#1C1F25; --panel-2:#232730;
+  --line:#2A2E36; --line-soft:#22252C;
+  --text:#E8E6E1; --dim:#9298A3; --dimmer:#6B7280;
+  --gold:#BD9B68; --gold-soft:rgba(189,155,104,.15); --gold-hi:#CDB184;
+  --danger:#D9736B; --ok:#7FB496; --r:10px;
+  --ui:'Manrope',system-ui,-apple-system,sans-serif;
+  --ui-ar:'IBM Plex Sans Arabic','Manrope',sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+/* A class that sets display (flex, grid) would otherwise override the hidden attribute. */
+[hidden]{display:none!important}
+html,body{margin:0;padding:0}
+body{background:var(--ink);color:var(--text);font-family:var(--ui);
+  font-size:14px;line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body[dir="rtl"]{font-family:var(--ui-ar)}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.wrap{max-width:1240px;margin:0 auto;padding:18px 20px 34px}
+body.wideview .wrap{max-width:1500px}
+.bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-bottom:16px;margin-bottom:20px;border-bottom:1px solid var(--line)}
+.bar h1{font-size:15px;font-weight:600;margin:0}
+.bar .sep{width:1px;height:16px;background:var(--line)}
+.bar .spacer{flex:1}
+.saved{font-size:12px;color:var(--dimmer);min-width:70px}
+/* Draft / Live status beside the title, and the publish result banner. */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:99px;letter-spacing:.02em}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.draft{background:rgba(255,255,255,.06);color:var(--dim)}
+.pill.live{background:rgba(127,180,150,.16);color:#BFE0CC}
+.btn.isLive{background:rgba(127,180,150,.16);border-color:rgba(127,180,150,.55);color:#BFE0CC}
+.btn.isLive:hover{background:rgba(127,180,150,.24);border-color:var(--ok)}
+.btn[disabled]{opacity:.6;cursor:wait}
+.pubbar{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:18px 20px;margin:-4px 0 22px;border-radius:14px;
+  border:1px solid rgba(127,180,150,.55);background:rgba(127,180,150,.12);animation:pubIn .35s ease-out}
+.pubbar .ic{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:22px;font-weight:700;
+  background:var(--ok);color:#10261A}
+.pubbar .tx{flex:1;min-width:220px}
+.pubbar h3{margin:0 0 3px;font-size:18px;font-weight:700;color:var(--text)}
+.pubbar p{margin:0;color:var(--dim);font-size:13.5px}
+.pubbar .url{display:block;margin-top:6px;font-size:13px;color:#BFE0CC;direction:ltr;unicode-bidi:isolate;overflow-wrap:anywhere}
+.pubbar .acts{display:flex;gap:8px;flex-wrap:wrap}
+.pubbar .btn{font-size:13px;padding:9px 14px;text-decoration:none;display:inline-flex;align-items:center}
+.pubbar .x{background:transparent;border:none;color:var(--dim);font-size:20px;line-height:1;cursor:pointer;padding:6px 8px;border-radius:8px}
+.pubbar .x:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.pubbar.busy{border-color:rgba(189,155,104,.5);background:var(--gold-soft)}
+.pubbar.busy .ic{background:var(--gold);color:#17130A;animation:spin 1s linear infinite}
+.pubbar.bad{border-color:rgba(217,115,107,.55);background:rgba(217,115,107,.12)}
+.pubbar.bad .ic{background:var(--danger);color:#2A0F0D}
+@keyframes pubIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.saved.on{color:var(--ok)}
+.btn{border:1px solid var(--line);background:var(--panel);padding:8px 14px;border-radius:var(--r);
+  cursor:pointer;font-weight:500;font-size:13px;transition:background .15s,border-color .15s}
+.btn:hover{background:var(--panel-2);border-color:#333843}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:#17130A;font-weight:600}
+.btn.primary:hover{background:var(--gold-hi);border-color:var(--gold-hi)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:5px 10px;font-size:12px;border-radius:8px}
+
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:34px;align-items:start}
+@media(max-width:900px){.cols{grid-template-columns:1fr;gap:26px}}
+body.wideview .cols{grid-template-columns:1fr;gap:28px}
+body.wideview .side{order:-1}
+
+.rail{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px}
+.step{display:flex;align-items:center;gap:8px;padding:7px 12px 7px 9px;border-radius:99px;cursor:pointer;
+  border:1px solid transparent;background:transparent;color:var(--dim);font-size:13px;transition:.15s}
+.step:hover{color:var(--text);background:var(--panel)}
+.step[aria-selected="true"]{color:var(--text);background:var(--gold-soft);border-color:rgba(189,155,104,.45)}
+.step i{font-style:normal;width:19px;height:19px;flex:none;border-radius:50%;display:grid;place-items:center;
+  font-size:11px;font-weight:600;background:var(--panel-2);color:var(--dim)}
+.step[aria-selected="true"] i{background:var(--gold);color:#17130A}
+.step.done i{background:rgba(127,180,150,.2);color:var(--ok)}
+
+.pane{display:none}
+.pane.on{display:block}
+.pane > h2{font-size:19px;font-weight:600;margin:0 0 4px}
+.pane > .lede{color:var(--dim);margin:0 0 22px;max-width:56ch}
+.field{margin-bottom:18px}
+.field > label,.legend{display:block;font-size:13px;color:var(--dim);margin-bottom:7px;font-weight:500}
+.hint{font-size:12.5px;color:var(--dimmer);margin-top:5px;line-height:1.45}
+.warn{font-size:12px;color:var(--danger);margin-top:6px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.row{grid-template-columns:1fr}}
+input[type=text],input[type=date],input[type=time],input[type=url],input[type=number]{
+  width:100%;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+  padding:10px 12px;transition:border-color .15s,background .15s}
+input:hover{border-color:#333843}
+input:focus{border-color:var(--gold);background:var(--panel-2);outline:none}
+input::placeholder{color:var(--dimmer)}
+input[type=date],input[type=time]{min-height:42px}
+input[type=date]::-webkit-calendar-picker-indicator,
+input[type=time]::-webkit-calendar-picker-indicator{filter:invert(.6);cursor:pointer}
+.count-note{font-size:11.5px;color:var(--dimmer);text-align:end;margin-top:4px}
+.toggle{display:flex;align-items:center;gap:11px;cursor:pointer;padding:9px 0}
+.toggle input{position:absolute;opacity:0;pointer-events:none}
+.track{width:38px;height:22px;border-radius:99px;background:var(--panel-2);border:1px solid var(--line);position:relative;flex:none;transition:.18s}
+.track::after{content:"";position:absolute;inset-inline-start:3px;top:2px;width:16px;height:16px;border-radius:50%;background:var(--dim);transition:.18s}
+.toggle input:checked + .track{background:var(--gold-soft);border-color:var(--gold)}
+.toggle input:checked + .track::after{background:var(--gold);transform:translateX(15px)}
+body[dir=rtl] .toggle input:checked + .track::after{transform:translateX(-15px)}
+.toggle input:focus-visible + .track{outline:2px solid var(--gold);outline-offset:2px}
+
+/* pickers */
+.pick{display:grid;gap:9px}
+.pick.c2{grid-template-columns:repeat(2,1fr)}
+.pick.c3{grid-template-columns:repeat(3,1fr)}
+.pick.c4{grid-template-columns:repeat(4,1fr)}
+.pick.c5{grid-template-columns:repeat(5,1fr)}
+.pick.c8{grid-template-columns:repeat(8,1fr)}
+@media(max-width:620px){.pick.c4,.pick.c5{grid-template-columns:repeat(3,1fr)}.pick.c8{grid-template-columns:repeat(6,1fr)}}
+.opt{border:1px solid var(--line);background:var(--panel);border-radius:var(--r);padding:9px 7px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;transition:.15s}
+.opt:hover{border-color:#3A4049;background:var(--panel-2)}
+.opt[aria-pressed="true"]{border-color:var(--gold);background:var(--gold-soft)}
+.opt .cap{font-size:12px;color:var(--dim);line-height:1.25}
+.opt[aria-pressed="true"] .cap{color:var(--text)}
+.opt .sw{width:100%;height:38px;border-radius:7px;border:1px solid rgba(255,255,255,.1);position:relative;overflow:hidden}
+.opt .sw svg{position:absolute;inset:14%;width:72%;height:72%}
+.dot{width:100%;aspect-ratio:1;border-radius:50%;border:1px solid rgba(255,255,255,.18)}
+.opt.tiny{padding:6px}
+.opt.tiny .cap{font-size:11.5px}
+
+/* style cards */
+.styles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:760px){.styles{grid-template-columns:repeat(2,1fr)}}
+.sty{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:8px;cursor:pointer;
+  display:flex;flex-direction:column;gap:9px;transition:.15s}
+.sty:hover{border-color:#3A4049;background:var(--panel-2)}
+.sty[aria-pressed="true"]{border-color:var(--gold);background:var(--gold-soft)}
+.sty .cap{font-size:13px;color:var(--dim);text-align:center;line-height:1.3}
+.sty[aria-pressed="true"] .cap{color:var(--text)}
+.stycard{aspect-ratio:3/4;border-radius:7px;overflow:hidden;position:relative}
+.stycard span{position:absolute}
+
+/* artwork grid */
+.artgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}
+@media(max-width:760px){.artgrid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:520px){.artgrid{grid-template-columns:repeat(3,1fr)}}
+.art-tile{aspect-ratio:3/4;border-radius:8px;overflow:hidden;cursor:pointer;border:1px solid var(--line);
+  background-size:contain;background-repeat:no-repeat;background-position:center;padding:0;transition:.15s}
+.art-tile:hover{border-color:#3A4049}
+.art-tile[aria-pressed="true"]{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-soft)}
+.photogrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+@media(max-width:620px){.photogrid{grid-template-columns:repeat(3,1fr)}}
+.photo{aspect-ratio:4/3;border-radius:var(--r);overflow:hidden;cursor:pointer;border:1px solid var(--line);
+  background:var(--panel-2);padding:0;transition:.15s}
+.photo img{width:100%;height:100%;object-fit:cover;display:block;opacity:.86}
+.photo:hover img{opacity:1}
+.photo[aria-pressed="true"]{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-soft)}
+.photo.none{display:grid;place-items:center;color:var(--dim);font-size:12px}
+
+.drop{border:1.5px dashed var(--line);border-radius:var(--r);padding:18px 16px;text-align:center;cursor:pointer;color:var(--dim);transition:.15s}
+.drop:hover,.drop.over{border-color:var(--gold);background:var(--gold-soft);color:var(--text)}
+.drop b{display:block;font-weight:600;color:var(--text);margin-bottom:3px;font-size:13.5px}
+.drop.busy{opacity:.6;pointer-events:none}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:9px;margin-top:11px}
+.thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--panel-2)}
+.thumb.up img{opacity:.5}
+.thumb .st{position:absolute;left:0;right:0;bottom:0;padding:4px 5px;font-size:11px;font-weight:600;line-height:1.25;text-align:center;background:rgba(0,0,0,.66);color:#fff}
+.thumb .st.fail{background:rgba(150,42,36,.92);cursor:pointer;border:0;font:inherit;font-size:11px;font-weight:700;width:100%}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb button{position:absolute;top:4px;inset-inline-end:4px;width:21px;height:21px;border-radius:50%;
+  border:none;background:rgba(10,11,13,.82);color:#fff;cursor:pointer;font-size:14px;line-height:19px;padding:0}
+.thumb button:hover{background:var(--danger)}
+.mycover{display:flex;gap:11px;align-items:center;margin-top:11px;padding:9px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+.mycover img{width:66px;height:50px;object-fit:cover;border-radius:6px;display:block}
+.mycover span{flex:1;font-size:12.5px;color:var(--dim)}
+.mycover span.fail{color:#F0B8B2}
+.mycover span button{background:none;border:0;padding:0;color:var(--gold);font:inherit;font-weight:700;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+#vp .inv .port.empty{display:grid;place-items:center;background:rgba(127,127,127,.16);outline:1.5px dashed var(--ln);outline-offset:-1.5px}
+#vp .inv .port.empty span{font:600 clamp(11px,3.2cqi,14px)/1.3 'Montserrat',system-ui,sans-serif;color:var(--mu);text-align:center;padding:0 14%}
+#vp .inv .port.empty.heart span{padding-top:8%}
+.icon-btn{border:none;background:transparent;color:var(--dimmer);cursor:pointer;padding:4px;border-radius:6px;line-height:0}
+.icon-btn:hover{color:var(--danger);background:rgba(217,115,107,.1)}
+.icon-btn svg{width:15px;height:15px}
+.note{border-inline-start:2px solid var(--gold);background:var(--gold-soft);padding:11px 13px;border-radius:0 var(--r) var(--r) 0;font-size:12.5px;line-height:1.5}
+body[dir=rtl] .note{border-radius:var(--r) 0 0 var(--r)}
+.linkbox{display:flex;gap:8px}
+.linkbox input{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+.navs{display:flex;gap:10px;margin-top:26px;padding-top:18px;border-top:1px solid var(--line-soft)}
+.navs .spacer{flex:1}
+
+/* colour wheel — hue by angle, saturation by distance from centre,
+   brightness on the slider. Shading is a CSS layer, so dragging never redraws. */
+.inv .bord.corner i img{width:100%;height:100%;object-fit:contain;object-position:top left;display:block}
+.opt .sw.corner-thumb img{position:absolute;top:3px;inset-inline-start:4px;width:34px;height:34px;object-fit:contain;object-position:top left}
+.opt .sw.corner-thumb svg{position:absolute;inset:auto;top:3px;inset-inline-start:4px;width:34px;height:34px}
+.opt .sw.corner-thumb svg *{vector-effect:non-scaling-stroke;stroke-width:1.3px}
+.cw-chip{display:flex;align-items:center;gap:10px;width:100%;padding:8px 12px 8px 8px;border:1px solid var(--line);
+  background:var(--panel);border-radius:var(--r);cursor:pointer;text-align:start;transition:.15s}
+.cw-chip:hover{border-color:#3A4049;background:var(--panel-2)}
+.cw-chip[aria-expanded="true"]{border-color:var(--gold)}
+.cw-sw{width:30px;height:30px;border-radius:7px;border:1px solid rgba(255,255,255,.18);flex:none}
+.cw-hex{flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;letter-spacing:.04em}
+.cw-caret{width:8px;height:8px;border-right:1.5px solid var(--dim);border-bottom:1.5px solid var(--dim);
+  transform:rotate(45deg);margin:-4px 6px 0;transition:transform .15s}
+.cw-chip[aria-expanded="true"] .cw-caret{transform:rotate(-135deg);margin-top:4px}
+.cw-pop{display:flex;gap:22px;align-items:center;padding:16px;margin-top:8px;border:1px solid var(--line);
+  border-radius:var(--r);background:var(--panel)}
+.cw-pop[hidden]{display:none}
+@media(max-width:480px){.cw-pop{flex-direction:column;align-items:stretch}}
+.cw-disc{position:relative;width:184px;height:184px;flex:none;border-radius:50%;touch-action:none;cursor:crosshair;margin:0 auto}
+.cw-disc canvas{width:100%;height:100%;display:block;border-radius:50%}
+.cw-shade{position:absolute;inset:0;border-radius:50%;background:#000;pointer-events:none}
+.cw-knob{position:absolute;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;border:2.5px solid #fff;
+  box-shadow:0 0 0 1px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.45);cursor:grab}
+.cw-knob:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.cw-side{flex:1;display:flex;flex-direction:column;gap:7px;min-width:0}
+.cw-side label{font-size:12.5px;color:var(--dim);font-weight:500}
+.cw-val{-webkit-appearance:none;appearance:none;width:100%;height:16px;border-radius:99px;
+  border:1px solid rgba(255,255,255,.14);cursor:pointer;margin:0 0 10px;background:#888}
+.cw-val::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:transparent;
+  border:2.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.45)}
+.cw-val::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:transparent;border:2.5px solid #fff;
+  box-shadow:0 0 0 1px rgba(0,0,0,.55)}
+.cw-hexin{font-family:ui-monospace,SFMono-Regular,Menlo,monospace!important;font-size:13px!important;letter-spacing:.04em}
+.cw-hexin.bad{border-color:var(--danger)!important}
+.fixrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
+.fixrow .warn{margin:0;flex:1;min-width:180px}
+
+.previewhead{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.previewhead .t{font-size:13px;color:var(--dim);flex:1}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:none;background:transparent;color:var(--dim);padding:6px 12px;font-size:12.5px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--panel-2);color:var(--text)}
+
+/* device preview — the invitation renders at the REAL device width
+   and is scaled down to fit, so what you see is what guests get */
+.device{margin:0 auto;background:#0C0E11;overflow:hidden;box-shadow:0 0 0 1px #2C313A,0 26px 54px -18px rgba(0,0,0,.85)}
+.device.phone{max-width:362px;border:9px solid #0C0E11;border-radius:36px}
+.device.tablet{max-width:844px;border:12px solid #0C0E11;border-radius:26px}
+.device.desktop{max-width:1442px;border:1px solid #2C313A;border-radius:10px}
+.screen{position:relative;overflow:hidden;background:#000;direction:ltr}
+.vp{position:absolute;top:0;left:0;transform-origin:0 0;overflow-y:auto;overflow-x:hidden;
+  scrollbar-width:none;-ms-overflow-style:none}
+.vp::-webkit-scrollbar{width:0;height:0;display:none}
+.devnote{font-size:12px;color:var(--dimmer);text-align:center;margin:10px 0 0;font-variant-numeric:tabular-nums}
+
+/* ═══════════════════════════════════════════════════════════
+   INVITATION — this block is identical in wedding-builder.html
+   and wedding-invite.html. Change both or they will drift.
+
+   It responds to its OWN width via container queries, not to the
+   browser window, so the builder's device preview and the real
+   guest page lay out identically at every size.
+   ═══════════════════════════════════════════════════════════ */
+.inv{
+  --bg:#14110C; --fg:#F3EADA; --ac:#BD9B68;
+  --mu:rgba(243,234,218,.86); --ln:rgba(243,234,218,.42);
+  --disp:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+  --bod:'Montserrat',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --arf:'Amiri','Times New Roman',serif;
+  --arb:'Tajawal',system-ui,sans-serif;
+  --vh:820px;
+  container:inv / inline-size;
+  background:var(--bg);color:var(--fg);font-family:var(--bod);font-weight:400;
+  font-size:15px;line-height:1.6;min-height:100%;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+.inv *{box-sizing:border-box}
+.inv[dir=rtl]{font-family:var(--arb)}
+.inv a:focus-visible,.inv button:focus-visible,.inv .ipt:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
+
+/* ── hero ── */
+.inv .hero{position:relative;overflow:hidden}
+.inv .stage-bg{display:none}
+.inv .card{container:card / inline-size;position:relative;overflow:hidden;min-height:var(--vh);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  padding:clamp(56px,8cqi,96px) clamp(26px,7cqi,80px)}
+.inv .card > .layer{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center}
+.inv .hero.s-photo .card > .layer{background-position:center 35%}
+/* Artwork is laid out as a NINE-SLICE: the four corner squares render
+   exactly as drawn, and only the plain areas between them stretch.
+   Nothing is ever cropped, however tall the card grows. Slices assume
+   a 3:4 source with 30%-wide corners (450 × 450 on a 1500 × 2000 file). */
+.inv .card > .lw{position:absolute;inset:0;z-index:0;container-type:inline-size}
+.inv .lw > .layer.art{position:absolute;inset:0;background:none;border-style:solid;border-width:0;
+  border-image-slice:22.5% 30% fill;border-image-width:30cqi;border-image-repeat:stretch}
+.inv .lw > .layer.art.rep{border-image-repeat:round}
+
+.inv .card > .fade{position:absolute;inset:0;z-index:1}
+.inv .card > .bord{position:absolute;z-index:2;color:var(--ac);pointer-events:none}
+.inv .card > .body{position:relative;z-index:3;width:100%;max-width:660px}
+
+/* Artwork is drawn portrait, so it always renders as a 3:4 card:
+   edge to edge on a phone, centred on a blurred stage on anything wider.
+   That keeps the corner artwork intact at every screen size. */
+.inv .hero.s-artwork .card,.inv .hero.s-portrait .card{min-height:calc(100cqi * 4 / 3)}
+@container inv (min-width:700px){
+  .inv .hero.s-artwork,.inv .hero.s-portrait{display:flex;justify-content:center;padding:clamp(36px,5cqi,84px) 24px}
+  .inv .hero.s-artwork .card,.inv .hero.s-portrait .card{width:min(640px,74cqi);min-height:calc(min(640px,74cqi) * 4 / 3);
+    padding:clamp(56px,6cqi,96px) clamp(40px,5cqi,76px);
+    box-shadow:0 44px 90px -44px rgba(0,0,0,.7),0 0 0 1px rgba(0,0,0,.08)}
+  .inv .hero.s-artwork .stage-bg,.inv .hero.s-portrait .stage-bg{display:block;position:absolute;inset:-70px;
+    background-size:cover;background-position:center;filter:blur(36px) brightness(.78) saturate(1.1)}
+}
+
+/* ── border vectors ── */
+.inv .bord.bd-rule{inset:clamp(12px,3.2cqi,28px);border:1.5px solid currentColor;opacity:.62}
+.inv .bord.bd-rule::after{content:"";position:absolute;inset:6px;border:1px solid currentColor;opacity:.7}
+.inv .bord.bd-hair{inset:clamp(14px,3.8cqi,32px);border:1.5px solid currentColor;opacity:.58}
+.inv .bord.bd-arch{inset:clamp(14px,3.8cqi,32px) clamp(16px,4.4cqi,38px);border:1.5px solid currentColor;
+  border-radius:50% 50% 0 0/22% 22% 0 0;opacity:.66}
+.inv .bord.corner{inset:0}
+.inv .bord.corner i{position:absolute;width:clamp(110px,32cqi,260px);aspect-ratio:1;display:block}
+.inv .bord.corner i svg{width:100%;height:100%;display:block}
+.inv .bord.corner i.a{top:0;inset-inline-start:0}
+.inv .bord.corner i.b{bottom:0;inset-inline-end:0;transform:rotate(180deg)}
+.inv[dir=rtl] .bord.corner i.a{transform:scaleX(-1)}
+.inv[dir=rtl] .bord.corner i.b{transform:rotate(180deg) scaleX(-1)}
+
+/* ── portrait shapes ── */
+.inv .port{width:clamp(136px,40cqi,260px);aspect-ratio:1;margin:0 auto clamp(22px,5cqi,38px);
+  background-size:cover;background-position:center;background-color:rgba(127,127,127,.18);position:relative}
+.inv .port.circle{border-radius:50%;box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ac)}
+.inv .port.square{border-radius:4px;box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ac)}
+.inv .port.heart{-webkit-mask-image:var(--heart);mask-image:var(--heart);-webkit-mask-size:contain;mask-size:contain;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center}
+
+/* ── type: fluid, tied to the card's own width; nothing under 11px ── */
+.inv .pre{max-width:24ch;text-wrap:balance;font-family:var(--bod);font-weight:500;font-size:clamp(11px,2.8cqi,14px);letter-spacing:.2em;
+  text-transform:uppercase;color:var(--mu);margin:0 auto clamp(16px,4cqi,30px);line-height:1.6}
+.inv[dir=rtl] .pre{font-family:var(--arb);letter-spacing:0;text-transform:none;font-size:clamp(14px,3.6cqi,18px)}
+.inv .names{font-family:var(--disp);font-weight:500;font-size:clamp(42px,11.5cqi,92px);line-height:1.04;margin:0;letter-spacing:.005em}
+.inv[dir=rtl] .names{font-family:var(--arf);font-weight:700;line-height:1.35;font-size:clamp(36px,9.6cqi,78px)}
+.inv .names .j{display:block;font-size:.46em;font-style:italic;font-weight:500;color:var(--ac);margin:.12em 0;line-height:1}
+.inv .tag{font-family:var(--disp);font-style:italic;font-weight:500;font-size:clamp(17px,4.4cqi,26px);
+  color:var(--mu);margin:clamp(14px,3.4cqi,24px) auto 0;max-width:28ch;line-height:1.45;text-wrap:balance}
+.inv[dir=rtl] .tag{font-family:var(--arb);font-style:normal;font-size:clamp(16px,4cqi,22px)}
+.inv .rule{width:clamp(56px,14cqi,110px);height:1.5px;background:var(--ln);margin:clamp(20px,5cqi,38px) auto}
+.inv .when{font-family:var(--disp);font-weight:600;font-size:clamp(21px,5.4cqi,36px);color:var(--ac);
+  letter-spacing:.02em;margin:0;line-height:1.3}
+.inv[dir=rtl] .when{font-family:var(--arf);font-weight:700;letter-spacing:0}
+.inv .where{font-size:clamp(13.5px,3.4cqi,17px);margin:clamp(14px,3.4cqi,22px) 0 0;line-height:1.65}
+.inv .where b{display:block;font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:.92em;margin-bottom:2px}
+.inv[dir=rtl] .where b{letter-spacing:0;text-transform:none;font-size:1em}
+.inv .where small{display:block;color:var(--mu);font-size:.94em}
+
+/* text over a photo gets a soft lift so it reads on any image */
+.inv .hero.lift-dark .body{text-shadow:0 1px 2px rgba(0,0,0,.5),0 0 28px rgba(0,0,0,.38)}
+.inv .hero.lift-light .body{text-shadow:0 1px 2px rgba(255,255,255,.55),0 0 24px rgba(255,255,255,.42)}
+
+.inv .acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:clamp(20px,5cqi,34px)}
+.inv .act{border:1.5px solid var(--ln);background:transparent;color:var(--fg);font-family:var(--bod);font-weight:600;
+  font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding:12px 20px;min-height:44px;
+  display:inline-flex;align-items:center;cursor:pointer;text-decoration:none;text-shadow:none;transition:.18s}
+.inv .act:hover{background:var(--ac);border-color:var(--ac);color:var(--bg)}
+.inv[dir=rtl] .act{font-family:var(--arb);letter-spacing:0;text-transform:none;font-size:14px}
+
+/* ── below the hero ── */
+.inv .after section{padding:clamp(48px,8cqi,104px) clamp(24px,6cqi,64px);text-align:center;border-top:1px solid var(--ln)}
+.inv .after section > *{max-width:680px;margin-left:auto;margin-right:auto}
+.inv .after section > .gal{max-width:1080px}
+.inv h3{font-family:var(--disp);font-weight:600;font-size:clamp(26px,6cqi,42px);
+  margin:0 auto clamp(18px,4cqi,30px);letter-spacing:.02em;line-height:1.2}
+.inv[dir=rtl] h3{font-family:var(--arf);font-weight:700;letter-spacing:0}
+
+.inv .cd{border-top:1px solid var(--ln);border-bottom:1px solid var(--ln);padding:clamp(28px,6cqi,60px) 12px}
+.inv .cdi{display:flex;width:100%;max-width:620px;margin:0 auto}
+.inv .cd .u{flex:1;position:relative;text-align:center}
+.inv .cd .u + .u::before{content:"";position:absolute;inset-inline-start:0;top:12%;height:76%;width:1px;background:var(--ln)}
+.inv .cd .u b{display:block;font-family:var(--disp);font-weight:600;font-size:clamp(36px,9cqi,68px);
+  color:var(--ac);line-height:1;font-variant-numeric:lining-nums tabular-nums}
+.inv .cd .u span{display:block;font-weight:600;font-size:clamp(11px,2.6cqi,13px);letter-spacing:.18em;
+  text-transform:uppercase;color:var(--mu);margin-top:10px}
+.inv[dir=rtl] .cd .u span{letter-spacing:0;text-transform:none;font-size:clamp(13px,3cqi,15px)}
+.inv .married{padding:clamp(28px,6cqi,56px) 20px;text-align:center;border-top:1px solid var(--ln);border-bottom:1px solid var(--ln)}
+.inv .married b{font-family:var(--disp);font-weight:600;font-size:clamp(24px,6cqi,40px);color:var(--ac)}
+
+.inv .gal{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.inv .gal img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+@container inv (min-width:700px){.inv .gal{grid-template-columns:repeat(3,1fr);gap:12px}.inv .gal img{aspect-ratio:4/3}}
+
+/* ── replies ── */
+.inv .rsvp{max-width:460px;margin:0 auto;text-align:start}
+.inv .rsvp label{display:block;font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--mu);margin:22px 0 8px}
+.inv[dir=rtl] .rsvp label{letter-spacing:0;text-transform:none;font-size:14px}
+.inv .ipt{width:100%;background:transparent;border:none;border-bottom:1.5px solid var(--ln);padding:10px 0;
+  color:var(--fg);font-family:inherit;font-size:16px;font-weight:500;border-radius:0}
+.inv .ipt:focus{outline:none;border-bottom-color:var(--ac)}
+.inv textarea.ipt{resize:vertical;min-height:70px;line-height:1.55}
+.inv select.ipt{-webkit-appearance:none;appearance:none;cursor:pointer;padding-inline-end:28px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23999' stroke-width='1.6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 4px center}
+.inv[dir=rtl] select.ipt{background-position:left 4px center}
+.inv select.ipt option{background:var(--bg);color:var(--fg)}
+.inv .yn{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:30px}
+.inv .yn button{min-height:52px;padding:14px 10px;border:1.5px solid var(--ln);background:transparent;color:var(--fg);
+  font-family:var(--bod);font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:.18s}
+.inv[dir=rtl] .yn button{font-family:var(--arb);letter-spacing:0;text-transform:none;font-size:15px}
+.inv .yn button:hover{border-color:var(--ac)}
+.inv .yn button[aria-pressed="true"]{background:var(--ac);border-color:var(--ac);color:var(--bg)}
+.inv .send{width:100%;min-height:54px;margin-top:22px;border:1.5px solid var(--ac);background:var(--ac);color:var(--bg);
+  font-family:var(--bod);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
+.inv[dir=rtl] .send{font-family:var(--arb);letter-spacing:0;text-transform:none;font-size:15px}
+.inv .send[disabled]{opacity:.55;cursor:default}
+.inv .deadline{font-size:13.5px;color:var(--mu);margin:16px 0 0;text-align:center}
+.inv .err{font-size:14px;font-weight:600;color:var(--fg);margin-top:12px;text-align:center;min-height:1.3em}
+.inv .done{text-align:center;padding:8px 0}
+.inv .done b{display:block;font-family:var(--disp);font-weight:600;font-size:clamp(28px,7cqi,40px);color:var(--ac);margin-bottom:10px}
+.inv .done p{margin:0;color:var(--mu);font-size:16px;line-height:1.7}
+.inv .done button{margin-top:20px;background:none;border:none;color:var(--fg);font-family:inherit;font-weight:600;
+  font-size:13.5px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.inv .foot{padding:clamp(28px,6cqi,48px) 24px;text-align:center;font-weight:500;font-size:12px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--mu);border-top:1px solid var(--ln)}
+.inv[dir=rtl] .foot{letter-spacing:0;text-transform:none;font-size:14px}
+.inv .langbtn{position:fixed;top:14px;inset-inline-end:14px;z-index:40;border:1.5px solid var(--ln);background:var(--bg);
+  color:var(--fg);font-family:var(--bod);font-weight:600;font-size:13px;padding:9px 16px;min-height:40px;
+  cursor:pointer;border-radius:99px}
+.inv .langbtn:hover{border-color:var(--ac)}
+</style>
+<style id="pp-layout">
+/* ── Pixel Pals layout safeguards ─────────────────────────────────────
+   Transparent page so the Wix section shows through seamlessly, sturdy form
+   controls on phones, long words wrap instead of widening the page, and a
+   safety space at the end so nothing is ever cut off. */
+html,body{background:transparent!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-wrap:break-word}
+input,select,textarea,button{max-width:100%}
+table{max-width:100%}
+/* iOS draws date fields wider and taller than other inputs; make them behave. */
+input[type=date],input[type=time],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;display:block}
+input[type=date]::-webkit-date-and-time-value{text-align:start;min-height:1.4em}
+/* Save bars sit in the flow: a sticky bar needs a solid background, and the page has none. */
+.savebar{position:static!important;background:transparent!important}
+/* Width: 80% of the frame on wide screens, never narrower than before (1240px). */
+.wrap{width:max(80%, min(100%, 1240px))!important;max-width:none!important;margin-left:auto!important;margin-right:auto!important}
+@media (max-width:1100px){.wrap{padding-left:20px!important;padding-right:20px!important}}
+@media (max-width:600px){.wrap{padding-left:14px!important;padding-right:14px!important}}
+body.wideview .wrap{width:max(80%, min(100%, 1500px))!important}
+/* Safety space under the content (counted by the height reporter). */
+.pp-safe-space{display:block;height:140px}
+@media (max-width:760px){.pp-safe-space{height:calc(180px + env(safe-area-inset-bottom, 0px))}}
+</style>
+<style id="card-image">
+/* ── Share: the invitation as an image (Premium) ── */
+.cardblock{margin-top:26px;padding-top:20px;border-top:1px solid var(--line)}
+.cardblock h3{font-size:15px;margin:0 0 6px}
+.cardblock .hint{margin:0 0 12px}
+.cardprev{margin:0 0 12px;max-width:220px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#0e0f12}
+.cardprev img{display:block;width:100%;height:auto}
+.cardrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.cardst{font-size:13px;color:var(--dim);margin:10px 0 0}
+.cardst.bad{color:var(--danger)}
+a.btn{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
+.prem{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);border-radius:99px;padding:2px 8px;margin-inline-start:8px;vertical-align:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <h1 data-t="pageTitle">Your wedding page</h1>
+    <span class="pill draft" id="statusPill"></span>
+    <span class="spacer"></span>
+    <span class="saved" id="savedFlag"></span>
+    <button class="btn sm ghost" id="langBtn" type="button">العربية</button>
+    <button class="btn sm" id="saveBtn" type="button" data-t="save">Save draft</button>
+    <button class="btn sm primary" id="pubBtn" type="button" data-t="publish">Publish</button>
+  </header>
+  <div class="pubbar" id="pubBar" hidden role="status" aria-live="polite"></div>
+
+  <div class="cols">
+    <main>
+      <nav class="rail" id="rail" role="tablist"></nav>
+
+      <!-- 1 · DETAILS -->
+      <section class="pane on" id="p-couple" role="tabpanel">
+        <h2 data-t="s1h">Who's getting married</h2>
+        <p class="lede" data-t="s1l">Names, date and place. These appear largest on the page, so check the spelling twice.</p>
+        <div class="row">
+          <div class="field"><label for="f-bride" data-t="bride">Bride's name</label><input id="f-bride" type="text" placeholder="Nour"></div>
+          <div class="field"><label for="f-groom" data-t="groom">Groom's name</label><input id="f-groom" type="text" placeholder="Khalid"></div>
+        </div>
+        <div class="field"><span class="legend" data-t="invLang">Invitation language</span>
+          <div class="pick c3" id="langPick"></div></div>
+        <div class="row" id="arNames" hidden>
+          <div class="field"><label for="f-brideAr" data-t="brideAr">Bride's name in Arabic</label><input id="f-brideAr" type="text" dir="rtl" placeholder="نور"></div>
+          <div class="field"><label for="f-groomAr" data-t="groomAr">Groom's name in Arabic</label><input id="f-groomAr" type="text" dir="rtl" placeholder="خالد"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label for="f-date" data-t="wdate">Wedding date</label><input id="f-date" type="date"></div>
+          <div class="field"><label for="f-time" data-t="wtime">Start time</label><input id="f-time" type="time" value="19:00"></div>
+        </div>
+        <div class="field"><label for="f-venue" data-t="venue">Venue</label><input id="f-venue" type="text" placeholder="Qasr Al Nakheel"></div>
+        <div class="row">
+          <div class="field"><label for="f-address" data-t="address2">Street address</label><input id="f-address" type="text" placeholder="Zahran St, Jabal Amman"></div>
+          <div class="field"><label for="f-city" data-t="city">City</label><input id="f-city" type="text" placeholder="Amman"></div>
+        </div>
+        <div class="field"><label for="f-map" data-t="map">Map link</label><input id="f-map" type="url" placeholder="https://maps.app.goo.gl/…"></div>
+        <div class="field"><label for="f-tag" data-t="tagline">Tagline</label>
+          <input id="f-tag" type="text" maxlength="90" placeholder="Two hearts, one beginning.">
+          <p class="count-note" id="tagCount"></p>
+          <p class="hint" data-t="taglineHint">One short line under your names. Leave it empty to skip it.</p></div>
+        <div class="field" id="tagArWrap" hidden><label for="f-tagAr" data-t="taglineAr">Tagline in Arabic</label>
+          <input id="f-tagAr" type="text" maxlength="90" dir="rtl"></div>
+        <div class="field"><label for="f-dress" data-t="dress">Dress code</label><input id="f-dress" type="text" placeholder="Formal"></div>
+      </section>
+
+      <!-- 2 · DESIGN -->
+      <section class="pane" id="p-design" role="tabpanel">
+        <h2 data-t="s2h">Choose a style</h2>
+        <p class="lede" data-t="s2l">Three ways to build your page. Pick one and only its own options appear.</p>
+        <div class="styles" id="styles"></div>
+
+        <div id="optArtwork" hidden style="margin-top:24px">
+          <div class="field"><span class="legend" data-t="artwork">Design</span>
+            <div class="artgrid" id="artworks"></div>
+            <p class="hint" data-t="artworkHint">Ten designs, or upload your own below.</p></div>
+          <div class="field"><span class="legend" data-t="ownArt">Your own design</span>
+            <div class="drop" id="ownArtDrop">
+              <b data-t="ownArtUp">Upload your own design</b>
+              <span data-t="ownArtHint">A portrait PNG with a transparent background, like ours (3:4, e.g. 1500 × 2000). Keep the middle clear for your names.</span></div>
+            <input type="file" id="ownArtFile" accept="image/png,image/webp,.png,.webp" hidden>
+            <div class="mycover" id="ownArtHas" hidden>
+              <img id="ownArtThumb" alt="" style="object-fit:contain;background:var(--panel-2)"><span id="ownArtStatus">Your design is in use</span>
+              <button class="icon-btn" type="button" id="ownArtClear" aria-label="Remove design">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>
+            </div></div>
+        </div>
+
+        <div id="optCouple" style="margin-top:4px">
+          <div class="field"><span class="legend" id="coupleLegend">Photo of the two of you (optional)</span>
+            <div class="drop" id="coupleDrop">
+              <b id="coupleUpTitle">Add a photo of the two of you</b>
+              <span id="coupleUpHint">It sits at the top of your invitation. Drop an image here, or click to choose.</span></div>
+            <input type="file" id="coupleFile" accept="image/jpeg,image/png,image/webp,image/*" hidden>
+            <div class="mycover" id="coupleHas" hidden>
+              <img id="coupleThumb" alt=""><span id="coupleStatus">Your photo is in use</span>
+              <button class="icon-btn" type="button" id="coupleClear" aria-label="Remove photo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>
+            </div></div>
+          <div class="field" id="shapeField" hidden><span class="legend" data-t="portraitShape">Photo shape</span>
+            <div class="pick c3" id="shapes"></div></div>
+        </div>
+
+        <div id="optBg" hidden style="margin-top:24px">
+          <div class="field"><span class="legend" data-t="bgColour">Background colour</span>
+            <div id="cwBg"></div></div>
+        </div>
+
+        <div id="optColour" hidden style="margin-top:4px">
+          <div class="field"><span class="legend" data-t="fade">Fade</span>
+            <div class="pick c4" id="fades"></div></div>
+        </div>
+
+        <div id="optPhoto" hidden style="margin-top:24px">
+          <div class="field"><span class="legend" data-t="overlayColour">Overlay colour</span>
+            <div id="cwOverlay"></div></div>
+          <div class="field"><span class="legend" data-t="overlay">Overlay strength</span>
+            <div class="pick c4" id="overlays"></div></div>
+        </div>
+
+        <div id="optCover" hidden style="margin-top:4px">
+          <div class="field"><span class="legend" id="coverLegend" data-t="yourPhoto">Your photo</span>
+            <div class="photogrid" id="covers"></div>
+            <div class="drop" id="coverDrop" style="margin-top:10px">
+              <b id="coverUpTitle">Upload your own photo</b>
+              <span data-t="coverUpHint">Drop an image here, or click to choose.</span></div>
+            <input type="file" id="coverFile" accept="image/jpeg,image/png,image/webp,image/*" hidden>
+            <div class="mycover" id="coverHas" hidden>
+              <img id="coverThumb" alt=""><span id="coverStatus">Your photo is in use</span>
+              <button class="icon-btn" type="button" id="coverClear" aria-label="Remove photo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>
+            </div></div>
+        </div>
+
+        <div id="optBorder" hidden style="margin-top:4px">
+          <div class="field"><span class="legend" data-t="border">Border</span>
+            <div class="pick c5" id="borders"></div>
+            <div class="drop" id="svgDrop" style="margin-top:10px">
+              <b data-t="svgUp">Upload your own border</b>
+              <span data-t="svgUpHint">A square SVG in one colour, set to currentColor.</span></div>
+            <input type="file" id="svgFile" accept=".svg,image/svg+xml" hidden></div>
+        </div>
+
+        <div id="optText" hidden style="margin-top:4px">
+          <div class="field"><span class="legend" data-t="textColour">Text colour</span>
+            <div id="cwText"></div>
+            <div class="fixrow" id="fixRow" hidden><p class="warn" id="contrastWarn"></p>
+              <button class="btn sm" type="button" id="fixContrast" data-t="fixContrast">Make it readable</button></div></div>
+        </div>
+      </section>
+
+      <!-- 3 · PHOTOS -->
+      <section class="pane" id="p-photos" role="tabpanel">
+        <h2 data-t="s4h">Photos</h2>
+        <p class="lede" data-t="s4l">A small gallery further down the page. Six or fewer looks best on a phone.</p>
+        <div class="drop" id="galDrop"><b data-t="galUp">Add photos</b>
+          <span data-t="galUpHint">Drop images here, or click to choose. Up to 12.</span></div>
+        <input type="file" id="galFile" accept="image/*" multiple hidden>
+        <div class="thumbs" id="galThumbs"></div>
+      </section>
+
+      <!-- 4 · RSVP -->
+      <section class="pane" id="p-rsvp" role="tabpanel">
+        <h2 data-t="s5h">Replies</h2>
+        <p class="lede" data-t="s5l">Decide what to ask guests. Every reply lands in your guest list.</p>
+        <label class="toggle"><input type="checkbox" id="r-on" checked><span class="track"></span>
+          <span data-t="rsvpOn">Let guests reply from this page</span></label>
+        <div id="rsvpOpts">
+          <div class="field" style="margin-top:14px"><label for="r-deadline" data-t="deadline">Reply by</label>
+            <input id="r-deadline" type="date"></div>
+          <label class="toggle"><input type="checkbox" id="r-count" checked><span class="track"></span>
+            <span data-t="askCount">Ask how many people are coming</span></label>
+          <div class="field" id="maxWrap" style="padding-inline-start:49px"><label for="r-max" data-t="maxParty">Most a single reply can bring</label>
+            <input id="r-max" type="number" min="1" max="20" value="4" style="max-width:110px"></div>
+          <label class="toggle"><input type="checkbox" id="r-msg" checked><span class="track"></span>
+            <span data-t="askMsg">Let guests leave a note</span></label>
+          <label class="toggle"><input type="checkbox" id="r-phone" checked><span class="track"></span>
+            <span data-t="askPhone">Ask for a phone number</span></label>
+        </div>
+      </section>
+
+      <!-- 5 · SHARE -->
+      <section class="pane" id="p-share" role="tabpanel">
+        <h2 data-t="s6h">Share it</h2>
+        <p class="lede" data-t="s6l">Your page lives at its own address. Publish when you're happy — you can keep editing afterwards.</p>
+        <div class="field"><label for="f-slug" data-t="pageAddress">Page address</label>
+          <div class="linkbox"><input id="f-slug" type="text" placeholder="nour-khalid">
+            <button class="btn" type="button" id="copyBtn" data-t="copy">Copy</button></div>
+          <p class="hint" id="slugHint"></p></div>
+        <label class="toggle"><input type="checkbox" id="f-private"><span class="track"></span>
+          <span data-t="private">Hide from search engines</span></label>
+        <div class="note" style="margin-top:18px" data-t="shareNote">Replies feed straight into your guest list, so you can track numbers without chasing anyone.</div>
+        <div style="margin-top:20px"><button class="btn primary" type="button" id="pubBtn2" data-t="publish">Publish</button></div>
+        <div class="cardblock" id="cardBlock">
+          <h3><span id="cardH">Your invitation as an image</span><span class="prem">Premium</span></h3>
+          <p class="hint" id="cardHint"></p>
+          <div class="cardprev" id="cardPrev" hidden><img id="cardImg" alt=""></div>
+          <div class="cardrow">
+            <button class="btn" type="button" id="cardBtn"></button>
+            <a class="btn" id="cardDl" download="3orsna-invitation.jpg" target="_blank" rel="noopener" hidden></a>
+          </div>
+          <p class="cardst" id="cardSt" role="status"></p>
+        </div>
+      </section>
+
+      <div class="navs">
+        <button class="btn ghost" type="button" id="prevBtn" data-t="back">Back</button>
+        <span class="spacer"></span>
+        <button class="btn" type="button" id="nextBtn" data-t="next">Next</button>
+      </div>
+    </main>
+
+    <aside class="side">
+      <div class="previewhead">
+        <span class="t" data-t="livePrev">Live preview</span>
+        <div class="seg" id="devSeg">
+          <button type="button" data-d="phone" aria-pressed="true" data-t="phone">Phone</button>
+          <button type="button" data-d="tablet" aria-pressed="false" data-t="tablet">Tablet</button>
+          <button type="button" data-d="desktop" aria-pressed="false" data-t="desktop">Desktop</button>
+        </div>
+      </div>
+      <div class="device phone" id="device"><div class="screen" id="screen"><div class="vp" id="vp"><div class="inv" id="inv"></div></div></div></div>
+      <p class="devnote" id="devNote"></p>
+    </aside>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ═══════════════════════════════════════════════════
+   STYLE 1 — BACKGROUND COLOURS + FADES
+   ═══════════════════════════════════════════════════ */
+const FADES = {
+  none:     {label:"None",     labelAr:"بدون",    css:(c)=>`none`},
+  soft:     {label:"Soft",     labelAr:"ناعم",    css:(c)=>`linear-gradient(180deg, ${lighten(c,.14)} 0%, ${c} 55%, ${darken(c,.12)} 100%)`},
+  glow:     {label:"Glow",     labelAr:"إشعاع",   css:(c)=>`radial-gradient(120% 88% at 50% 32%, ${lighten(c,.22)} 0%, ${c} 58%, ${darken(c,.16)} 100%)`},
+  diagonal: {label:"Diagonal", labelAr:"مائل",    css:(c)=>`linear-gradient(145deg, ${lighten(c,.18)} 0%, ${c} 52%, ${darken(c,.14)} 100%)`}
+};
+
+/* ═══════════════════════════════════════════════════
+   STYLE 2 & 3 — ARTWORK BACKGROUNDS
+   ───────────────────────────────────────────────────
+   These ten are PLACEHOLDERS, generated as SVG so nothing 404s
+   while you build. To use your own artwork, give the entry a
+   `url` and it is used instead of the generated art:
+
+     {id:"a1", label:"Blush Roses", labelAr:"ورود",
+      url:"https://static.wixstatic.com/media/….jpg", text:"#3A2430"}
+
+   Artwork should be portrait 3:4, at least 1200 × 1600, and must
+   leave the middle ~55% clear for the names. `text` is the default
+   text colour for that design — couples can still change it.
+   ═══════════════════════════════════════════════════ */
+/* ═══ DESIGNS ═══
+   Transparent PNGs supplied as Wix Media. The couple's background colour
+   shows through them. Proportions are read from each file when it loads,
+   so the nine-slice corners stay square whatever size Canva exported.
+   Keep the ids a1–a10 fixed; they're what gets saved.                    */
+const ARTWORKS = [
+  {id:"a1", label:"Design 1", labelAr:"تصميم ١", url:"https://static.wixstatic.com/media/974d64_9061d9d6516e4ee4a62aea76a7e5c12e~mv2.png"},
+  {id:"a2", label:"Design 2", labelAr:"تصميم ٢", url:"https://static.wixstatic.com/media/974d64_bd44e049d6a641959652e84dc9baf8f0~mv2.png"},
+  {id:"a3", label:"Design 3", labelAr:"تصميم ٣", url:"https://static.wixstatic.com/media/974d64_d7c4c501eaff4ab6bb97d487cfd82632~mv2.png"},
+  {id:"a4", label:"Design 4", labelAr:"تصميم ٤", url:"https://static.wixstatic.com/media/974d64_5f03f181824e46a88da8d3a6eb6cde0b~mv2.png"},
+  {id:"a5", label:"Design 5", labelAr:"تصميم ٥", url:"https://static.wixstatic.com/media/974d64_6066b90f57f346e4bfcbd84cd16c9220~mv2.png"},
+  {id:"a6", label:"Design 6", labelAr:"تصميم ٦", url:"https://static.wixstatic.com/media/974d64_915a80e7b3bf4dfd829faf7f5761042a~mv2.png"},
+  {id:"a7", label:"Design 7", labelAr:"تصميم ٧", url:"https://static.wixstatic.com/media/974d64_0dd1be8dc6cf4a47934cb535bf25e129~mv2.png"},
+  {id:"a8", label:"Design 8", labelAr:"تصميم ٨", url:"https://static.wixstatic.com/media/974d64_d59e1cd706594a9895002d2047425278~mv2.png"},
+  {id:"a9", label:"Design 9", labelAr:"تصميم ٩", url:"https://static.wixstatic.com/media/974d64_41742c660cd94ca69df3b963c3047023~mv2.png"},
+  {id:"a10", label:"Design 10", labelAr:"تصميم ١٠", url:"https://static.wixstatic.com/media/974d64_362f897865884a3a80a02cb08d61d814~mv2.png"}
+];
+/* A couple's own uploaded design is the artwork "own" (see artById). Here it
+   follows the builder's state; on the guest page, the saved wedding. */
+const OWN_ART = () => state.ownArt || "";
+
+/* ═══════════════════════════════════════════════════
+   BORDER VECTORS — styles 1 and 4
+   Add your own by pasting an entry. `svg` is a corner
+   ornament in a 200 × 200 box; `kind:"frame"` entries are
+   pure CSS rules instead. Couples can also upload an SVG.
+   ═══════════════════════════════════════════════════ */
+const BORDERS = {
+  none: {label:"None",       labelAr:"بدون",     kind:"none"},
+  rule: {label:"Double rule",labelAr:"خطّان",    kind:"frame"},
+  hair: {label:"Hairline",   labelAr:"خط رفيع",  kind:"frame"},
+  arch: {label:"Arch",       labelAr:"قوس",      kind:"frame"},
+  /* Supplied ornaments, loaded live from Wix Media. Rename freely —
+     the key is what gets saved, so don't change keys once couples use them. */
+  o1:{label:"Ornament 1", labelAr:"زخرفة ١", kind:"corner", url:"https://static.wixstatic.com/shapes/974d64_d0edc71f045c457c945c7771d4b907c2.svg"},
+  o2:{label:"Ornament 2", labelAr:"زخرفة ٢", kind:"corner", url:"https://static.wixstatic.com/shapes/974d64_56dce4d1cc3e4a99b8a0d7bf62cf7510.svg"},
+  o3:{label:"Ornament 3", labelAr:"زخرفة ٣", kind:"corner", url:"https://static.wixstatic.com/shapes/974d64_9355cb28256042178a6277f1c496bebe.svg"},
+  o4:{label:"Ornament 4", labelAr:"زخرفة ٤", kind:"corner", url:"https://static.wixstatic.com/shapes/974d64_a92e903c3abb42e09aa9758f2dc3867b.svg"},
+  o5:{label:"Ornament 5", labelAr:"زخرفة ٥", kind:"corner", url:"https://static.wixstatic.com/shapes/974d64_def8889b0ee3433b9d5aff26aa15ae11.svg"},
+  o6:{label:"Ornament 6", labelAr:"زخرفة ٦", kind:"corner", url:"https://static.wixstatic.com/shapes/974d64_98d0a853d83444f5898a82b6c55381b9.svg"},
+  o7:{label:"Ornament 7", labelAr:"زخرفة ٧", kind:"corner", url:"https://static.wixstatic.com/shapes/974d64_21c224c1d8ad4eb5a93f8c7e0d40e9f8.svg"}
+};
+
+/* ═══ ORNAMENT LOADER ═══
+   Fetches each supplied SVG once, cleans it, recolours every fill and
+   stroke to currentColor (so it follows the couple's text colour with no
+   hand-editing), prefixes its internal IDs so two ornaments can't clash,
+   and anchors it to the top-left of its square. If the fetch is blocked,
+   the ornament still shows as a plain image — just in its own colour.   */
+const ORN_CACHE = {};                 // key → svg string, "" = load failed, null = loading
+function prepareSvg(txt, key){
+  let s = String(txt)
+    .replace(/<\?xml[\s\S]*?\?>/gi,"").replace(/<!DOCTYPE[\s\S]*?>/gi,"").replace(/<!--[\s\S]*?-->/g,"")
+    .replace(/<script[\s\S]*?<\/script>/gi,"").replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi,"")
+    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*')/gi,"").trim();
+  if (!/^<svg[\s>]/i.test(s)) return "";
+  const keep = v => /^(none|transparent|url\(|currentColor)/i.test(v.trim());
+  s = s.replace(/\b(fill|stroke)\s*=\s*"([^"]*)"/gi, (m,a,v)=> keep(v) ? m : `${a}="currentColor"`)
+       .replace(/\b(fill|stroke)\s*=\s*'([^']*)'/gi, (m,a,v)=> keep(v) ? m : `${a}="currentColor"`)
+       .replace(/\b(fill|stroke)\s*:\s*([^;"'}]+)/gi,  (m,a,v)=> keep(v) ? m : `${a}:currentColor`);
+  s = s.replace(/\bid\s*=\s*"([^"]+)"/g, (m,id)=>`id="${key}-${id}"`)
+       .replace(/url\(\s*#([^)\s]+)\s*\)/g, (m,id)=>`url(#${key}-${id})`)
+       .replace(/(xlink:)?href\s*=\s*"#([^"]+)"/g, (m,x,id)=>`${x||""}href="#${key}-${id}"`);
+  s = s.replace(/^<svg\b([^>]*)>/i, (m, attrs)=>{
+    let a = attrs;
+    if (!/viewBox\s*=/i.test(a)){
+      const w = (a.match(/\bwidth\s*=\s*"([\d.]+)/i)||[])[1], hh = (a.match(/\bheight\s*=\s*"([\d.]+)/i)||[])[1];
+      if (w && hh) a += ` viewBox="0 0 ${w} ${hh}"`;
+    }
+    a = a.replace(/\s(width|height)\s*=\s*"[^"]*"/gi,"").replace(/\spreserveAspectRatio\s*=\s*"[^"]*"/i,"");
+    if (!/\bfill\s*=/i.test(a)) a += ' fill="currentColor"';
+    return `<svg${a} preserveAspectRatio="xMinYMin meet">`;
+  });
+  return s;
+}
+function loadOrnaments(){
+  Object.entries(BORDERS).forEach(([key,b])=>{
+    if (!b.url || key in ORN_CACHE) return;
+    ORN_CACHE[key] = null;
+    fetch(b.url, {mode:"cors"})
+      .then(r => r.ok ? r.text() : Promise.reject(new Error("HTTP "+r.status)))
+      .then(txt => { ORN_CACHE[key] = prepareSvg(txt, key); })
+      .catch(err => { ORN_CACHE[key] = ""; console.warn("ornament", key, "couldn't be loaded for recolouring:", err.message); })
+      .finally(() => { buildAll(); render(); });
+  });
+}
+function ornSvg(key){
+  if (key === "custom") return state.customBorder ? state.customBorder.svg : "";
+  const b = BORDERS[key];
+  if (b && b.url){
+    const c = ORN_CACHE[key];
+    if (c) return c;
+    if (c === "") return `<img src="${b.url}" alt="">`;   // blocked: show it uncoloured rather than not at all
+    return "";                                             // still loading
+  }
+  return VEC[key] || "";                                   // older drafts that saved roses / euc / deco / tulip
+}
+
+const VEC = {
+  roses:`<svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+    <circle cx="52" cy="46" r="26"/><path d="M52 46a12 12 0 0 1 12-12 19 19 0 0 1 7 14 19 19 0 0 1-19 19 26 26 0 0 1-14-5"/>
+    <path d="M52 46a6 6 0 0 1 6-6 9 9 0 0 1 3 7 9 9 0 0 1-9 9"/>
+    <circle cx="108" cy="30" r="17"/><path d="M108 30a8 8 0 0 1 8-8 12 12 0 0 1 4 9 12 12 0 0 1-12 12 17 17 0 0 1-9-3"/>
+    <circle cx="30" cy="104" r="19"/><path d="M30 104a9 9 0 0 1 9-9 13 13 0 0 1 5 10 13 13 0 0 1-14 13 19 19 0 0 1-9-3"/>
+    <circle cx="86" cy="86" r="13"/><path d="M86 86a6 6 0 0 1 6-6 9 9 0 0 1 3 7 9 9 0 0 1-9 9"/>
+    <g opacity=".8"><ellipse cx="88" cy="58" rx="17" ry="8" transform="rotate(-34 88 58)"/>
+    <ellipse cx="128" cy="62" rx="15" ry="7" transform="rotate(22 128 62)"/>
+    <ellipse cx="58" cy="124" rx="15" ry="7" transform="rotate(-58 58 124)"/>
+    <ellipse cx="18" cy="60" rx="14" ry="7" transform="rotate(-70 18 60)"/></g>
+    <g opacity=".6"><path d="M124 18c8 6 14 14 17 24M46 140c4 10 4 20 2 30"/>
+    <circle cx="146" cy="18" r="4"/><circle cx="24" cy="148" r="4"/></g></svg>`,
+  euc:`<svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <path d="M6 6c34 14 60 38 78 70M6 6C30 34 44 66 50 104M6 6c20 4 42 12 62 24"/>
+    <ellipse cx="34" cy="26" rx="13" ry="9" transform="rotate(-30 34 26)"/>
+    <ellipse cx="58" cy="46" rx="14" ry="10" transform="rotate(-24 58 46)"/>
+    <ellipse cx="80" cy="70" rx="15" ry="10" transform="rotate(-18 80 70)"/>
+    <ellipse cx="26" cy="54" rx="12" ry="9" transform="rotate(-62 26 54)"/>
+    <ellipse cx="38" cy="82" rx="13" ry="9" transform="rotate(-70 38 82)"/>
+    <ellipse cx="48" cy="112" rx="12" ry="9" transform="rotate(-80 48 112)"/>
+    <ellipse cx="60" cy="18" rx="11" ry="8" transform="rotate(-12 60 18)"/>
+    <ellipse cx="88" cy="32" rx="12" ry="8" transform="rotate(-6 88 32)"/>
+    <g opacity=".7"><circle cx="104" cy="52" r="5"/><circle cx="96" cy="14" r="4.5"/><circle cx="62" cy="128" r="4.5"/></g></svg>`,
+  deco:`<svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+    <path d="M0 40h40V0M0 60h60V0M0 80h80V0"/><path d="M96 0v20M116 0v12M0 96h20M0 116h12"/>
+    <path d="M0 110C40 110 110 40 110 0" opacity=".6"/>
+    <circle cx="128" cy="128" r="4"/><circle cx="146" cy="110" r="3"/><circle cx="110" cy="146" r="3"/></svg>`,
+  tulip:`<svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <path d="M18 182C18 130 30 88 58 54"/>
+    <path d="M58 54c-14-6-22-20-20-36 16 2 27 13 30 28 5-14 17-24 33-24 1 16-8 30-23 36-14 6-20 2-20-4z"/>
+    <path d="M40 120c-16-2-26-12-28-28 15-3 28 4 33 18M62 96c14-6 22-18 20-33-15 1-26 10-29 24"/>
+    <g opacity=".75"><ellipse cx="86" cy="140" rx="16" ry="8" transform="rotate(-24 86 140)"/>
+    <ellipse cx="112" cy="166" rx="14" ry="7" transform="rotate(-14 112 166)"/>
+    <path d="M62 150c22 6 42 18 58 34"/></g></svg>`,
+  ivyE:`<svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <path d="M4 196C4 130 30 70 84 26"/>
+    <path d="M22 150c-9-9-8-22 3-27 9 7 10 19 2 27zM46 106c10 8 12 22 3 29-10-6-13-20-3-29z"/>
+    <path d="M60 74c-9-9-8-22 3-27 9 7 10 19 2 27zM86 42c10 8 12 21 3 28-10-5-13-19-3-28z"/>
+    <g opacity=".7"><circle cx="34" cy="126" r="3"/><circle cx="58" cy="90" r="3"/><circle cx="82" cy="58" r="3"/></g></svg>`,
+  wildE:`<svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round">
+    <path d="M20 196C20 140 26 96 44 58M52 196c0-48 10-86 30-116M84 196c0-40 8-72 24-98"/>
+    <g><g transform="translate(44 52)"><circle r="4"/><ellipse cy="-10" rx="4.4" ry="7.4"/><ellipse cy="10" rx="4.4" ry="7.4"/><ellipse cx="-10" rx="7.4" ry="4.4"/><ellipse cx="10" rx="7.4" ry="4.4"/></g>
+    <g transform="translate(82 74) scale(.8)"><circle r="4"/><ellipse cy="-10" rx="4.4" ry="7.4"/><ellipse cy="10" rx="4.4" ry="7.4"/><ellipse cx="-10" rx="7.4" ry="4.4"/><ellipse cx="10" rx="7.4" ry="4.4"/></g>
+    <g transform="translate(110 94) scale(.66)"><circle r="4"/><ellipse cy="-10" rx="4.4" ry="7.4"/><ellipse cy="10" rx="4.4" ry="7.4"/><ellipse cx="-10" rx="7.4" ry="4.4"/><ellipse cx="10" rx="7.4" ry="4.4"/></g></g>
+    <g opacity=".6"><circle cx="32" cy="110" r="2.6"/><circle cx="66" cy="124" r="2.6"/><circle cx="96" cy="140" r="2.6"/></g></svg>`,
+  blue:`<svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <g transform="translate(46 46)"><circle r="7"/><ellipse cy="-20" rx="10" ry="16"/><ellipse cy="20" rx="10" ry="16"/>
+    <ellipse cx="-20" rx="16" ry="10"/><ellipse cx="20" rx="16" ry="10"/></g>
+    <g transform="translate(112 26) scale(.72)"><circle r="7"/><ellipse cy="-20" rx="10" ry="16"/><ellipse cy="20" rx="10" ry="16"/>
+    <ellipse cx="-20" rx="16" ry="10"/><ellipse cx="20" rx="16" ry="10"/></g>
+    <g transform="translate(28 116) scale(.62)"><circle r="7"/><ellipse cy="-20" rx="10" ry="16"/><ellipse cy="20" rx="10" ry="16"/>
+    <ellipse cx="-20" rx="16" ry="10"/><ellipse cx="20" rx="16" ry="10"/></g>
+    <g opacity=".7"><ellipse cx="88" cy="74" rx="16" ry="8" transform="rotate(-32 88 74)"/>
+    <ellipse cx="66" cy="102" rx="15" ry="7" transform="rotate(-62 66 102)"/>
+    <path d="M78 66c16 12 28 28 34 48"/></g></svg>`
+};
+
+/* ═══ TEXT COLOURS ═══ */
+const OVERLAYS = {
+  none:  {label:"None",   labelAr:"بدون",   v:0},
+  light: {label:"Light",  labelAr:"خفيف",   v:.32},
+  medium:{label:"Medium", labelAr:"متوسط",  v:.55},
+  strong:{label:"Strong", labelAr:"قوي",    v:.74}
+};
+const SHAPES = {
+  circle:{label:"Circle", labelAr:"دائرة"},
+  heart: {label:"Heart",  labelAr:"قلب"},
+  square:{label:"Square", labelAr:"مربع"}
+};
+const STYLES = [
+  {id:"colour",   label:"Colour",          labelAr:"لون"},
+  {id:"artwork",  label:"Design",          labelAr:"تصميم"},
+  {id:"photo",    label:"Your photo",      labelAr:"صورتكم"}
+];
+
+/* ═══ COVER LIBRARY (style 4 + portrait fallback) ═══ */
+/* COVER PHOTO LIBRARY — optional ready-made backgrounds for the "Your photo" style.
+   Upload each photo to Wix Media, copy its URL (https://static.wixstatic.com/media/…)
+   and paste it into url. Entries with an empty url are hidden, so with none filled
+   in, couples simply upload their own. A photo that fails to load hides itself. */
+const COVERS = [
+  {id:"none",   label:"None",         labelAr:"بدون"},
+  {id:"hall",   label:"Ballroom",     labelAr:"قاعة",  url:""},
+  {id:"stage",  label:"Chandeliers",  labelAr:"ثريات", url:""},
+  {id:"drapes", label:"White drapes", labelAr:"ستائر", url:""},
+  {id:"table",  label:"Table set",    labelAr:"طاولة", url:""},
+  {id:"linen",  label:"Outdoors",     labelAr:"حديقة", url:""},
+  {id:"window", label:"Terrace",      labelAr:"شرفة",  url:""}
+];
+/* The plain Wix address, exactly as pasted — upload library photos at around 1600px wide. */
+const coverUrl  = (u)=> u;
+const LIBRARY   = () => COVERS.filter(c=>c.url);
+/* A neutral stand-in for the small style and overlay swatches. */
+const SWATCH_BG = "linear-gradient(160deg,#5b4a3a,#2a2420 60%,#14110c)";
+const coverById = id => (COVERS.find(c=>c.id===id)||{}).url || "";
+
+/* ═══ COLOUR MATHS ═══ */
+const hx = h => { h=String(h||"#000").replace("#","");
+  if (h.length===3) h=h.split("").map(c=>c+c).join("");
+  return [parseInt(h.slice(0,2),16)||0,parseInt(h.slice(2,4),16)||0,parseInt(h.slice(4,6),16)||0]; };
+const toHex = r => "#"+r.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,"0")).join("");
+const mixc = (a,b,t)=>{ const A=hx(a),B=hx(b); return toHex(A.map((v,i)=> v+(B[i]-v)*t)); };
+const lighten = (c,t)=> mixc(c,"#FFFFFF",t);
+const darken  = (c,t)=> mixc(c,"#000000",t);
+const rgba = (h,a)=>{ const [r,g,b]=hx(h); return `rgba(${r},${g},${b},${a})`; };
+const lum = h => { const c=hx(h).map(v=>{v/=255; return v<=.03928? v/12.92 : Math.pow((v+.055)/1.055,2.4);});
+  return .2126*c[0]+.7152*c[1]+.0722*c[2]; };
+const contrast = (a,b)=>{ const l1=lum(a),l2=lum(b); return (Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05); };
+
+/* Generated placeholder artwork — replaced the moment an entry has a `url`. */
+function artUrl(a, w){
+  if (a.url) return a.url;
+  const [c1,c2,vecKey,vecCol] = a.gen;
+  const vec = (VEC[vecKey]||"").replace(/currentColor/g, vecCol);
+  const root  = ((vec.match(/^<svg([^>]*)>/)||["",""])[1]).replace(/\sviewBox="[^"]*"/,"");
+  const inner = vec.replace(/^<svg[^>]*>/,"").replace(/<\/svg>$/,"");
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='600' height='800' viewBox='0 0 600 800'>
+    <defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'>
+      <stop offset='0' stop-color='${c1}'/><stop offset='1' stop-color='${c2}'/></linearGradient></defs>
+    <rect width='600' height='800' fill='url(%23g)'/>
+    <g${root} transform='translate(0,0) scale(.9)' opacity='.9'>${inner}</g>
+    <g${root} transform='translate(600,800) rotate(180) scale(.9)' opacity='.9'>${inner}</g>
+    <rect x='26' y='26' width='548' height='748' fill='none' stroke='${vecCol}' stroke-opacity='.45'/>
+  </svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg).replace(/'/g,"%27")}`;
+}
+const ART_RATIO = {};                     // id → height / width, filled in as each PNG loads
+const artKey = a => a.id === "own" ? "own:" + a.url : a.id;   // a re-uploaded own design gets measured again
+function loadArtworkSizes(){
+  ARTWORKS.concat(OWN_ART() ? [artById("own")] : []).forEach(a=>{
+    if (!a.url || artKey(a) in ART_RATIO) return;
+    const im = new Image();
+    im.onload = ()=>{
+      const r = im.naturalHeight / im.naturalWidth;
+      if (r < 1.1) console.warn(`design ${a.id} is ${im.naturalWidth}×${im.naturalHeight} — designs should be portrait (3:4)`);
+      ART_RATIO[artKey(a)] = Math.max(1.1, r);
+      if (state.artwork === a.id) render();
+    };
+    im.src = a.url;
+  });
+}
+/* Corners are 30% of the width. Top/bottom slices are that same pixel
+   size expressed as a % of the height, so the corners stay square. */
+const artSlice = a => `${(30 / (ART_RATIO[artKey(a)] || 4/3)).toFixed(3)}% 30% fill`;
+const artBg = a => (a && (a.bg || (a.gen && a.gen[1]))) || "#F4F1EA";
+const artById = id => (id === "own" && OWN_ART()) ? {id:"own", label:"Your design", labelAr:"تصميمكم", url:OWN_ART()} : (ARTWORKS.find(a=>a.id===id) || ARTWORKS[0]);   // one line: build-invite.py copies to the end of it
+
+const HEART = `url("data:image/svg+xml,${encodeURIComponent(
+  `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 90C18 67 4 50 4 31 4 17 15 6 29 6c9 0 17 4 21 11 4-7 12-11 21-11 14 0 29 11 29 25 0 19-14 36-50 59z' fill='%23000'/></svg>`)}")`;
+
+/* ═══ UI STRINGS ═══ */
+const T = { ar:{
+  pageTitle:"صفحة زفافكم", save:"حفظ مسودة", publish:"نشر",
+  s1h:"من سيتزوج", s1l:"الأسماء والتاريخ والمكان. تظهر بأكبر حجم على الصفحة، فتأكدوا من الإملاء.",
+  bride:"اسم العروس", groom:"اسم العريس", invLang:"لغة الدعوة",
+  brideAr:"اسم العروس بالعربية", groomAr:"اسم العريس بالعربية",
+  wdate:"تاريخ الزفاف", wtime:"وقت البداية", venue:"القاعة", address2:"العنوان", city:"المدينة", map:"رابط الخريطة",
+  tagline:"جملة قصيرة", taglineAr:"الجملة بالعربية",
+  taglineHint:"سطر واحد قصير تحت أسمائكم. اتركوه فارغاً لتخطّيه.", dress:"قواعد اللباس",
+  s2h:"اختاروا النمط", s2l:"ثلاث طرق لبناء صفحتكم. اختاروا واحدة وتظهر خياراتها فقط.",
+  bgColour:"لون الخلفية", fade:"التدرّج", artwork:"التصميم",
+  artworkHint:"عشرة تصاميم، أو ارفعوا تصميمكم أدناه.",
+  ownArt:"تصميمكم الخاص", ownArtUp:"ارفعوا تصميمكم", ownArtHint:"صورة PNG طولية بخلفية شفافة مثل تصاميمنا (٣:٤، مثلاً ١٥٠٠ × ٢٠٠٠). اتركوا الوسط فارغاً للأسماء.",
+  portraitShape:"شكل الصورة", overlayColour:"لون الطبقة", overlay:"قوة الطبقة",
+  yourPhoto:"صورتكم", coverUp:"ارفعوا صورتكم", coverUpHint:"أفلتوا صورة هنا أو اضغطوا للاختيار.",
+  coverSet:"صورتكم مستخدمة", border:"الإطار",
+  svgUp:"ارفعوا إطاركم الخاص", svgUpHint:"ملف SVG مربّع بلون واحد مضبوط على currentColor.",
+  textColour:"لون النص", fixContrast:"اجعلوه مقروءاً",
+  s4h:"الصور", s4l:"معرض صغير أسفل الصفحة. ست صور أو أقل تبدو أفضل على الهاتف.",
+  galUp:"إضافة صور", galUpHint:"أفلتوا الصور هنا أو اضغطوا للاختيار. حتى ١٢ صورة.",
+  s5h:"الردود", s5l:"حدّدوا ما تسألون عنه الضيوف. كل رد يصل إلى قائمة المدعوين.",
+  rsvpOn:"السماح للضيوف بالرد من هذه الصفحة", deadline:"آخر موعد للرد",
+  askCount:"السؤال عن عدد الحضور", maxParty:"أقصى عدد في الرد الواحد",
+  askMsg:"السماح للضيوف بترك رسالة", askPhone:"طلب رقم الهاتف",
+  s6h:"المشاركة", s6l:"لصفحتكم عنوان خاص بها. انشروها عندما تعجبكم — يمكنكم التعديل لاحقاً.",
+  pageAddress:"عنوان الصفحة", copy:"نسخ", private:"إخفاء عن محركات البحث",
+  shareNote:"الردود تصل مباشرة إلى قائمة المدعوين، فتتابعون الأعداد دون ملاحقة أحد.",
+  back:"السابق", next:"التالي", livePrev:"معاينة مباشرة", phone:"هاتف", tablet:"جهاز لوحي", desktop:"حاسوب"
+}};
+
+const STEPS = [
+  {id:"couple", pane:"p-couple", en:"Details", ar:"التفاصيل"},
+  {id:"design", pane:"p-design", en:"Design",  ar:"التصميم"},
+  {id:"photos", pane:"p-photos", en:"Photos",  ar:"الصور"},
+  {id:"rsvp",   pane:"p-rsvp",   en:"Replies", ar:"الردود"},
+  {id:"share",  pane:"p-share",  en:"Share",   ar:"المشاركة"}
+];
+
+/* ═══ STATE ═══ */
+const state = {
+  slug:"", uiLang:"en", invLang:"en", private:false,
+  bride:"", groom:"", brideAr:"", groomAr:"",
+  date:"", time:"19:00", venue:"", address:"", city:"", mapUrl:"",
+  tagline:"", taglineAr:"", dress:"",
+  style:"colour",
+  bgColour:"#14110C", fade:"glow",
+  artwork:"a1", ownArt:"", shape:"circle", couple:"",
+  overlayColour:"#000000", overlay:"medium",
+  border:"none", customBorder:null,
+  textColour:"#F4EDE2",
+  coverId:"none", cover:"", gallery:[],
+  rsvp:{on:true, deadline:"", count:true, max:4, msg:true, phone:true}
+};
+/* A clean copy of the empty invitation. Every load starts from this, so nothing
+   from another account (or an earlier visit) can carry over. The database is
+   the only place a wedding is kept — nothing is stored in the browser. */
+const BLANK = JSON.parse(JSON.stringify(state));
+/* Interface language is shared with the other couple iframes. */
+try{ if (localStorage.getItem("3orsna:uiLang")==="ar") state.uiLang="ar"; }catch(e){}
+function defaultDate(){ const d=new Date(); d.setMonth(d.getMonth()+6); return d.toISOString().slice(0,10); }
+let loaded = false;                                   // true once the page has sent this couple's wedding
+
+/* ═══ PUBLISH STATUS ═══ */
+let pubStatus = "draft";                              // what the database says: draft | published
+let publishing = false;                               // waiting for the result of a Publish click
+let pubBar = null;                                    // {kind:"busy"|"ok"|"bad", key, url}
+const PUB = {
+  en:{ draft:"Draft", live:"Live", btnLive:"Published ✓", publishing:"Publishing…",
+    busyT:"Publishing your page…", busyP:"This takes a moment.",
+    okT:"Your wedding page is live 🎉", okP:"Guests can open it now. Any change you save from here on shows on the page straight away.",
+    view:"View page", copy:"Copy link", copied:"Copied ✓", close:"Close",
+    badT:"Not published yet", generic:"Publishing didn't work. Please try again.",
+    slugTaken:"That page address is taken — choose another in the Share step, then publish again.",
+    needSlug:"Choose your page address in the Share step first, then publish." },
+  ar:{ draft:"مسودة", live:"منشورة", btnLive:"منشورة ✓", publishing:"جارٍ النشر…",
+    busyT:"جارٍ نشر صفحتكم…", busyP:"لحظات قليلة.",
+    okT:"صفحة زفافكم منشورة الآن 🎉", okP:"يمكن لضيوفكم فتحها الآن. أي تعديل تحفظونه من الآن يظهر على الصفحة مباشرة.",
+    view:"عرض الصفحة", copy:"نسخ الرابط", copied:"تم النسخ ✓", close:"إغلاق",
+    badT:"لم تُنشر الصفحة بعد", generic:"تعذّر النشر. حاولوا مرة أخرى.",
+    slugTaken:"عنوان الصفحة هذا محجوز — اختاروا عنواناً آخر في خطوة المشاركة ثم انشروا مجدداً.",
+    needSlug:"اختاروا عنوان صفحتكم في خطوة المشاركة أولاً، ثم انشروا." }
+};
+function renderPub(){
+  const L = PUB[state.uiLang==="ar"?"ar":"en"], live = pubStatus==="published";
+  const pill = document.getElementById("statusPill");
+  if (pill){ pill.className = "pill " + (live?"live":"draft"); pill.textContent = live ? L.live : L.draft; }
+  ["pubBtn","pubBtn2"].forEach(id=>{
+    const b=document.getElementById(id); if(!b) return;
+    b.disabled = publishing;
+    b.classList.toggle("isLive", live && !publishing);
+    b.classList.toggle("primary", !live || publishing);
+    if (publishing) b.textContent = L.publishing; else if (live) b.textContent = L.btnLive;
+  });
+  const bar = document.getElementById("pubBar"); if (!bar) return;
+  if (!pubBar){ bar.hidden = true; bar.innerHTML = ""; return; }
+  const k = pubBar.kind;
+  bar.className = "pubbar " + (k==="ok" ? "" : k);
+  bar.innerHTML = k==="busy"
+    ? `<span class="ic" aria-hidden="true">◌</span><div class="tx"><h3>${L.busyT}</h3><p>${L.busyP}</p></div>`
+    : k==="ok"
+    ? `<span class="ic" aria-hidden="true">✓</span><div class="tx"><h3>${L.okT}</h3><p>${L.okP}</p>
+        ${pubBar.url?`<span class="url">${esc(pubBar.url)}</span>`:""}</div>
+       <div class="acts">${pubBar.url?`<a class="btn primary" href="${esc(pubBar.url)}" target="_blank" rel="noopener">${L.view}</a>
+         <button class="btn" type="button" id="pubCopy">${L.copy}</button>`:""}</div>
+       <button class="x" type="button" id="pubClose" aria-label="${esc(L.close)}">×</button>`
+    : `<span class="ic" aria-hidden="true">!</span><div class="tx"><h3>${L.badT}</h3><p>${L[pubBar.key]||L.generic}</p></div>
+       <button class="x" type="button" id="pubClose" aria-label="${esc(L.close)}">×</button>`;
+  bar.hidden = false;
+  const c=document.getElementById("pubCopy");
+  if (c) c.onclick=()=>{ copyText(pubBar.url); c.textContent=L.copied; setTimeout(()=>{ if(c.isConnected) c.textContent=L.copy; },2000); };
+  const x=document.getElementById("pubClose"); if (x) x.onclick=()=>{ pubBar=null; renderPub(); };
+ 
+}
+function showPub(kind, key, url){
+  pubBar = { kind, key:key||"", url:url||"" };
+  renderPub();
+  try{ document.body.scrollTo({top:0, behavior:"smooth"}); }catch(e){}         // inside the iframe (body is the scroll box)
+  try{ window.parent.postMessage({type:"3orsna:scrollTop"},"*"); }catch(e){}   // and the Wix page, so the banner is seen
+}
+
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let step = 0;
+let publicBase = "https://www.3orsna.com/invite/";
+let savedOwnArt = "";                                 // last own design the database has
+let savedCouple = "";                                 // last couple photo the database has
+let savedCover = "";                                  // last cover the database has; kept while a new one uploads   // the Wix page sends the real one on load
+
+/* Real device sizes. The preview renders at these widths and scales down. */
+const DEVICES = {
+  phone:  {w:390,  h:844,  maxH:640},
+  tablet: {w:820,  h:1180, maxH:780},
+  desktop:{w:1440, h:900,  maxH:760}
+};
+let device = "phone";
+function fitPreview(){
+  const d=DEVICES[device], scr=$("#screen"), vp=$("#vp");
+  if (!scr || !vp) return;
+  const avail = scr.clientWidth || 344;
+  const scale = Math.min(1, avail / d.w);
+  const visH  = Math.min(Math.round(d.h * scale), d.maxH);
+  scr.style.height   = visH + "px";
+  vp.style.width     = d.w + "px";
+  vp.style.height    = Math.ceil(visH / scale) + "px";
+  vp.style.transform = `scale(${scale})`;
+  $("#inv").style.setProperty("--vh", d.h + "px");
+  $("#devNote").textContent = `${d.w} × ${d.h} · ${Math.round(scale*100)}%`;
+ 
+}
+
+/* ═══ HEIGHT ═══ */
+/* Height: the Pixel Pals reporter at the end of this file (setHeight → site-wide listener). */
+if (document.fonts) document.fonts.ready.then(()=>{ render(); });
+
+/* ═══ LANGUAGE ═══ */
+const EN={};
+$$("[data-t]").forEach(el=> EN[el.dataset.t]=el.textContent);
+function applyLang(){
+  const ar = state.uiLang==="ar";
+  document.documentElement.lang = ar?"ar":"en";
+  document.body.dir = ar?"rtl":"ltr";
+  $$("[data-t]").forEach(el=>{ el.textContent = ar ? (T.ar[el.dataset.t]||EN[el.dataset.t]) : EN[el.dataset.t]; });
+  $("#langBtn").textContent = ar?"English":"العربية";
+  buildRail(); buildAll();
+  renderPub();                                        // after the data-t pass, which resets the Publish buttons' text
+}
+function buildRail(){
+  const rail=$("#rail"); rail.innerHTML="";
+  STEPS.forEach((s,i)=>{
+    const b=document.createElement("button");
+    b.type="button"; b.className="step"; b.setAttribute("role","tab");
+    b.setAttribute("aria-selected", i===step?"true":"false");
+    if(i<step) b.classList.add("done");
+    b.innerHTML=`<i>${i<step?"✓":i+1}</i><span>${state.uiLang==="ar"?s.ar:s.en}</span>`;
+    b.onclick=()=>goto(i); rail.appendChild(b);
+  });
+}
+function goto(i){
+  step=Math.max(0,Math.min(STEPS.length-1,i));
+  STEPS.forEach((s,n)=> $("#"+s.pane).classList.toggle("on", n===step));
+  buildRail();
+  $("#prevBtn").style.visibility = step===0?"hidden":"visible";
+  $("#nextBtn").style.visibility = step===STEPS.length-1?"hidden":"visible";
+ 
+}
+
+/* ═══ PICKERS ═══ */
+const lbl = (o,ar)=> ar ? (o.labelAr||o.label) : o.label;
+
+/* ═══ COLOUR WHEEL ═══════════════════════════════════════════
+   Hue is the angle, saturation the distance from the centre,
+   brightness the slider. The disc is painted once; brightness is a
+   black layer over it, since scaling HSV value is the same as
+   laying black over the colour at (1 − value) opacity. That keeps
+   dragging smooth on older phones.                                 */
+const rgbToHsv = ([r,g,b])=>{ r/=255; g/=255; b/=255;
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn; let hh=0;
+  if (d){ if (mx===r) hh=((g-b)/d)%6; else if (mx===g) hh=(b-r)/d+2; else hh=(r-g)/d+4; hh*=60; if (hh<0) hh+=360; }
+  return [hh, mx ? d/mx : 0, mx]; };
+const hsvToRgb = (hh,s,v)=>{ const c=v*s, x=c*(1-Math.abs((hh/60)%2-1)), m=v-c; let r,g,b;
+  if (hh<60) [r,g,b]=[c,x,0]; else if (hh<120) [r,g,b]=[x,c,0]; else if (hh<180) [r,g,b]=[0,c,x];
+  else if (hh<240) [r,g,b]=[0,x,c]; else if (hh<300) [r,g,b]=[x,0,c]; else [r,g,b]=[c,0,x];
+  return [(r+m)*255,(g+m)*255,(b+m)*255]; };
+const isHex = s => /^#?[0-9a-f]{6}$/i.test(String(s||"").trim());
+const normHex = s => "#"+String(s).trim().replace("#","").toUpperCase();
+
+let discImage = null;                       // one painted disc, shared by every wheel
+function paintDisc(cv){
+  if (!discImage){
+    const N=cv.width, R=N/2, ctx=cv.getContext("2d"), img=ctx.createImageData(N,N), d=img.data;
+    for (let y=0;y<N;y++) for (let x=0;x<N;x++){
+      const dx=x-R+.5, dy=y-R+.5, r=Math.hypot(dx,dy), i=(y*N+x)*4;
+      if (r>R) continue;
+      const [rr,gg,bb]=hsvToRgb((Math.atan2(dy,dx)*180/Math.PI+360)%360, Math.min(1,r/R), 1);
+      d[i]=rr; d[i+1]=gg; d[i+2]=bb; d[i+3]= r>R-1.5 ? Math.round(255*(R-r)/1.5) : 255;
+    }
+    discImage = img;
+  }
+  cv.getContext("2d").putImageData(discImage,0,0);
+}
+
+const WHEELS = {};
+function ColourWheel(mount, key){
+  const root = document.createElement("div");
+  root.innerHTML = `
+    <button type="button" class="cw-chip" aria-expanded="false"><span class="cw-sw"></span><span class="cw-hex"></span><span class="cw-caret"></span></button>
+    <div class="cw-pop" hidden>
+      <div class="cw-disc"><canvas width="368" height="368"></canvas><span class="cw-shade"></span>
+        <span class="cw-knob" tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="360"></span></div>
+      <div class="cw-side">
+        <label class="cw-l1"></label><input type="range" class="cw-val" min="0" max="100" step="1">
+        <label class="cw-l2"></label><input type="text" class="cw-hexin" maxlength="7" spellcheck="false" autocomplete="off" inputmode="text">
+      </div></div>`;
+  mount.appendChild(root);
+  const q = s => root.querySelector(s);
+  const chip=q(".cw-chip"), pop=q(".cw-pop"), disc=q(".cw-disc"), cv=q("canvas"), shade=q(".cw-shade"),
+        knob=q(".cw-knob"), val=q(".cw-val"), hexin=q(".cw-hexin");
+  let hsv=[0,0,1], hex="#FFFFFF", painted=false, dragging=false;
+
+  function paint(fromInput){
+    hex = toHex(hsvToRgb(hsv[0],hsv[1],hsv[2])).toUpperCase();
+    q(".cw-sw").style.background = hex;
+    q(".cw-hex").textContent = hex;
+    const a = hsv[0]*Math.PI/180, r = hsv[1]*50;
+    knob.style.left = (50 + Math.cos(a)*r) + "%";
+    knob.style.top  = (50 + Math.sin(a)*r) + "%";
+    knob.style.background = hex;
+    knob.setAttribute("aria-valuenow", Math.round(hsv[0]));
+    knob.setAttribute("aria-valuetext", hex);
+    shade.style.opacity = Math.min(.5, 1 - hsv[2]);   // never shade the disc past half, or dark picks show a black circle
+    val.value = Math.round(hsv[2]*100);
+    val.style.background = `linear-gradient(90deg,#000,${toHex(hsvToRgb(hsv[0],hsv[1],1))})`;
+    if (!fromInput){ hexin.value = hex; hexin.classList.remove("bad"); }
+  }
+  function commit(fromInput){ paint(fromInput); onColour(key, hex); }
+
+  function pick(e){
+    const b = disc.getBoundingClientRect(), R = b.width/2;
+    const dx = e.clientX-b.left-R, dy = e.clientY-b.top-R;
+    hsv[0] = (Math.atan2(dy,dx)*180/Math.PI+360)%360;
+    hsv[1] = Math.min(1, Math.hypot(dx,dy)/R);
+    if (hsv[2] < .08) hsv[2] = .8;           // picking a hue on a black disc should show it
+    commit();
+  }
+  disc.addEventListener("pointerdown", e=>{ e.preventDefault(); dragging=true; disc.setPointerCapture(e.pointerId); pick(e); });
+  disc.addEventListener("pointermove", e=>{ if (dragging) pick(e); });
+  ["pointerup","pointercancel"].forEach(t=> disc.addEventListener(t, ()=>{ dragging=false; }));
+
+  knob.addEventListener("keydown", e=>{
+    const step = e.shiftKey ? 15 : 5;
+    const k = {ArrowLeft:[-step,0], ArrowRight:[step,0], ArrowUp:[0,.05], ArrowDown:[0,-.05]}[e.key];
+    if (!k) return;
+    e.preventDefault();
+    hsv[0] = (hsv[0]+k[0]+360)%360;
+    hsv[1] = Math.max(0, Math.min(1, hsv[1]+k[1]));
+    commit();
+  });
+  val.addEventListener("input", ()=>{ hsv[2] = +val.value/100; commit(); });
+  hexin.addEventListener("input", ()=>{
+    if (!isHex(hexin.value)){ hexin.classList.add("bad"); return; }
+    hexin.classList.remove("bad");
+    const keepHue = hsv[0], next = rgbToHsv(hx(normHex(hexin.value)));
+    hsv = next[1] ? next : [keepHue, next[1], next[2]];
+    commit(true);
+  });
+  hexin.addEventListener("blur", ()=> paint());
+
+  chip.addEventListener("click", ()=> toggle(pop.hidden));
+  root.addEventListener("keydown", e=>{ if (e.key==="Escape" && !pop.hidden){ toggle(false); chip.focus(); } });
+  function toggle(open){
+    if (open) Object.values(WHEELS).forEach(w=>{ if (w!==api) w.close(); });
+    pop.hidden = !open;
+    chip.setAttribute("aria-expanded", String(open));
+    if (open && !painted){ paintDisc(cv); painted=true; }
+   
+  }
+
+  const api = {
+    set(v){                                   // external change: artwork default, hydrate, fix button
+      if (!isHex(v)) return;
+      v = normHex(v); if (v === hex) return;
+      const keepHue = hsv[0], next = rgbToHsv(hx(v));
+      hsv = next[1] ? next : [keepHue, next[1], next[2]];
+      paint();
+    },
+    close(){ if (!pop.hidden){ pop.hidden=true; chip.setAttribute("aria-expanded","false"); } },
+    relabel(ar){
+      q(".cw-l1").textContent = ar ? "السطوع" : "Brightness";
+      q(".cw-l2").textContent = ar ? "رمز اللون" : "Colour code";
+      knob.setAttribute("aria-label", ar ? "اختيار اللون" : "Pick a colour");
+      val.setAttribute("aria-label", ar ? "السطوع" : "Brightness");
+    }
+  };
+  WHEELS[key] = api;
+  api.set(state[key] || "#FFFFFF");
+  return api;
+}
+
+/* Wheel changes arrive many times a second; repaint the preview once per frame. */
+let lastSurface = "#000000";
+let renderQueued = 0;
+function queueRender(){ if (renderQueued) return; renderQueued = requestAnimationFrame(()=>{ renderQueued=0; render(); }); }
+function onColour(key, hex){
+  state[key] = hex;
+  if (key==="bgColour"){ paintFades(); $$("#artworks .art-tile").forEach(t=> t.style.backgroundColor = hex); }
+  if (key==="overlayColour") paintOverlays();
+  queueRender(); markDirty();
+}
+function paintFades(){
+  $$("#fades .opt").forEach(b=>{ const f=FADES[b.dataset.v]; if(!f) return;
+    const g=f.css(state.bgColour); b.querySelector(".sw").style.background = g==="none" ? state.bgColour : g; });
+}
+function paintOverlays(){
+  $$("#overlays .opt").forEach(b=>{ const o=OVERLAYS[b.dataset.v]; if(!o) return;
+    const c=rgba(state.overlayColour||"#000",o.v);
+    b.querySelector(".sw").style.backgroundImage = `linear-gradient(${c},${c}),${SWATCH_BG}`; });
+}
+function syncWheels(){
+  const ar = state.uiLang==="ar";
+  Object.entries(WHEELS).forEach(([k,w])=>{ w.set(state[k]); w.relabel(ar); });
+}
+
+/* Nudge a colour toward white or black until it passes 4.5:1, keeping its hue. */
+function readable(fg, bg, target){
+  const toward = lum(bg) < .22 ? "#FFFFFF" : "#000000";
+  let c = fg;
+  for (let i=0; i<30 && contrast(c,bg) < target; i++) c = mixc(c, toward, .07);
+  return c.toUpperCase();
+}
+
+function buildAll(){
+  const ar = state.uiLang==="ar";
+
+  $("#langPick").innerHTML = [["en","English","English"],["ar","العربية","العربية"],["both","Both","الاثنتان"]]
+    .map(([v,en,a])=>`<button class="opt tiny" type="button" data-p="invLang" data-v="${v}" aria-pressed="${state.invLang===v}">
+      <span class="cap">${ar?a:en}</span></button>`).join("");
+
+  $("#styles").innerHTML = STYLES.map(s=>`
+    <button class="sty" type="button" data-p="style" data-v="${s.id}" aria-pressed="${state.style===s.id}">
+      <span class="stycard">${styleThumb(s.id)}</span>
+      <span class="cap">${lbl(s,ar)}</span></button>`).join("");
+
+  $("#fades").innerHTML = Object.entries(FADES).map(([k,f])=>`
+    <button class="opt" type="button" data-p="fade" data-v="${k}" aria-pressed="${state.fade===k}">
+      <span class="sw" style="background:${f.css(state.bgColour)==="none"?state.bgColour:f.css(state.bgColour)}"></span>
+      <span class="cap">${lbl(f,ar)}</span></button>`).join("");
+
+  $("#artworks").innerHTML = ARTWORKS.concat(OWN_ART() ? [artById("own")] : []).map(a=>`
+    <button class="art-tile" type="button" data-p="artwork" data-v="${a.id}" aria-pressed="${state.artwork===a.id}"
+      title="${lbl(a,ar)}" style="background-color:${state.bgColour};background-image:url('${artUrl(a,300)}')"></button>`).join("");
+
+  $("#shapes").innerHTML = Object.entries(SHAPES).map(([k,s])=>`
+    <button class="opt" type="button" data-p="shape" data-v="${k}" aria-pressed="${state.shape===k}">
+      <span class="sw" style="background:var(--panel-2);display:grid;place-items:center">
+        <span style="width:24px;height:24px;background:var(--dim);${
+          k==="circle"?"border-radius:50%":k==="square"?"border-radius:3px":
+          `-webkit-mask-image:${HEART};mask-image:${HEART};-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat`}"></span></span>
+      <span class="cap">${lbl(s,ar)}</span></button>`).join("");
+
+  $("#overlays").innerHTML = Object.entries(OVERLAYS).map(([k,o])=>`
+    <button class="opt" type="button" data-p="overlay" data-v="${k}" aria-pressed="${state.overlay===k}">
+      <span class="sw" style="background:linear-gradient(${rgba(state.overlayColour||"#000",o.v)},${rgba(state.overlayColour||"#000",o.v)}),${SWATCH_BG};background-size:cover"></span>
+      <span class="cap">${lbl(o,ar)}</span></button>`).join("");
+
+  const bkeys = Object.entries(BORDERS).concat(state.customBorder ? [["custom",{label:state.customBorder.label,labelAr:"مخصص",kind:"corner"}]] : []);
+  $("#borders").innerHTML = bkeys.map(([k,b])=>`
+    <button class="opt" type="button" data-p="border" data-v="${k}" aria-pressed="${state.border===k}">
+      <span class="sw${b.kind==="corner"?" corner-thumb":""}" style="color:var(--gold)">${borderThumb(k,b)}</span>
+      <span class="cap">${lbl(b,ar)}</span></button>`).join("");
+
+  const lib = LIBRARY();
+  $("#covers").innerHTML = !lib.length ? "" : COVERS.filter(c=>!c.id || c.id==="none" || c.url).map(c=> c.url ? `
+    <button class="photo" type="button" data-p="coverId" data-v="${c.id}" aria-pressed="${state.coverId===c.id && !state.cover}" title="${lbl(c,ar)}">
+      <img src="${coverUrl(c.url,260)}" alt="${lbl(c,ar)}" loading="lazy" onerror="this.closest('button').remove()"></button>` : `
+    <button class="photo none" type="button" data-p="coverId" data-v="${c.id}" aria-pressed="${state.coverId===c.id && !state.cover}">${lbl(c,ar)}</button>`).join("");
+
+  syncWheels();
+  syncOptions();
+}
+function styleThumb(id){
+  if (id==="colour")   return `<span style="inset:0;background:radial-gradient(120% 88% at 50% 32%,#3A2E52,#1B1526)"></span>
+    <span style="inset:11%;border:1px solid rgba(232,211,169,.6)"></span>`;
+  if (id==="artwork")  return `<span style="inset:0;background-color:#F4EEE3;background-image:url('${artUrl(ARTWORKS[0],200)}');background-size:contain;background-repeat:no-repeat;background-position:center"></span>`;
+  if (id==="portrait") return `<span style="inset:0;background-color:#F4EEE3;background-image:url('${artUrl(ARTWORKS[3],200)}');background-size:contain;background-repeat:no-repeat;background-position:center"></span>
+    <span style="left:50%;top:26%;transform:translate(-50%,-50%);width:44%;aspect-ratio:1;border-radius:50%;background:rgba(228,185,138,.22);box-shadow:0 0 0 2px #E4B98A"></span>`;
+  return `<span style="inset:0;background-image:${SWATCH_BG};background-size:cover"></span>
+    <span style="inset:0;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.72))"></span>`;
+}
+function borderThumb(k,b){
+  if (k==="none") return `<span style="position:absolute;inset:0;display:grid;place-items:center;color:var(--dimmer);font-size:15px">—</span>`;
+  if (b.kind==="frame"){
+    const r = k==="arch" ? "border-radius:50% 50% 0 0/26% 26% 0 0" : "";
+    const inner = k==="rule" ? `<span style="position:absolute;inset:4px;border:1px solid currentColor;opacity:.6"></span>` : "";
+    return `<span style="position:absolute;inset:6px;border:1px solid currentColor;${r}">${inner}</span>`;
+  }
+  const svg = ornSvg(k);
+  return svg;
+}
+
+/* which option groups belong to which style */
+function syncOptions(){
+  const s = state.style;
+  $("#optColour").hidden   = s!=="colour";
+  $("#optBg").hidden       = !(s==="colour" || s==="artwork");
+  $("#optArtwork").hidden  = s!=="artwork";
+  $("#optPhoto").hidden    = s!=="photo";
+  $("#optCover").hidden    = s!=="photo";
+  $("#optBorder").hidden   = !(s==="colour" || s==="photo");
+  $("#optText").hidden     = false;
+  $("#coverLegend").textContent = state.uiLang==="ar" ? "صورة الغلاف" : "Cover photo";
+  $("#covers").hidden = !LIBRARY().length;
+  $("#coverUpTitle").textContent = state.uiLang==="ar" ? "ارفعوا صورتكم" : "Upload your own photo";
+  const ar = state.uiLang==="ar";
+  $("#coupleLegend").textContent  = ar ? "صورتكما معاً (اختياري)" : "Photo of the two of you (optional)";
+  $("#coupleUpTitle").textContent = ar ? "أضيفوا صورتكما معاً" : "Add a photo of the two of you";
+  $("#coupleUpHint").textContent  = ar ? "تظهر أعلى الدعوة. اسحبوا صورة هنا أو اضغطوا للاختيار." : "It sits at the top of your invitation. Drop an image here, or click to choose.";
+  syncCover(); syncCouple(); syncOwnArt();
+ 
+}
+
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-p]"); if (!b) return;
+  const p = b.dataset.p, v = b.dataset.v;
+  if (p==="coverId"){ state.coverId=v; state.cover=""; $("#coverHas").hidden=true; }
+  else if (p==="artwork"){ state.artwork=v; keepTextReadable(); }
+  else if (p==="style"){
+    /* entering a design style: use that design's own text colour, not the last style's */
+    const wasDesign = state.style==="artwork";
+    const isDesign  = v==="artwork";
+    state.style = v;
+    if (isDesign && !wasDesign) keepTextReadable();
+  }
+  else state[p]=v;
+  if (p==="invLang"){ $("#arNames").hidden = v==="en"; $("#tagArWrap").hidden = v==="en"; }
+  buildAll(); render(); markDirty();
+});
+
+$("#fixContrast").addEventListener("click", ()=>{
+  const c = readable(state.textColour, lastSurface, 4.6);
+  state.textColour = c;
+  if (WHEELS.textColour) WHEELS.textColour.set(c);
+  render(); markDirty();
+});
+
+/* If the current text colour can't be read on the background, switch to
+   whichever of ivory or charcoal reads better. Otherwise leave it alone. */
+function keepTextReadable(){
+  if (contrast(state.textColour, state.bgColour) >= 4.5) return;
+  const light="#F4EDE2", dark="#2A2A2E";
+  state.textColour = contrast(light,state.bgColour) >= contrast(dark,state.bgColour) ? light : dark;
+}
+
+/* ═══ FIELDS ═══ */
+function bind(sel,key){
+  const el=$(sel); if(!el) return;
+  const ev = el.type==="checkbox" ? "change":"input";
+  el.addEventListener(ev, ()=>{
+    const v = el.type==="checkbox" ? el.checked : (el.type==="number" ? +el.value : el.value);
+    if (key.includes(".")){ const [a,b]=key.split("."); state[a][b]=v; } else state[key]=v;
+    render(); markDirty();
+  });
+}
+["#f-bride:bride","#f-groom:groom","#f-brideAr:brideAr","#f-groomAr:groomAr",
+ "#f-date:date","#f-time:time","#f-venue:venue","#f-address:address","#f-city:city","#f-map:mapUrl",
+ "#f-tag:tagline","#f-tagAr:taglineAr","#f-dress:dress","#f-slug:slug","#f-private:private",
+ "#r-on:rsvp.on","#r-deadline:rsvp.deadline","#r-count:rsvp.count","#r-max:rsvp.max",
+ "#r-msg:rsvp.msg","#r-phone:rsvp.phone"].forEach(s=>{ const [a,b]=s.split(":"); bind(a,b); });
+$("#f-tag").addEventListener("input", ()=>{ const n=$("#f-tag").value.length; $("#tagCount").textContent = n?`${n}/90`:""; });
+$("#r-on").addEventListener("change", ()=>{ $("#rsvpOpts").hidden=!$("#r-on").checked; });
+$("#r-count").addEventListener("change", ()=>{ $("#maxWrap").hidden=!$("#r-count").checked; });
+
+const slugify = s => String(s).toLowerCase().trim().replace(/[^\p{L}\p{N}]+/gu,"-").replace(/^-+|-+$/g,"").slice(0,48);
+let slugTouched=false;
+$("#f-slug").addEventListener("input", ()=> slugTouched=true);
+function autoSlug(){
+  if (slugTouched) return;
+  const a=state.bride||state.brideAr, b=state.groom||state.groomAr;
+  if(!a && !b) return;
+  state.slug = slugify([a,b].filter(Boolean).join("-"));
+  $("#f-slug").value = state.slug;
+}
+(function(){ const t=new Date(); t.setHours(0,0,0,0); const iso=t.toISOString().slice(0,10);
+  $("#f-date").min=iso; $("#r-deadline").min=iso; })();
+
+/* ═══ IMAGES ═══ */
+const MAX_BYTES=20*1024*1024, MAX_EDGE=1800;
+function processImage(file){
+  return new Promise((res,rej)=>{
+    if (!/^image\//.test(file.type) && !/\.(jpe?g|png|webp|gif|avif)$/i.test(file.name)) return rej(new Error("notimage"));
+    if (file.size>MAX_BYTES) return rej(new Error("toobig"));
+    const url=URL.createObjectURL(file), img=new Image();
+    img.onload=()=>{ try{
+        const s=Math.min(1,MAX_EDGE/Math.max(img.naturalWidth,img.naturalHeight));
+        const w=Math.round(img.naturalWidth*s), h=Math.round(img.naturalHeight*s);
+        const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+        cv.getContext("2d").drawImage(img,0,0,w,h);
+        res(cv.toDataURL("image/jpeg",.84));
+      }catch(e){ rej(new Error("decode")); } finally{ URL.revokeObjectURL(url); } };
+    img.onerror=()=>{ URL.revokeObjectURL(url); rej(new Error("decode")); };
+    img.src=url;
+  });
+}
+/* A couple's own design: kept as PNG so its transparency survives, portrait,
+   and it must actually be transparent — a flat white export would hide their
+   background colour, which is the whole point of the Design style. */
+function processDesign(file){
+  return new Promise((res,rej)=>{
+    if (!/^image\/(png|webp)$/.test(file.type) && !/\.(png|webp)$/i.test(file.name)) return rej(new Error("notpng"));
+    if (file.size>MAX_BYTES) return rej(new Error("toobig"));
+    const url=URL.createObjectURL(file), img=new Image();
+    img.onload=()=>{ try{
+        if (img.naturalHeight / img.naturalWidth < 1.1) return rej(new Error("landscape"));
+        const s=Math.min(1,2000/Math.max(img.naturalWidth,img.naturalHeight));
+        const w=Math.round(img.naturalWidth*s), h=Math.round(img.naturalHeight*s);
+        const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+        const ctx=cv.getContext("2d"); ctx.drawImage(img,0,0,w,h);
+        const px=ctx.getImageData(0,0,w,h).data; let clear=0, n=0;
+        for (let i=3; i<px.length; i+=4*97){ n++; if (px[i]<250) clear++; }
+        if (clear < n*0.08) return rej(new Error("notransparent"));
+        res(cv.toDataURL("image/png"));
+      }catch(e){ rej(new Error("decode")); } finally{ URL.revokeObjectURL(url); } };
+    img.onerror=()=>{ URL.revokeObjectURL(url); rej(new Error("decode")); };
+    img.src=url;
+  });
+}
+function wireDrop(dropSel,inputSel,onFiles){
+  const d=$(dropSel), inp=$(inputSel);
+  d.addEventListener("click",()=>inp.click());
+  inp.addEventListener("change",()=>{ const f=Array.from(inp.files); inp.value=""; onFiles(f); });
+  ["dragenter","dragover"].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();d.classList.add("over");}));
+  ["dragleave","dragend"].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove("over");}));
+  d.addEventListener("drop",e=>{ e.preventDefault(); e.stopPropagation(); d.classList.remove("over");
+    const f=Array.from((e.dataTransfer&&e.dataTransfer.files)||[]); if(f.length) onFiles(f); });
+}
+function dropMessage(sel,code){
+  const d=$(sel), b=d.querySelector("b"), keep=b.textContent, ar=state.uiLang==="ar";
+  const m={toobig:ar?"الصورة أكبر من ٢٠ ميغابايت":"That image is over 20 MB",
+           notimage:ar?"هذا الملف ليس صورة":"That file isn't an image",
+           decode:ar?"تعذّر فتح الصورة — جرّبوا JPG أو PNG":"Couldn't open that image — try a JPG or PNG",
+           upload:ar?"تعذّر رفع الصورة — حاولوا مرة أخرى":"That photo didn't upload — please try again",
+           notsvg:ar?"هذا الملف ليس SVG":"That file isn't an SVG",
+           notpng:ar?"ارفعوا التصميم بصيغة PNG بخلفية شفافة":"Upload your design as a PNG with a transparent background",
+           landscape:ar?"يجب أن يكون التصميم طولياً (٣:٤)":"Your design needs to be portrait (3:4)",
+           notransparent:ar?"لا توجد خلفية شفافة — صدّروه PNG بخلفية شفافة":"This design has no transparent background — export it as a PNG with a transparent background",
+           svgbig:ar?"ملف SVG كبير جداً — بسّطوه إلى أقل من ٦٠ كيلوبايت":"That SVG is too detailed — simplify it to under 60 KB"};
+  b.textContent=m[code]||m.decode; d.style.borderColor="var(--danger)";
+  setTimeout(()=>{ b.textContent=keep; d.style.borderColor=""; },3000);
+}
+wireDrop("#coverDrop","#coverFile", async files=>{
+  if(!files[0]) return;
+  const d=$("#coverDrop"); d.classList.add("busy");
+  try{ state.cover=await processImage(files[0]);
+       handOff("cover",state.cover,files[0].name); buildAll(); render(); markDirty(); }
+  catch(err){ dropMessage("#coverDrop",err.message); }
+  finally{ d.classList.remove("busy"); }
+});
+$("#coverClear").addEventListener("click",e=>{ e.stopPropagation(); state.cover=""; syncCover(); buildAll(); render(); markDirty(); });
+wireDrop("#coupleDrop","#coupleFile", async files=>{
+  if(!files[0]) return;
+  const d=$("#coupleDrop"); d.classList.add("busy");
+  try{ state.couple=await processImage(files[0]);
+       handOff("couple",state.couple,files[0].name); buildAll(); render(); markDirty(); }
+  catch(err){ dropMessage("#coupleDrop",err.message); }
+  finally{ d.classList.remove("busy"); }
+});
+wireDrop("#ownArtDrop","#ownArtFile", async files=>{
+  if(!files[0]) return;
+  const d=$("#ownArtDrop"); d.classList.add("busy");
+  try{ state.ownArt=await processDesign(files[0]); state.artwork="own";
+       handOff("art",state.ownArt,files[0].name); loadArtworkSizes(); keepTextReadable(); buildAll(); render(); markDirty(); }
+  catch(err){ dropMessage("#ownArtDrop",err.message); }
+  finally{ d.classList.remove("busy"); }
+});
+$("#ownArtClear").addEventListener("click",e=>{ e.stopPropagation();
+  state.ownArt=""; if (state.artwork==="own") state.artwork="a1"; syncOwnArt(); buildAll(); render(); markDirty(); });
+$("#coupleClear").addEventListener("click",e=>{ e.stopPropagation(); state.couple=""; syncCouple(); buildAll(); render(); markDirty(); });
+wireDrop("#galDrop","#galFile", async files=>{
+  const d=$("#galDrop"); d.classList.add("busy");
+  for (const f of files.slice(0,12-state.gallery.length)){
+    try{ const u=await processImage(f); state.gallery.push(u); handOff("gallery",u,f.name); }
+    catch(err){ dropMessage("#galDrop",err.message); }
+  }
+  d.classList.remove("busy"); renderThumbs(); render(); markDirty();
+});
+wireDrop("#svgDrop","#svgFile", files=>{
+  const f=files[0]; if(!f) return;
+  if(!/svg/i.test(f.type) && !/\.svg$/i.test(f.name)) return dropMessage("#svgDrop","notsvg");
+  const r=new FileReader();
+  r.onload=()=>{
+    let svg=String(r.result).replace(/<\?xml[\s\S]*?\?>/gi,"").replace(/<!DOCTYPE[\s\S]*?>/gi,"")
+      .replace(/<script[\s\S]*?<\/script>/gi,"").replace(/\son\w+\s*=\s*("[^"]*"|'[^']*')/gi,"").trim();
+    if(!/^<svg/i.test(svg)) return dropMessage("#svgDrop","notsvg");
+    if(svg.length > 60000) return dropMessage("#svgDrop","svgbig");
+    state.customBorder={label:f.name.replace(/\.svg$/i,"").slice(0,14), svg};
+    state.border="custom"; buildAll(); render(); markDirty();
+  };
+  r.onerror=()=>dropMessage("#svgDrop","notsvg");
+  r.readAsText(f);
+});
+function syncOwnArt(){
+  const has = !!state.ownArt;
+  $("#ownArtHas").hidden = !has; $("#ownArtDrop").hidden = has;
+  if (!has) return;
+  if ($("#ownArtThumb").getAttribute("src") !== state.ownArt) $("#ownArtThumb").src = state.ownArt;
+  const ar = state.uiLang==="ar", st = UPSTATE[state.ownArt], el = $("#ownArtStatus");
+  el.className = st==="fail" ? "fail" : "";
+  el.innerHTML = st==="up"   ? (ar ? "جارٍ الرفع…" : "Uploading…")
+               : st==="fail" ? `${ar?"لم يُرفع التصميم":"Didn't upload"} · <button type="button" id="ownArtRetry">${ar?"أعيدوا المحاولة":"Try again"}</button>`
+               : (state.artwork==="own" ? (ar ? "تصميمكم مستخدم" : "Your design is in use") : (ar ? "تصميمكم جاهز — اختاروه من الشبكة" : "Your design is ready — pick it in the grid above"));
+  const rb = $("#ownArtRetry");
+  if (rb) rb.onclick = e => { e.stopPropagation(); retryUpload(state.ownArt); syncOwnArt(); };
+}
+function syncCouple(){
+  const has = !!state.couple;
+  $("#coupleHas").hidden = !has; $("#coupleDrop").hidden = has; $("#shapeField").hidden = !has;
+  if (!has) return;
+  if ($("#coupleThumb").getAttribute("src") !== state.couple) $("#coupleThumb").src = state.couple;
+  const ar = state.uiLang==="ar", st = UPSTATE[state.couple], el = $("#coupleStatus");
+  el.className = st==="fail" ? "fail" : "";
+  el.innerHTML = st==="up"   ? (ar ? "جارٍ الرفع…" : "Uploading…")
+               : st==="fail" ? `${ar?"لم تُرفع الصورة":"Didn't upload"} · <button type="button" id="coupleRetry">${ar?"أعيدوا المحاولة":"Try again"}</button>`
+               : (ar ? "صورتكما مستخدمة" : "Your photo is in use");
+  const rb = $("#coupleRetry");
+  if (rb) rb.onclick = e => { e.stopPropagation(); retryUpload(state.couple); syncCouple(); };
+}
+function syncCover(){
+  const has = !!state.cover; $("#coverHas").hidden = !has;
+  if (!has) return;
+  if ($("#coverThumb").getAttribute("src") !== state.cover) $("#coverThumb").src = state.cover;
+  const ar = state.uiLang==="ar", st = UPSTATE[state.cover], el = $("#coverStatus");
+  el.className = st==="fail" ? "fail" : "";
+  el.innerHTML = st==="up"   ? (ar ? "جارٍ الرفع…" : "Uploading…")
+               : st==="fail" ? `${ar?"لم تُرفع الصورة":"Didn't upload"} · <button type="button" id="coverRetry">${ar?"أعيدوا المحاولة":"Try again"}</button>`
+               : (ar ? "صورتكم مستخدمة" : "Your photo is in use");
+  const rb = $("#coverRetry");
+  if (rb) rb.onclick = e => { e.stopPropagation(); retryUpload(state.cover); syncCover(); };
+}
+function renderThumbs(){
+  const ar = state.uiLang==="ar";
+  $("#galThumbs").innerHTML = state.gallery.map((src,i)=>{
+    const st = UPSTATE[src];
+    const uid = st==="fail" ? Object.keys(PENDING).find(k=>PENDING[k].preview===src) : "";
+    const why = uid && PENDING[uid].reason ? PENDING[uid].reason : "";
+    const badge = st==="up" ? `<span class="st">${ar?"جارٍ الرفع…":"Uploading…"}</span>`
+                : st==="fail" ? `<button type="button" class="st fail" data-retry="${i}" title="${why.replace(/"/g,"")}">${ar?"تعذّر · أعيدوا":"Failed · retry"}</button>` : "";
+    return `<div class="thumb${st==="up"?" up":""}"><img src="${src}" alt="">${badge}<button type="button" data-g="${i}" aria-label="Remove photo">×</button></div>`;
+  }).join("");
+  syncCover(); syncCouple(); syncOwnArt();
+ 
+}
+$("#galThumbs").addEventListener("click",e=>{
+  const r=e.target.closest("[data-retry]"); if(r){ retryUpload(state.gallery[+r.dataset.retry]); return; }
+  const b=e.target.closest("[data-g]"); if(!b) return;
+  state.gallery.splice(+b.dataset.g,1); renderThumbs(); render(); markDirty();
+});
+/* Photos upload one at a time, each re-encoded small enough for a Wix
+   backend call (gallery photos smaller than the cover, since they show
+   small). A failed upload is retried once automatically; after that the
+   thumbnail says so and can be tapped to try again. Only finished uploads
+   (Wix image URLs) are ever saved. */
+const PENDING = {};            // uid → {slot, preview, name, tries, timer, reason}
+const UPSTATE = {};            // preview data URL → "up" | "fail"
+let uploadSeq = 0, UPQ = [], upBusy = false;
+function compactJpeg(dataUrl, edge){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const s=Math.min(1,edge/Math.max(img.naturalWidth,img.naturalHeight));
+      const cv=document.createElement("canvas"); cv.width=Math.round(img.naturalWidth*s); cv.height=Math.round(img.naturalHeight*s);
+      cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+      let q=.8, out=cv.toDataURL("image/jpeg",q);
+      while (out.length>700000 && q>.45){ q-=.07; out=cv.toDataURL("image/jpeg",q); }
+      res(out);
+    };
+    img.onerror=()=>res(dataUrl);
+    img.src=dataUrl;
+  });
+}
+function compactArt(dataUrl){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      let edge=1600, out=dataUrl;
+      for (;;){
+        const s=Math.min(1,edge/Math.max(img.naturalWidth,img.naturalHeight));
+        const cv=document.createElement("canvas"); cv.width=Math.round(img.naturalWidth*s); cv.height=Math.round(img.naturalHeight*s);
+        cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+        out=cv.toDataURL("image/webp",.9);
+        if (!/^data:image\/webp/.test(out)) out=cv.toDataURL("image/png");
+        if (out.length<=1350000 || edge<=800) break;    // the upload limit is about 1 MB
+        edge-=200;
+      }
+      res(out);
+    };
+    img.onerror=()=>res(dataUrl);
+    img.src=dataUrl;
+  });
+}
+function handOff(slot, preview, name){
+  const uid = "u"+(++uploadSeq);
+  PENDING[uid] = {slot, preview, name:String(name||"photo"), tries:0};
+  UPSTATE[preview] = "up";
+  UPQ.push(uid); pumpUploads();
+}
+const stillWanted = p => p.slot==="card" ? cardPending===p.preview : p.slot==="cover" ? state.cover===p.preview : p.slot==="couple" ? state.couple===p.preview
+  : p.slot==="art" ? state.ownArt===p.preview : state.gallery.indexOf(p.preview)>-1;
+async function pumpUploads(){
+  if (upBusy) return;
+  const uid = UPQ.shift(); if (!uid) return;
+  const p = PENDING[uid];
+  if (!p || !stillWanted(p)){ if (p){ delete UPSTATE[p.preview]; delete PENDING[uid]; } return pumpUploads(); }
+  upBusy = true; p.tries++;
+  const dataUrl = p.slot==="card" ? p.preview : p.slot==="art" ? await compactArt(p.preview) : await compactJpeg(p.preview, p.slot==="cover" ? 1600 : 1200);
+  try{ window.parent.postMessage({type:"3orsna:upload",slot:p.slot,uid,name:p.name,dataUrl},"*"); }catch(e){}
+  p.timer = setTimeout(()=>uploadDone(uid, null, "timeout"), 60000);
+}
+function uploadDone(uid, url, reason){
+  const p = PENDING[uid]; if (!p) return;
+  clearTimeout(p.timer); upBusy = false;
+  if (url){
+    delete PENDING[uid]; delete UPSTATE[p.preview];
+    if (p.slot==="cover" && state.cover===p.preview){ state.cover=url; savedCover=url; $("#coverThumb").src=url; }
+    if (p.slot==="couple" && state.couple===p.preview){ state.couple=url; savedCouple=url; $("#coupleThumb").src=url; }
+    if (p.slot==="art" && state.ownArt===p.preview){ state.ownArt=url; savedOwnArt=url; $("#ownArtThumb").src=url; loadArtworkSizes(); syncOwnArt(); buildAll(); }
+    if (p.slot==="gallery"){ const i=state.gallery.indexOf(p.preview); if (i>-1) state.gallery[i]=url; }
+    if (p.slot==="card"){ cardSaved=url; cardPending=""; cardBusy=false; syncCard("saved"); save(true); pumpUploads(); return; }
+    renderThumbs(); render(); markDirty();
+  } else if (p.tries < 2 && stillWanted(p)){
+    UPQ.unshift(uid);                                   // one automatic retry
+  } else {
+    p.reason = String(reason||""); UPSTATE[p.preview] = "fail";
+    if (p.slot==="card"){ delete PENDING[uid]; delete UPSTATE[p.preview]; cardPending=""; cardBusy=false; syncCard("fail"); pumpUploads(); return; }
+    if (p.slot==="cover"){ dropMessage("#coverDrop","upload"); syncCover(); }
+    if (p.slot==="couple") syncCouple();
+    if (p.slot==="art"){ dropMessage("#ownArtDrop","upload"); syncOwnArt(); }
+    renderThumbs();
+  }
+  pumpUploads();
+}
+function retryUpload(preview){
+  const uid = Object.keys(PENDING).find(k=>PENDING[k].preview===preview);
+  if (!uid) return;
+  PENDING[uid].tries = 0; UPSTATE[preview] = "up";
+  UPQ.push(uid); renderThumbs(); pumpUploads();
+}
+
+/* ═══ DATE ═══ */
+function countdown(){
+  if(!state.date) return null;
+  const t=new Date(`${state.date}T${state.time||"19:00"}:00`); if(isNaN(t)) return null;
+  let ms=t-Date.now(); if(ms<=0) return {past:true};
+  const days=Math.floor(ms/86400000); ms-=days*86400000;
+  const hours=Math.floor(ms/3600000); ms-=hours*3600000;
+  return {past:false,days,hours,mins:Math.floor(ms/60000)};
+}
+const LOC = l=> l==="ar" ? "ar-JO":"en-GB";
+function fmtDate(iso,L){ if(!iso) return ""; const d=new Date(iso+"T12:00:00"); if(isNaN(d)) return "";
+  return d.toLocaleDateString(LOC(L),{weekday:"long",day:"numeric",month:"long",year:"numeric"}); }
+function fmtTime(t,L){ if(!t) return ""; const d=new Date(`2000-01-01T${t}:00`); if(isNaN(d)) return t;
+  return d.toLocaleTimeString(LOC(L),{hour:"numeric",minute:"2-digit",hour12:true}); }
+
+/* ═══ RENDER ═══ */
+function render(){
+  autoSlug();
+  const L = state.invLang==="ar" ? "ar":"en", rtl = L==="ar";
+  const inv = $("#inv");
+  const s = state.style;
+
+  /* the surface the text sits on, for contrast checking */
+  const surface = s==="photo" ? mixc("#8A8A8A", state.overlayColour||"#000", OVERLAYS[state.overlay].v)
+    : state.bgColour;
+  const fg = state.textColour;
+  const ratio = contrast(fg, surface);
+  const tooFaint = ratio < 4.5;
+  $("#fixRow").hidden = !tooFaint;
+  lastSurface = surface;
+  if (tooFaint) $("#contrastWarn").textContent = state.uiLang==="ar"
+    ? "قد يصعب قراءة النص الصغير بهذا اللون على هذه الخلفية."
+    : "Smaller text may be hard to read in this colour on this background.";
+
+  inv.dir = rtl ? "rtl":"ltr";
+  const bgBase = s==="photo" ? "#1A1A1A" : state.bgColour;
+  inv.style.cssText = `--bg:${bgBase};--fg:${fg};--ac:${fg};--mu:${rgba(fg,.86)};--ln:${rgba(fg,.42)};--heart:${HEART};--vh:${DEVICES[device].h}px;`;
+
+  const A = (rtl ? (state.brideAr||state.bride) : (state.bride||state.brideAr)) || (rtl?"العروس":"Nour");
+  const B = (rtl ? (state.groomAr||state.groom) : (state.groom||state.groomAr)) || (rtl?"العريس":"Khalid");
+  const joiner = rtl ? "و" : "&";
+  const W = rtl ? {pre:"يسرّنا دعوتكم لحضور زفاف",days:"يوم",hours:"ساعة",mins:"دقيقة",married:"تزوجنا في",
+      gallery:"لحظاتنا",dress:"اللباس",rsvpH:"أكّدوا حضوركم",name:"الاسم الكامل",phone:"رقم الهاتف",
+      count:"عدد الحضور",msg:"رسالة للعروسين",yes:"سأحضر",no:"أعتذر",by:"يرجى الرد قبل",dir:"الاتجاهات",tbc:"التاريخ قريباً",cal:"أضيفوا إلى التقويم",send:"إرسال الرد"}
+    : {pre:"With joy, we invite you to the wedding of",days:"Days",hours:"Hours",mins:"Minutes",married:"Married on",
+      gallery:"Our moments",dress:"Dress code",rsvpH:"Will you be there?",name:"Full name",phone:"Phone number",
+      count:"How many of you",msg:"A note for us",yes:"I'll be there",no:"Sadly, no",by:"Kindly reply by",
+      dir:"Get directions",tbc:"Date to come",cal:"Add to calendar",send:"Send reply"};
+
+  const photo = state.cover || (coverById(state.coverId) ? coverUrl(coverById(state.coverId),1400) : "");
+
+  /* background layers per style */
+  let layer="", fade="";
+  if (s==="colour"){
+    const g = FADES[state.fade].css(state.bgColour);
+    fade = `<div class="fade" style="background:${g==="none"?state.bgColour:g}"></div>`;
+  } else if (s==="artwork"){
+    const art = artById(state.artwork);
+    layer = `<div class="lw"><div class="layer art${art.edges==="repeat"?" rep":""}" style="border-image-source:url('${artUrl(art)}');border-image-slice:${artSlice(art)}"></div></div>`;
+  } else if (s==="photo"){
+    if (photo) layer = `<div class="layer" style="background-image:url('${photo}')"></div>`;
+    const oc = state.overlayColour, v = OVERLAYS[state.overlay].v;
+    if (oc && v) fade = `<div class="fade" style="background:linear-gradient(180deg,${rgba(oc,v*.62)},${rgba(oc,v)} 58%,${rgba(oc,Math.min(1,v*1.25))})"></div>`;
+  }
+
+  /* border vectors — styles 1 and 4 only */
+  let bord = "";
+  if ((s==="colour" || s==="photo") && state.border!=="none"){
+    const def = (state.border==="custom" || !BORDERS[state.border]) ? {kind:"corner"} : BORDERS[state.border];
+    if (def && def.kind==="frame") bord = `<div class="bord bd-${state.border}"></div>`;
+    else {
+      const svg = ornSvg(state.border);
+      if (svg) bord = `<div class="bord corner"><i class="a">${svg}</i><i class="b">${svg}</i></div>`;
+    }
+  }
+
+  /* Optional on every style: the couple's own photo, in their chosen shape. */
+  const portrait = state.couple ? `<div class="port ${state.shape}" style="background-image:url('${state.couple}')"></div>` : "";
+  const tag   = rtl ? (state.taglineAr||state.tagline) : (state.tagline||state.taglineAr);
+  const lift  = s==="photo" ? (lum(fg) > .45 ? " lift-dark" : " lift-light") : "";
+  const stage = (s==="artwork")
+    ? `<div class="stage-bg" style="background-image:url('${artUrl(artById(state.artwork))}')"></div>` : "";
+
+  /* On tablet and desktop the design sits on a slightly deeper stage, so the card reads as a card. */
+  const isDesign = s==="artwork";
+  const heroBg = isDesign ? ` style="background:${darken(state.bgColour,.12)}"` : "";
+  const cardBg = isDesign ? ` style="background:${state.bgColour}"` : "";
+  let html = `<div class="hero s-${s}${lift}"${heroBg}>${stage}<div class="card"${cardBg}>
+    ${layer}${fade}${bord}
+    <div class="body">
+      ${portrait}
+      <p class="pre">${W.pre}</p>
+      <h1 class="names">${esc(A)}<span class="j">${joiner}</span>${esc(B)}</h1>
+      ${tag?`<p class="tag">${esc(tag)}</p>`:""}
+      <div class="rule"></div>
+      <p class="when">${fmtDate(state.date,L)||W.tbc}${state.time?`${rtl?"، الساعة ":" · "}${fmtTime(state.time,L)}`:""}</p>
+      ${(state.venue||state.city||state.address)?`<p class="where">
+        ${state.venue?`<b>${esc(state.venue)}</b>`:""}
+        ${state.address?esc(state.address)+"<br>":""}${esc(state.city)}</p>`:""}
+      ${state.dress?`<p class="where"><small>${W.dress}: ${esc(state.dress)}</small></p>`:""}
+      <div class="acts" inert>${state.mapUrl?`<span class="act">${W.dir}</span>`:""}<span class="act">${W.cal}</span></div>
+    </div></div></div><div class="after">`;
+
+  const cd = countdown();
+  if (cd && cd.past) html += `<div class="married"><b>${W.married} ${fmtDate(state.date,L)}</b></div>`;
+  else if (cd) html += `<div class="cd"><div class="cdi">
+    <div class="u"><b>${cd.days}</b><span>${W.days}</span></div>
+    <div class="u"><b>${String(cd.hours).padStart(2,"0")}</b><span>${W.hours}</span></div>
+    <div class="u"><b>${String(cd.mins).padStart(2,"0")}</b><span>${W.mins}</span></div></div></div>`;
+
+  if (state.gallery.length)
+    html += `<section><h3>${W.gallery}</h3><div class="gal">${state.gallery.slice(0,6).map(x=>`<img src="${x}" alt="">`).join("")}</div></section>`;
+
+  if (state.rsvp.on){
+    const r=state.rsvp;
+    html += `<section><h3>${W.rsvpH}</h3><div class="rsvp" inert>
+      <label>${W.name}</label><input class="ipt" tabindex="-1">
+      ${r.phone?`<label>${W.phone}</label><input class="ipt" tabindex="-1">`:""}
+      ${r.count?`<label>${W.count}</label><select class="ipt" tabindex="-1"><option>1</option></select>`:""}
+      ${r.msg?`<label>${W.msg}</label><textarea class="ipt" rows="2" tabindex="-1"></textarea>`:""}
+      <div class="yn"><button type="button" aria-pressed="true">${W.yes}</button><button type="button" aria-pressed="false">${W.no}</button></div>
+      <button class="send" type="button">${W.send}</button>
+      ${r.deadline?`<p class="deadline">${W.by} ${fmtDate(r.deadline,L)}</p>`:""}</div></section>`;
+  }
+  html += `<div class="foot">${esc(A)} ${joiner} ${esc(B)}</div></div>`;
+
+  inv.innerHTML = html;
+  $("#slugHint").textContent = state.slug ? `${publicBase.replace(/^https?:\/\//,"")}${state.slug}`
+    : (state.uiLang==="ar"?"سيُنشأ من أسمائكم":"We'll build one from your names");
+}
+setInterval(()=>{ if(state.date) render(); },30000);
+
+/* ═══ SAVE ═══ */
+let dirty=false, saveTimer=null;
+function markDirty(){
+  dirty=true; const f=$("#savedFlag"); f.className="saved";
+  f.textContent = state.uiLang==="ar"?"لم يُحفظ":"Unsaved";
+  clearTimeout(saveTimer); saveTimer=setTimeout(()=>save(true),2500);
+}
+/* The preview works from data URLs; the database only ever gets Wix
+   image URLs. Photos still uploading are left out until they land. */
+function payload(){
+  const d = JSON.parse(JSON.stringify(state));
+  const web = u => typeof u === "string" && /^https:\/\//.test(u);
+  d.coverUrl = web(state.cover) ? state.cover
+             : state.cover ? savedCover                     // still uploading: keep the saved one
+             : coverById(state.coverId);                    // the plain Wix address — resized ones are rejected on save
+  d.couplePhotoUrl = web(state.couple) ? state.couple : state.couple ? savedCouple : "";
+  d.ownArtworkUrl = web(state.ownArt) ? state.ownArt : state.ownArt ? savedOwnArt : "";
+  d.galleryUrls = state.gallery.filter(web);
+  if (cardSaved) d.cardImageUrl = cardSaved;                // the invitation image (Premium)
+  delete d.cover; delete d.couple; delete d.gallery; delete d.ownArt; delete d.uiLang;
+  return d;
+}
+function copyText(t){
+  if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(t).catch(()=>fallbackCopy(t)); return; }
+  fallbackCopy(t);
+}
+function fallbackCopy(t){                         // clipboard API is often blocked inside embeds
+  const ta=document.createElement("textarea"); ta.value=t; ta.setAttribute("readonly","");
+  ta.style.cssText="position:absolute;left:-9999px;top:0"; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); }catch(e){} ta.remove();
+}
+function save(silent){
+  if (!loaded) return;                                // never save before this couple's wedding has loaded
+  try{ window.parent.postMessage({type:"3orsna:save",auto:!!silent,data:payload()},"*"); }catch(e){}
+  dirty=false; const f=$("#savedFlag"); f.className="saved on";
+  f.textContent = state.uiLang==="ar"?"تم الحفظ":"Saved";
+  setTimeout(()=>{ if(!dirty) f.textContent=""; },2600);
+}
+$("#saveBtn").onclick=()=>save(false);
+function publish(){
+  if (!loaded || publishing) return;
+  if(!state.slug){ goto(4); $("#f-slug").focus(); showPub("bad","needSlug"); return; }
+  publishing = true;
+  clearTimeout(saveTimer); dirty = false;             // the publish itself saves everything — no separate save racing it
+  showPub("busy");
+  try{ window.parent.postMessage({type:"3orsna:publish",data:payload()},"*"); }catch(e){ publishing=false; showPub("bad","generic"); }
+}
+$("#pubBtn").onclick=publish; $("#pubBtn2").onclick=publish;
+
+/* ═══ INVITATION AS AN IMAGE (Premium) ═══
+   The card (the top of the invitation, phone layout) as a JPG: the couple can
+   download it to see exactly what guests get, and it's uploaded so WhatsApp
+   invitations can send it. Refreshed automatically each time a Premium couple
+   publishes. html-to-image is only loaded when it's needed. */
+let premium = true, cardSaved = "", cardLocal = "", cardPending = "", cardBusy = false;
+const H2I_URL = "https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js";
+function loadH2I(){
+  if (window.htmlToImage) return Promise.resolve();
+  return new Promise((res, rej)=>{ const sc=document.createElement("script"); sc.src=H2I_URL; sc.onload=()=>res(); sc.onerror=()=>rej(new Error("lib")); document.head.appendChild(sc); });
+}
+const nextFrame = () => new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+function setPreviewDevice(d){
+  device=d; $("#device").className="device "+d; document.body.classList.toggle("wideview", d!=="phone");
+  $$("#devSeg button").forEach(x=>x.setAttribute("aria-pressed", x.dataset.d===d?"true":"false"));
+  fitPreview(); render();
+}
+async function makeCard(){
+  await loadH2I();
+  const before = device;
+  if (before!=="phone"){ setPreviewDevice("phone"); await nextFrame(); }
+  try{
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    const hero = $("#inv .hero"); if (!hero) throw new Error("noHero");
+    const opts = { pixelRatio: 1080 / Math.max(1, hero.offsetWidth), backgroundColor: state.bgColour || "#14110C", cacheBust: false,
+                   filter: n => !(n.classList && n.classList.contains("acts")) };   // buttons (directions, calendar) don't belong in a picture
+    try{ await htmlToImage.toJpeg(hero, Object.assign({quality:.5}, opts)); }catch(e){}   // first pass loads fonts and images (Safari needs it)
+    let q=.9, out=await htmlToImage.toJpeg(hero, Object.assign({quality:q}, opts));
+    while (out.length>1300000 && q>.5){ q-=.1; out=await htmlToImage.toJpeg(hero, Object.assign({quality:q}, opts)); }   // under the 1 MB upload cap
+    if (!/^data:image\/jpeg/.test(out) || out.length<2000) throw new Error("empty");
+    return out;
+  } finally {
+    if (before!=="phone") setPreviewDevice(before);
+  }
+}
+async function saveCardImage(quiet){
+  if (!premium || cardBusy || !loaded) return;
+  cardBusy=true; syncCard(quiet ? "" : "making");
+  try{
+    const jpg = await makeCard();
+    cardLocal = jpg; cardPending = jpg;
+    handOff("card", jpg, (state.slug||"invitation")+"-card.jpg");
+    syncCard("uploading");
+  }catch(e){ cardBusy=false; syncCard(quiet ? "" : "makeFail"); }
+}
+function syncCard(stage){
+  const ar = state.uiLang==="ar";
+  $("#cardH").textContent = ar ? "دعوتكم كصورة" : "Your invitation as an image";
+  $("#cardHint").textContent = !premium
+    ? (ar ? "مع الباقة المميزة: احفظوا دعوتكم كصورة لتروا شكلها قبل إرسالها، وتُرسل مع دعوات واتساب."
+          : "With Premium: save your invitation as a JPG to see exactly how it looks before you send it. It's the image your guests receive on WhatsApp.")
+    : (ar ? "هذه الصورة تُرسل مع دعوات واتساب. تتحدّث تلقائياً كلما نشرتم الصفحة."
+          : "This is the image your guests receive with their WhatsApp invitation. It updates automatically each time you publish.");
+  const src = cardLocal || cardSaved;
+  $("#cardPrev").hidden = !src; if (src && $("#cardImg").getAttribute("src")!==src) $("#cardImg").src = src;
+  const b=$("#cardBtn");
+  b.disabled = !premium || cardBusy;
+  b.textContent = cardBusy ? (ar ? "جارٍ التجهيز…" : "Preparing…") : (src ? (ar ? "تحديث الصورة" : "Update image") : (ar ? "حفظ الدعوة كصورة" : "Save invitation as image"));
+  const dl=$("#cardDl"); dl.hidden = !src || !premium; dl.href = src || "#"; dl.textContent = ar ? "تنزيل JPG" : "Download JPG";
+  const msg = { making: ar?"جارٍ تحويل الدعوة إلى صورة…":"Turning your invitation into an image…",
+                uploading: ar?"جارٍ الحفظ…":"Saving…",
+                saved: ar?"تم حفظ الصورة. هذه ما سيصل لضيوفكم.":"Image saved — this is what your guests will receive.",
+                makeFail: ar?"تعذّر إنشاء الصورة. حاولوا مرة أخرى.":"We couldn't create the image. Try again.",
+                fail: ar?"تعذّر حفظ الصورة. حاولوا مرة أخرى.":"The image didn't save. Try again." }[stage] || "";
+  const st=$("#cardSt"); st.textContent = msg; st.className = "cardst" + (stage==="makeFail"||stage==="fail" ? " bad" : "");
+}
+$("#cardBtn").onclick = ()=> saveCardImage(false);
+
+$("#copyBtn").onclick=async()=>{
+  copyText(`${publicBase}${encodeURIComponent(state.slug||"")}`);
+  const b=$("#copyBtn"),k=b.textContent;
+  b.textContent = state.uiLang==="ar"?"تم النسخ":"Copied";
+  setTimeout(()=>b.textContent=k,1600);
+};
+
+/* ═══ NAV ═══ */
+$("#prevBtn").onclick=()=>goto(step-1);
+$("#nextBtn").onclick=()=>goto(step+1);
+$("#langBtn").onclick=()=>{ state.uiLang = state.uiLang==="ar"?"en":"ar";
+  try{ localStorage.setItem("3orsna:uiLang",state.uiLang); }catch(e){}
+  applyLang(); render(); syncCard(""); };
+$("#devSeg").addEventListener("click",e=>{
+  const b=e.target.closest("[data-d]"); if(!b) return;
+  device=b.dataset.d;
+  $$("#devSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));
+  $("#device").className="device "+device;
+  document.body.classList.toggle("wideview", device!=="phone");
+  requestAnimationFrame(fitPreview);
+});
+new ResizeObserver(fitPreview).observe($("#screen"));
+
+/* ═══ HYDRATE ═══ */
+/* Back to an empty invitation, keeping only the interface language. */
+function resetState(){
+  const lang = state.uiLang;
+  Object.keys(state).forEach(k=>{ delete state[k]; });
+  Object.assign(state, JSON.parse(JSON.stringify(BLANK)));
+  state.uiLang = lang; state.date = defaultDate();
+  savedCouple = ""; savedCover = ""; savedOwnArt = ""; slugTouched = false;
+  dirty = false; clearTimeout(saveTimer);
+}
+function hydrate(data){
+  if(!data||typeof data!=="object") return;
+  /* The database stores coverUrl / galleryUrls; the builder works in cover / gallery. */
+  /* "Design + photo" is now Design with an optional couple photo. */
+  if (data.style === "portrait"){
+    data.style = "artwork";
+    if (!data.couplePhotoUrl && data.coverUrl && !/images\.unsplash\.com/.test(data.coverUrl)) data.couplePhotoUrl = data.coverUrl;
+    data.coverUrl = "";
+  }
+  if (typeof data.couplePhotoUrl === "string" && !/images\.unsplash\.com/.test(data.couplePhotoUrl)){
+    data.couple = data.couplePhotoUrl; savedCouple = data.couplePhotoUrl;
+  }
+  if (typeof data.coverUrl === "string" && /images\.unsplash\.com/.test(data.coverUrl)){
+    data.coverUrl = ""; data.coverId = "none";             // old stock photos no longer exist
+  }
+  if (typeof data.coverUrl === "string"){
+    const lib = COVERS.find(c=>c.url && data.coverUrl.indexOf(c.url)===0);
+    if (lib){ data.coverId = lib.id; data.cover = ""; } else data.cover = data.coverUrl;
+    savedCover = data.coverUrl;
+  }
+  if (Array.isArray(data.galleryUrls)) data.gallery = data.galleryUrls.slice(0,12);
+  if (typeof data.ownArtworkUrl === "string"){ data.ownArt = data.ownArtworkUrl; savedOwnArt = data.ownArtworkUrl; }
+  /* drafts saved before the wheel may hold "" for "no overlay" — strength handles that now */
+  ["bgColour","overlayColour","textColour"].forEach(k=>{ if (data[k]!==undefined && !isHex(data[k])) delete data[k]; });
+  Object.keys(state).forEach(k=>{
+    if(data[k]===undefined) return;
+    if(k==="rsvp") Object.assign(state.rsvp,data.rsvp||{}); else state[k]=data[k];
+  });
+  const map={"#f-bride":"bride","#f-groom":"groom","#f-brideAr":"brideAr","#f-groomAr":"groomAr",
+    "#f-date":"date","#f-time":"time","#f-venue":"venue","#f-address":"address","#f-city":"city",
+    "#f-map":"mapUrl","#f-tag":"tagline","#f-tagAr":"taglineAr","#f-dress":"dress","#f-slug":"slug",
+    "#r-deadline":"rsvp.deadline","#r-max":"rsvp.max"};
+  Object.entries(map).forEach(([sel,key])=>{
+    const el=$(sel); if(!el) return;
+    el.value = key.includes(".") ? state[key.split(".")[0]][key.split(".")[1]] : state[key];
+  });
+  $("#f-private").checked=!!state.private;
+  ["on","count","msg","phone"].forEach(k=>{ const el=$("#r-"+k); if(el) el.checked=!!state.rsvp[k]; });
+  $("#rsvpOpts").hidden=!state.rsvp.on;
+  $("#maxWrap").hidden=!state.rsvp.count;
+  syncCover();
+  if(state.slug) slugTouched=true;
+  $("#arNames").hidden = state.invLang==="en";
+  $("#tagArWrap").hidden = state.invLang==="en";
+  buildAll(); renderThumbs(); render();
+}
+window.addEventListener("message",e=>{
+  const d=e.data; if(!d||typeof d!=="object") return;
+  if(d.type==="3orsna:load"){
+    if (d.publicBase) publicBase = String(d.publicBase);
+    resetState(); hydrate(d.data || {}); loaded = true;   // null = new couple → empty invitation
+    premium = d.data ? d.data.guestListEnabled !== false : true;
+    cardSaved = (d.data && d.data.cardImageUrl) || ""; cardLocal = ""; cardPending = ""; cardBusy = false; syncCard("");
+    pubStatus = (d.data && d.data.status) || "draft"; publishing = false; pubBar = null;
+    applyLang(); render();
+  }
+  if(d.type==="3orsna:saved"){ const f=$("#savedFlag"); f.className="saved on";
+    f.textContent = state.uiLang==="ar"?"تم الحفظ":"Saved";
+    if (d.status) pubStatus = d.status;
+    if (d.wasPublish && publishing){ publishing=false; showPub("ok","",d.publicUrl || (publicBase+encodeURIComponent(state.slug)));
+      if (premium) saveCardImage(true); }                    // keep the WhatsApp image in step with what's published
+    else renderPub();
+  }
+  if((d.type==="3orsna:slugTaken"||d.type==="3orsna:saveFailed") && publishing){
+    publishing=false;
+    if (d.type==="3orsna:slugTaken") goto(4);
+    showPub("bad", d.type==="3orsna:slugTaken" ? "slugTaken" : "generic");
+  }
+  if(d.type==="3orsna:slugTaken"){ const h=$("#slugHint");
+    h.textContent = state.uiLang==="ar"?"هذا العنوان محجوز — جرّبوا غيره":"That address is taken — try another";
+    h.style.color="var(--danger)"; }
+  if(d.type==="3orsna:uploaded" && d.url) uploadDone(d.uid, d.url);
+  if(d.type==="3orsna:uploadFailed") uploadDone(d.uid, null, d.reason);
+  if(d.type==="3orsna:saveFailed"){
+    const f=$("#savedFlag"); f.className="saved"; f.textContent = state.uiLang==="ar"?"تعذّر الحفظ":"Couldn't save";
+  }
+});
+
+/* ═══ BOOT ═══ */
+(function boot(){
+  state.date=defaultDate();
+  $("#f-date").value=state.date;
+  /* Older versions kept a draft in the browser, which leaked between accounts. Remove it. */
+  try{ localStorage.removeItem("3orsna:draft"); }catch(e){}
+  ColourWheel($("#cwBg"), "bgColour");
+  ColourWheel($("#cwOverlay"), "overlayColour");
+  ColourWheel($("#cwText"), "textColour");
+  loadOrnaments();
+  loadArtworkSizes();
+  applyLang(); goto(0); renderThumbs(); syncCard("");
+  render();
+  /* Say "ready" every second until the page answers — the page's listener may
+   attach after this iframe loads, and a single message would be lost. */
+let __answered = false;
+window.addEventListener("message", e => { if (e.data && e.data.type === "3orsna:load") __answered = true; });
+(function ping(n){
+  if (__answered) return;
+  try{ window.parent.postMessage({type:"3orsna:ready"}, "*"); }catch(e){}
+  if (n < 30) setTimeout(() => ping(n + 1), 1000);
+})(0);
+  fitPreview();
+ 
+})();
+</script>
+<div class="pp-safe-space" aria-hidden="true"></div>
+<!-- Pixel Pals iframe auto-height reporter v3 (body is the scroll box).
+     Scrolls inside the iframe until the site-wide listener sizes it.
+     Once the site-wide listener sizes the iframe, there is nothing left to scroll. -->
+<script>
+(function () {
+  if (window.__ppReporter) return;
+  window.__ppReporter = true;
+
+  var s = document.createElement('style');
+  s.textContent =
+    'html{height:100%!important;min-height:0!important;overflow:hidden!important}' +
+    'body{height:100%!important;min-height:0!important;margin:0;overflow-x:hidden!important;overflow-y:auto!important;' +
+      '-webkit-overflow-scrolling:touch;overscroll-behavior:auto;scrollbar-width:none;-ms-overflow-style:none;display:flow-root}' +
+    'html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0;display:none}';
+  document.head.appendChild(s);
+
+  var body = document.body, last = -1, raf = 0;
+
+  // Height of the content itself, not the scroll box (so the iframe can shrink as well as grow)
+  function measure() {
+    var top = body.getBoundingClientRect().top - body.scrollTop;
+    var bottom = 0, kids = body.children;
+    for (var i = 0; i < kids.length; i++) {
+      var r = kids[i].getBoundingClientRect();
+      if (!r.height && !r.width) continue; // hidden, scripts, styles
+      var mb = parseFloat(getComputedStyle(kids[i]).marginBottom) || 0;
+      bottom = Math.max(bottom, r.bottom + mb);
+    }
+    var pb = parseFloat(getComputedStyle(body).paddingBottom) || 0;
+    return Math.ceil(bottom - top + pb);
+  }
+
+  function send(force) {
+    var h = measure();
+    if (!force && h === last) return;
+    last = h;
+    window.parent.postMessage({ type: 'setHeight', height: h }, '*');
+  }
+
+  function schedule() {
+    if (raf) return;
+    raf = requestAnimationFrame(function () { raf = 0; send(false); });
+  }
+
+  // Watch the content (the body itself is now a fixed-size scroll box)
+  var ro = 'ResizeObserver' in window ? new ResizeObserver(schedule) : null;
+  function watchKids() {
+    if (!ro) return;
+    ro.observe(body);
+    for (var i = 0; i < body.children.length; i++) ro.observe(body.children[i]);
+  }
+  watchKids();
+  if ('MutationObserver' in window) {
+    new MutationObserver(function () { watchKids(); schedule(); })
+      .observe(body, { childList: true, subtree: true, attributes: true, characterData: true });
+  }
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', function () { send(true); });
+  document.addEventListener('load', schedule, true);
+  document.addEventListener('transitionend', schedule, true);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { send(true); });
+
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'requestHeight') send(true);
+  });
+
+  [0, 300, 1000, 2500, 5000].forEach(function (t) { setTimeout(function () { send(true); }, t); });
+})();
+</script>
+</body>
+</html>

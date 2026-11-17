@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Venues</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://static.wixstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Mulish:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Pixel Pals build standards ─────────────────────────────────────
+   No visible scrollbars anywhere (everything still scrolls), media never
+   wider than its box, 16px form text on phones so iOS doesn't zoom.
+   Height: the reporter at the end of this file (setHeight → site-wide listener). */
+*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{width:0;height:0;display:none}
+img,video,canvas{max-width:100%}
+@media (max-width:760px){input,select,textarea{font-size:16px!important}}
+
+  :root {
+    color-scheme: dark;
+    --bg:            #0C0C0B;
+    --surface:       #141413;
+    --field:         #181713;
+    --field-hover:   #1E1C19;
+    --border:        #383733;
+    --border-quiet:  #262625;
+    --gold:          #AA936F;
+    --gold-tint:     rgba(170,147,111,0.10);
+    --gold-line:     rgba(170,147,111,0.28);
+    --gold-soft:     #C4B091;
+    --text:          #FFFFFF;
+    --body:          #ADADAD;
+    --label:         #A8A7A3;
+    --placeholder:   #8C8C8B;
+    --danger:        #C4705A;
+    --danger-tint:   #241713;
+    --r-field:       8px;
+    --r-card:        12px;
+    --font-display:  "Playfair Display", Georgia, serif;
+    --font-body:     "Mulish", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .wrap { max-width: 1050px; margin: 0 auto; padding: 4px 0 40px; }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 34px;
+    line-height: 1.15;
+    margin: 0 0 6px;
+  }
+
+  fieldset { border: 0; margin: 0 0 34px; padding: 0; }
+
+  legend {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--label);
+    margin: 0 0 14px;
+    padding: 0;
+  }
+
+  .req { color: var(--gold); margin-left: 3px; font-style: normal; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px 20px; }
+  .span-all { grid-column: 1 / -1; }
+
+  label.field { display: block; }
+
+  label.field > span.txt {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--label);
+    margin: 0 0 8px;
+  }
+
+  input[type="text"], input[type="tel"], input[type="email"], textarea {
+    width: 100%;
+    background: var(--field);
+    border: 1px solid var(--border);
+    border-radius: var(--r-field);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    padding: 12px 14px;
+    min-height: 45px;
+    transition: border-color 140ms ease, background 140ms ease;
+  }
+
+  textarea { min-height: 108px; resize: vertical; line-height: 1.65; }
+  input::placeholder, textarea::placeholder { color: var(--placeholder); }
+  input:hover, textarea:hover { background: var(--field-hover); }
+
+  input:focus-visible, textarea:focus-visible,
+  .chip:focus-visible, button:focus-visible {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(170,147,111,0.22);
+  }
+
+  .hint { font-style: normal; display: block; font-size: 13px; color: var(--placeholder); margin: 7px 0 0; line-height: 1.5; }
+
+  /* Chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; }
+  .chip {
+    background: var(--field);
+    border: 1px solid var(--border-quiet);
+    border-radius: 999px;
+    color: var(--placeholder);
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 8px 16px;
+    transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+  }
+  .chip:hover { color: var(--gold-soft); border-color: var(--border); }
+  .chip[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #1A1509; font-weight: 600; }
+  .chip .n { opacity: 0.75; margin-left: 5px; font-variant-numeric: tabular-nums; }
+
+  /* Blocked / empty state */
+  .empty {
+    background: var(--surface);
+    border: 1px solid var(--border-quiet);
+    border-radius: var(--r-card);
+    padding: 22px;
+  }
+  .empty h2 {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 400;
+    margin: 0 0 8px;
+  }
+  .empty p { font-size: 15px; line-height: 1.65; color: var(--placeholder); margin: 0 0 16px; }
+  .empty p:last-child { margin-bottom: 0; }
+  .empty a {
+    background: rgba(170,147,111,0.12);
+    border: 1px solid rgba(170,147,111,0.40);
+    border-radius: var(--r-field);
+    color: var(--gold);
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 13px 30px;
+    text-decoration: none;
+  }
+  .empty a:hover { background: rgba(170,147,111,0.18); }
+
+  button.primary {
+    border-radius: var(--r-field);
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    padding: 13px 30px;
+    background: var(--gold); border: 1px solid var(--gold); color: var(--text);
+    transition: filter 140ms ease;
+  }
+  button.primary:hover { filter: brightness(1.08); }
+
+  /* Status + errors */
+  .status {
+    border-radius: var(--r-card);
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 22px 0 0;
+    padding: 13px 16px;
+  }
+  .status.ok   { background: rgba(170,147,111,0.12); border: 1px solid rgba(170,147,111,0.40); color: var(--gold-soft); }
+  .status.err  { background: var(--danger-tint); border: 1px solid rgba(196,112,90,0.45); color: var(--danger); }
+  .status.busy { background: var(--surface); border: 1px solid var(--border-quiet); color: var(--label); }
+
+  .err-msg { font-style: normal; display: block; font-size: 13px; color: var(--danger); margin: 7px 0 0; }
+  .invalid input, .invalid textarea { border-color: var(--danger); }
+
+  .sr {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  [hidden] { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+
+  /* Select */
+  select {
+    width: 100%; background: var(--field);
+    border: 1px solid var(--border); border-radius: var(--r-field);
+    color: var(--text); font-family: var(--font-body); font-size: 15px;
+    padding: 12px 38px 12px 14px; min-height: 45px; appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238E8E8B' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+    transition: border-color 140ms ease, background-color 140ms ease;
+  }
+  select:hover { background-color: var(--field-hover); }
+  select:focus-visible { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(170,147,111,0.22); }
+
+  /* Sticky save bar */
+  .savebar {
+    position: sticky; bottom: 0; z-index: 5;
+    background: var(--bg);
+    border-top: 1px solid var(--border-quiet);
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+    margin-top: 34px; padding: 16px 0;
+  }
+  .savebar .spacer { flex: 1 1 auto; }
+  .dirty { font-size: 13px; color: var(--placeholder); }
+  .dirty b { color: var(--gold); font-weight: 600; }
+
+  button.primary .spin {
+    display: none; width: 14px; height: 14px; margin-right: 9px;
+    border: 2px solid rgba(255,255,255,0.35); border-top-color: var(--text);
+    border-radius: 50%; vertical-align: -2px;
+  }
+  button.primary.busy .spin { display: inline-block; }
+  button.primary.busy { pointer-events: none; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes spin { to { transform: rotate(360deg); } }
+    button.primary .spin { animation: spin 700ms linear infinite; }
+  }
+
+  /* Tabs */
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 26px; }
+  .tab {
+    background: var(--field); border: 1px solid var(--border-quiet);
+    border-radius: 999px; color: var(--placeholder); cursor: pointer;
+    font-family: var(--font-body); font-size: 14px; font-weight: 600;
+    padding: 9px 17px;
+    transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+  }
+  .tab:hover { color: var(--gold-soft); border-color: var(--border); }
+  .tab[aria-selected="true"] { background: var(--gold); border-color: var(--gold); color: #1A1509; }
+  .tab .n { opacity: 0.75; margin-left: 5px; font-variant-numeric: tabular-nums; }
+  .tab .dot {
+    display: inline-block; min-width: 18px; height: 18px; border-radius: 999px; margin-left: 6px;
+    background: var(--gold); color: #1A1509; font-size: 11px; line-height: 18px; text-align: center; padding: 0 5px;
+  }
+  .tab[aria-selected="true"] .dot { background: #1A1509; color: var(--gold); }
+
+  .flags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+  .flags .state {
+    border-radius: 999px; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 10px;
+  }
+  .flags .state.live    { background: var(--gold-tint); border: 1px solid var(--gold-line); color: var(--gold); }
+  .flags .state.pending { background: var(--field); border: 1px solid var(--border-quiet); color: var(--placeholder); }
+
+  .act {
+    border-radius: var(--r-field); cursor: pointer; white-space: nowrap;
+    font-family: var(--font-body); font-size: 13px; font-weight: 600; padding: 9px 15px;
+    text-decoration: none; display: inline-block;
+    transition: filter 140ms ease, background 140ms ease, border-color 140ms ease;
+  }
+  .act.go   { background: var(--gold); border: 1px solid var(--gold); color: #1A1509; }
+  .act.go:hover { filter: brightness(1.08); }
+  .act.q    { background: transparent; border: 1px solid var(--border); color: var(--body); }
+  .act.q:hover { border-color: var(--gold); color: var(--gold); }
+  .act[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+  .rowmsg { font-size: 13px; line-height: 1.5; margin: 12px 0 0; }
+  .rowmsg.ok { color: var(--gold-soft); }
+  .rowmsg.err { color: var(--danger); }
+
+  /* Header */
+  .top { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; margin: 0 0 26px; }
+  .top .who { flex: 1 1 240px; min-width: 0; }
+  .top h1 { margin: 0 0 4px; }
+  .top .sub { font-size: 14px; color: var(--placeholder); margin: 0; line-height: 1.6; }
+  a.newbtn {
+    background: var(--gold); border: 1px solid var(--gold); border-radius: var(--r-field);
+    color: #1A1509; font-size: 15px; font-weight: 600;
+    padding: 12px 22px; text-decoration: none; white-space: nowrap;
+    transition: filter 140ms ease;
+  }
+  a.newbtn:hover { filter: brightness(1.08); }
+
+  /* Stat strip */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 0 0 26px; }
+  .stats > div {
+    background: var(--surface); border: 1px solid var(--border-quiet);
+    border-radius: var(--r-field); padding: 14px 16px;
+  }
+  .stats .n { font-family: var(--font-display); font-size: 26px; line-height: 1; }
+  .stats .n.alert { color: var(--gold); }
+  .stats .k {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.13em;
+    text-transform: uppercase; color: var(--placeholder); margin: 7px 0 0;
+  }
+
+  /* Enquiries */
+  .etools { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; margin: 0 0 16px; }
+  .etools select { width: auto; min-width: 180px; margin-left: auto; min-height: 40px; padding-top: 9px; padding-bottom: 9px; font-size: 14px; }
+  .enq { background: var(--surface); border: 1px solid var(--border-quiet); border-radius: var(--r-card); margin: 0 0 12px; padding: 16px; }
+  .enq.unread { border-color: var(--gold-line); }
+  .enq-top { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; }
+  .enq-main { flex: 1 1 240px; min-width: 0; }
+  .enq-name { font-family: var(--font-display); font-size: 19px; line-height: 1.25; }
+  .enq-for { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 3px; }
+  .enq-meta { font-size: 13px; color: var(--placeholder); line-height: 1.6; margin-top: 6px; }
+  .enq-contact { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+  .enq-contact a {
+    background: transparent; border: 1px solid var(--border); border-radius: var(--r-field);
+    color: var(--gold-soft); font-size: 13px; font-weight: 600;
+    padding: 8px 14px; text-decoration: none; white-space: nowrap; overflow-wrap: anywhere;
+  }
+  .enq-contact a:hover { border-color: var(--gold); color: var(--gold); }
+  .enq-acts { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+  .enq-acts select { width: auto; min-width: 150px; min-height: 40px; padding: 8px 36px 8px 12px; font-size: 14px; font-weight: 600; }
+  .enq-acts select.s-new       { border-color: var(--gold); color: var(--gold-soft); }
+  .enq-acts select.s-booked    { border-color: var(--gold-line); color: var(--text); }
+  .enq-acts select.s-declined  { color: var(--placeholder); }
+  .enq-when { font-size: 12px; color: var(--placeholder); }
+  @media (max-width: 560px) {
+    .enq-acts { flex-direction: row; align-items: center; width: 100%; justify-content: space-between; }
+    .etools select { margin-left: 0; width: 100%; }
+  }
+
+  /* Venue row */
+  .vrow {
+    background: var(--surface); border: 1px solid var(--border-quiet);
+    border-radius: var(--r-card); margin: 0 0 12px; padding: 16px;
+  }
+  .vrow.busy { opacity: 0.55; pointer-events: none; }
+  .vrow-top { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+  .vthumb { flex: 0 0 auto; width: 104px; height: 78px; border-radius: 8px; background: var(--field); overflow: hidden; }
+  .vthumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .vthumb.none { display: grid; place-items: center; color: var(--border); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .vmain { flex: 1 1 220px; min-width: 0; }
+  .vname { font-family: var(--font-display); font-size: 20px; line-height: 1.25; overflow-wrap: break-word; }
+  .vmeta { font-size: 13px; color: var(--placeholder); line-height: 1.55; margin-top: 5px; }
+  .vacts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+  /* Visibility switch */
+  button.vis {
+    background: transparent; border: 0; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 9px;
+    font-family: var(--font-body); font-size: 13px; font-weight: 600;
+    color: var(--placeholder); padding: 6px 2px; white-space: nowrap;
+  }
+  button.vis .track {
+    width: 40px; height: 22px; border-radius: 999px;
+    background: var(--field); border: 1px solid var(--border);
+    position: relative; transition: background 140ms ease, border-color 140ms ease;
+  }
+  button.vis .track::after {
+    content: ""; position: absolute; top: 3px; left: 3px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--placeholder);
+    transition: transform 140ms ease, background 140ms ease;
+  }
+  button.vis[aria-checked="true"] { color: var(--gold); }
+  button.vis[aria-checked="true"] .track { background: var(--gold-tint); border-color: var(--gold); }
+  button.vis[aria-checked="true"] .track::after { transform: translateX(18px); background: var(--gold); }
+  button.vis:focus-visible .track { box-shadow: 0 0 0 3px rgba(170,147,111,0.22); }
+  button.vis[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+  .gaps {
+    background: var(--danger-tint); border: 1px solid rgba(196,112,90,0.45);
+    border-radius: var(--r-field); color: var(--danger);
+    font-size: 13px; line-height: 1.55; margin: 12px 0 0; padding: 10px 13px;
+  }
+
+  /* Quick-add strip */
+  .quickadd {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+    background: var(--surface); border: 1px solid var(--border-quiet);
+    border-radius: var(--r-card); margin: 0 0 26px; padding: 14px 16px;
+  }
+  .quickadd .lbl {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.13em;
+    text-transform: uppercase; color: var(--placeholder); margin-right: 4px;
+  }
+  .quickadd a {
+    background: var(--gold-tint); border: 1px solid var(--gold-line);
+    border-radius: var(--r-field); color: var(--gold);
+    font-size: 14px; font-weight: 600; padding: 9px 16px;
+    text-decoration: none; white-space: nowrap;
+    transition: background 140ms ease;
+  }
+  .quickadd a:hover { background: rgba(170,147,111,0.18); }
+  .quickadd .note { font-size: 12px; color: var(--placeholder); flex-basis: 100%; line-height: 1.55; }
+
+  .how {
+    background: var(--surface); border: 1px solid var(--border-quiet);
+    border-radius: var(--r-card); margin: 0 0 18px; padding: 16px 18px;
+    font-size: 14px; line-height: 1.7; color: var(--body);
+  }
+  .how b { color: var(--gold-soft); font-weight: 600; }
+</style>
+<style id="pp-layout">
+/* ── Pixel Pals layout safeguards ─────────────────────────────────────
+   Transparent page so the Wix section shows through seamlessly, sturdy form
+   controls on phones, long words wrap instead of widening the page, and a
+   safety space at the end so nothing is ever cut off. */
+html,body{background:transparent!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-wrap:break-word}
+input,select,textarea,button{max-width:100%}
+table{max-width:100%}
+/* iOS draws date fields wider and taller than other inputs; make them behave. */
+input[type=date],input[type=time],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;display:block}
+input[type=date]::-webkit-date-and-time-value{text-align:start;min-height:1.4em}
+/* Save bars sit in the flow: a sticky bar needs a solid background, and the page has none. */
+.savebar{position:static!important;background:transparent!important}
+/* Width: 80% of the frame on wide screens, never narrower than before (1050px). */
+.wrap{width:max(80%, min(100%, 1050px))!important;max-width:none!important;margin-left:auto!important;margin-right:auto!important}
+@media (max-width:1100px){.wrap{padding-left:20px!important;padding-right:20px!important}}
+@media (max-width:600px){.wrap{padding-left:14px!important;padding-right:14px!important}}
+/* Safety space under the content (counted by the height reporter). */
+.pp-safe-space{display:block;height:140px}
+@media (max-width:760px){.pp-safe-space{height:calc(180px + env(safe-area-inset-bottom, 0px))}}
+</style>
+<style id="contact-card">
+  /* ---------- Account: contact card on venue pages ---------- */
+  .ppic { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin: 0 0 22px; }
+  .ppic-img { width: 84px; height: 84px; border-radius: 50%; background: var(--field) center/cover no-repeat; border: 1px solid var(--border); flex: 0 0 auto;
+              display: grid; place-items: center; color: var(--placeholder); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+  .ppic-acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .ppic-st { font-size: 13px; color: var(--placeholder); }
+  .ppic-st.err { color: var(--danger); }
+  .showset { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+  .showopt { display: flex; align-items: center; gap: 10px; background: var(--field); border: 1px solid var(--border-quiet);
+             border-radius: var(--r-field); padding: 12px 14px; font-size: 15px; cursor: pointer; color: var(--text); }
+  .showopt input { width: 18px; height: 18px; accent-color: var(--gold); margin: 0; flex: 0 0 auto; }
+  .showopt em { font-style: normal; font-size: 12px; color: var(--placeholder); margin-left: auto; }
+  .showopt.fixed { cursor: default; opacity: .8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="who">
+      <h1 id="hello">Your Venues</h1>
+      <p class="sub" id="sub">Loading&hellip;</p>
+    </div>
+    <a class="newbtn" id="addVenue" href="#" target="_top" hidden>+ Add venue</a>
+  </div>
+
+  <div class="empty" id="blocked" hidden>
+    <h2 id="blockedTitle">One thing first</h2>
+    <p id="blockedBody"></p>
+    <a id="blockedAction" href="#" target="_top">Continue</a>
+  </div>
+
+  <div id="app" hidden>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="quickadd" id="quickAdd" hidden>
+      <span class="lbl">Add new</span>
+      <a id="addPackage"   href="#" target="_top">+ Package</a>
+      <a id="addPromotion" href="#" target="_top">+ Promotion</a>
+      <a id="addCatering"  href="#" target="_top">+ Catering option</a>
+      <span class="note" id="quickAddNote"></span>
+    </div>
+
+    <div class="tabs" id="tabs" role="tablist">
+      <button type="button" class="tab" role="tab" data-tab="venues"    aria-selected="true">Venues<span class="n" id="nVenues"></span></button>
+      <button type="button" class="tab" role="tab" data-tab="enquiries" aria-selected="false">Enquiries<span class="n" id="nEnq"></span><span class="dot" id="nEnqNew" hidden></span></button>
+      <button type="button" class="tab" role="tab" data-tab="claim"     aria-selected="false">Claim a venue<span class="n" id="nClaims"></span></button>
+      <button type="button" class="tab" role="tab" data-tab="profile"   aria-selected="false">Account</button>
+    </div>
+
+    <!-- Venues -->
+    <div class="panel" id="panelVenues">
+      <div id="vRows"></div>
+      <div class="empty" id="noVenues" hidden>
+        <h2>No venues yet</h2>
+        <p>Add one and couples will be able to find it in search. If we already added your venue for you, check the Claim a venue tab.</p>
+        <a id="noVenuesAction" href="#" target="_top">Add your venue</a>
+      </div>
+    </div>
+
+    <!-- Enquiries -->
+    <div class="panel" id="panelEnq" hidden>
+      <div class="etools" id="eTools"></div>
+      <div id="eRows"></div>
+      <div class="empty" id="noEnq" hidden>
+        <h2 id="noEnqTitle">No enquiries yet</h2>
+        <p id="noEnqBody">When couples ask about your venues, their enquiries appear here.</p>
+      </div>
+      <p class="rowmsg err" id="enqErr" hidden></p>
+    </div>
+
+    <!-- Claim -->
+    <div class="panel" id="panelClaim" hidden>
+      <div class="how">
+        Sometimes we add a venue to 3orsna before its owner has an account &mdash; from a partner listing or a directory.
+        If we added yours against <b id="claimEmail">your email address</b>, it will appear here for you to take over.
+        Claiming moves it into your account with everything already filled in, and it stays <b>hidden</b> until you have checked the details.
+      </div>
+      <div id="cRows"></div>
+      <div class="empty" id="noClaims" hidden>
+        <h2>Nothing waiting</h2>
+        <p id="noClaimsBody">We have not pre-added a venue against this email address. If your venue is already on 3orsna under a different address, get in touch and we will move it across.</p>
+        <a id="noClaimsAction" href="#" target="_top" hidden>Contact us</a>
+      </div>
+    </div>
+
+    <!-- Account -->
+    <div class="panel" id="panelProfile" hidden>
+      <form id="profileForm" novalidate>
+        <fieldset>
+          <legend>Your details</legend>
+          <em class="hint" style="margin:0 0 16px">This is the vendor profile couples see on your venue pages, when you choose to show it.</em>
+          <div class="grid">
+            <label class="field" data-for="name">
+              <span class="txt">Business name<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="text" id="name" maxlength="120" autocomplete="organization">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="field" data-for="position">
+              <span class="txt">Your role</span>
+              <input type="text" id="position" maxlength="80" placeholder="Manager">
+            </label>
+            <label class="field" data-for="phone">
+              <span class="txt">Phone</span>
+              <input type="tel" id="phone" autocomplete="tel">
+            </label>
+            <label class="field" data-for="email">
+              <span class="txt">Sign-in email</span>
+              <input type="email" id="email" disabled>
+              <em class="hint">This identifies your account and links your venues to it, so it cannot be changed here.</em>
+            </label>
+            <label class="field span-all" data-for="about">
+              <span class="txt">About your business</span>
+              <textarea id="about" maxlength="1000"></textarea>
+              <em class="hint"><span id="aboutCount">0</span> of 1000 characters.</em>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Contact card on your venue pages</legend>
+          <em class="hint" style="margin:0 0 16px">Couples see a card with your name on every venue page. Choose what else it shows.</em>
+          <div class="ppic">
+            <div class="ppic-img" id="ppicImg">Photo</div>
+            <div class="ppic-acts">
+              <button type="button" class="act q" id="ppicPick">Upload photo</button>
+              <button type="button" class="act q" id="ppicRemove" hidden>Remove</button>
+              <span class="ppic-st" id="ppicSt"></span>
+            </div>
+            <input type="file" id="ppicFile" accept="image/jpeg,image/png,image/webp,image/*" hidden>
+          </div>
+          <div class="showset">
+            <label class="showopt fixed"><input type="checkbox" checked disabled> Name <em>always shown</em></label>
+            <label class="showopt"><input type="checkbox" id="showImage"> Photo</label>
+            <label class="showopt"><input type="checkbox" id="showPhone"> Phone number</label>
+            <label class="showopt"><input type="checkbox" id="showEmail"> Email</label>
+          </div>
+        </fieldset>
+
+        <div class="savebar">
+          <button type="submit" class="primary" id="saveProfile"><span class="spin" aria-hidden="true"></span>Save details</button>
+          <span class="spacer"></span>
+          <span class="dirty" id="profileDirty"></span>
+        </div>
+      </form>
+    </div>
+
+    <div class="status" id="status" role="status" aria-live="polite" hidden></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var $ = function (id) { return document.getElementById(id); };
+  var tab = "venues";
+  var busy = {};
+  var baseline = null;
+  var routes = {};
+  var counts = {};
+  var DEBUG = true;   // set false once things are working
+
+  /* Enquiries */
+  var ENQ = null;                       // { venues:[{id,name}], items:[...] }
+  var enqFilter = "all", enqVenue = "all";
+  var ENQ_LABEL = { "new": "New", contacted: "Contacted", booked: "Booked", declined: "Declined" };
+
+  function post(m) { try { window.parent.postMessage(m, "*"); } catch (e) {} }
+  /* Height: the Pixel Pals reporter at the end of this file. */
+
+  /* Relative links resolve against the iframe's own (Wix sandbox) origin, so
+     Velo sends the real site base and these are made absolute. */
+  var SITE = "";
+  function abs(u) {
+    if (!u) return u;
+    if (/^[a-z][a-z0-9+.\-]*:/i.test(u)) return u;
+    if (!SITE) return u;
+    return SITE.replace(/\/+$/, "") + (u.charAt(0) === "/" ? u : "/" + u);
+  }
+
+  /* Same-site links can't load inside this sandboxed box ("Forbidden"),
+     so they're handed to Velo to navigate the real page. */
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a) return;
+    var href = a.getAttribute("href");
+    if (!href || href.charAt(0) === "#") return;
+    if (/^(mailto:|tel:|sms:|https?:)/i.test(href)) return;
+    if (a.target === "_blank" && /^[a-z][a-z0-9+.\-]*:/i.test(href)) return;
+    if (e.defaultPrevented || e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (DEBUG) console.log("[iframe] intercepted click ->", href);
+    e.preventDefault();
+    post({ type: "iframe:navigate", url: href });
+  });
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+  function val(id) { return $(id).value.trim(); }
+
+  function showStatus(text, kind) {
+    var s = $("status");
+    s.textContent = text;
+    s.className = "status " + kind;
+    s.hidden = false;
+   
+  }
+  function rowMsg(row, text, kind) {
+    var m = row.querySelector(".rowmsg");
+    if (!m) { m = el("p", "rowmsg"); row.appendChild(m); }
+    m.textContent = text;
+    m.className = "rowmsg " + kind;
+    m.hidden = false;
+   
+  }
+
+  /* ---------- tabs ---------- */
+  $("tabs").addEventListener("click", function (e) {
+    var b = e.target.closest(".tab");
+    if (!b || b.dataset.tab === tab) return;
+    tab = b.dataset.tab;
+    Array.prototype.forEach.call($("tabs").querySelectorAll(".tab"), function (t) {
+      t.setAttribute("aria-selected", String(t === b));
+    });
+    $("panelVenues").hidden  = tab !== "venues";
+    $("panelEnq").hidden     = tab !== "enquiries";
+    $("panelClaim").hidden   = tab !== "claim";
+    $("panelProfile").hidden = tab !== "profile";
+    $("status").hidden = true;
+   
+  });
+
+  /* ---------- stats ---------- */
+  function drawStats() {
+    var c = counts || {};
+    var newEnq = ENQ ? ENQ.items.filter(function (x) { return x.status === "new"; }).length : 0;
+    var st = $("stats");
+    st.innerHTML = "";
+    [[c.venuesLive || 0, "Visible in search", false],
+     [c.venuesTotal || 0, "Venues total", false],
+     [newEnq, "New enquiries", newEnq > 0],
+     [c.claimsPending || 0, "To claim", (c.claimsPending || 0) > 0]
+    ].forEach(function (pair) {
+      var box = el("div");
+      box.appendChild(el("div", "n" + (pair[2] ? " alert" : ""), String(pair[0])));
+      box.appendChild(el("p", "k", pair[1]));
+      st.appendChild(box);
+    });
+    $("nEnq").textContent = ENQ ? " " + ENQ.items.length : "";
+    $("nEnqNew").textContent = String(newEnq);
+    $("nEnqNew").hidden = !newEnq;
+  }
+
+  /* ---------- venues ---------- */
+  function drawVenues(items) {
+    var host = $("vRows");
+    host.innerHTML = "";
+    if (!items.length) { $("noVenues").hidden = false; return; }
+    $("noVenues").hidden = true;
+
+    items.forEach(function (v) {
+      var row = el("div", "vrow");
+      row.dataset.id = v.id;
+      var top = el("div", "vrow-top");
+
+      var th = el("div", "vthumb");
+      if (v.image) {
+        var im = document.createElement("img");
+        im.src = v.image; im.alt = ""; im.loading = "lazy";
+        im.addEventListener("error", function () { th.className = "vthumb none"; th.textContent = "No photo"; });
+        th.appendChild(im);
+      } else { th.className = "vthumb none"; th.textContent = "No photo"; }
+      top.appendChild(th);
+
+      var main = el("div", "vmain");
+      main.appendChild(el("div", "vname", v.name));
+      var bits = [];
+      if (v.city) bits.push(v.city);
+      if (v.minGuests != null && v.maxGuests != null) bits.push(v.minGuests + "\u2013" + v.maxGuests + " guests");
+      else if (v.maxGuests != null) bits.push("Up to " + v.maxGuests + " guests");
+      if (v.pricePerGuest != null) bits.push("JOD " + v.pricePerGuest + " per guest");
+      if (bits.length) main.appendChild(el("div", "vmeta", bits.join("  \u00b7  ")));
+      var flags = el("div", "flags");
+      flags.appendChild(el("span", "state " + (v.visibility ? "live" : "pending"),
+        v.visibility ? "Visible in search" : "Hidden"));
+      main.appendChild(flags);
+      top.appendChild(main);
+
+      var acts = el("div", "vacts");
+      var sw = el("button", "vis");
+      sw.type = "button";
+      sw.setAttribute("role", "switch");
+      sw.setAttribute("aria-checked", String(v.visibility));
+      sw.setAttribute("aria-label", "Show " + v.name + " in search");
+      sw.appendChild(el("span", "track"));
+      sw.appendChild(el("span", null, v.visibility ? "Visible" : "Hidden"));
+      sw.addEventListener("click", function () {
+        if (busy[v.id]) return;
+        busy[v.id] = true;
+        sw.disabled = true;
+        row.classList.add("busy");
+        post({ type: "vd:visibility", id: v.id, visible: !v.visibility });
+      });
+      acts.appendChild(sw);
+
+      if (v.editLink) {
+        var ed = el("a", "act q", "Edit");
+        ed.href = v.editLink;
+        acts.appendChild(ed);
+      } else if (DEBUG) {
+        var noEd = el("span", "act q", "no edit link");
+        noEd.style.opacity = "0.5";
+        acts.appendChild(noEd);
+      }
+      if (v.link) {
+        var vw = el("a", "act q", "View");
+        vw.href = abs(v.link);
+        vw.target = "_blank"; vw.rel = "noopener";
+        acts.appendChild(vw);
+      }
+      top.appendChild(acts);
+      row.appendChild(top);
+
+      if (v.missing && v.missing.length) {
+        row.appendChild(el("div", "gaps",
+          (v.visibility ? "Still missing: " : "Add a ") + v.missing.join(", ") +
+          (v.visibility ? "." : " before you can make this visible.")));
+      }
+      var m = el("p", "rowmsg");
+      m.hidden = true;
+      row.appendChild(m);
+      host.appendChild(row);
+    });
+   
+  }
+
+  /* ---------- enquiries ---------- */
+  function day(iso) {
+    var d = new Date(iso + "T12:00:00");
+    return isNaN(d) ? iso : d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+  }
+  function ago(at) {
+    var s = (Date.now() - new Date(at).getTime()) / 1000;
+    if (!isFinite(s)) return "";
+    if (s < 3600) return Math.max(1, Math.floor(s / 60)) + " min ago";
+    if (s < 86400) return Math.floor(s / 3600) + " h ago";
+    if (s < 86400 * 30) return Math.floor(s / 86400) + " d ago";
+    return new Date(at).toLocaleDateString("en-GB");
+  }
+  function waNumber(p) {
+    var d = String(p || "").replace(/[^\d+]/g, "");
+    if (d.indexOf("00") === 0) d = "+" + d.slice(2);
+    if (d.charAt(0) === "0") d = "+962" + d.slice(1);
+    return d.replace(/^\+/, "");
+  }
+
+  function drawEnquiries() {
+    var tools = $("eTools"), host = $("eRows");
+    tools.innerHTML = ""; host.innerHTML = "";
+    if (!ENQ) return;
+    var inVenue = ENQ.items.filter(function (e) { return enqVenue === "all" || e.venueId === enqVenue; });
+    var shown = inVenue.filter(function (e) { return enqFilter === "all" || e.status === enqFilter; });
+
+    if (ENQ.items.length) {
+      ["all", "new", "contacted", "booked", "declined"].forEach(function (k) {
+        var n = inVenue.filter(function (e) { return k === "all" || e.status === k; }).length;
+        var b = el("button", "chip", k === "all" ? "All" : ENQ_LABEL[k]);
+        b.type = "button";
+        b.setAttribute("aria-pressed", String(enqFilter === k));
+        b.appendChild(el("span", "n", String(n)));
+        b.addEventListener("click", function () { enqFilter = k; drawEnquiries(); });
+        tools.appendChild(b);
+      });
+      if (ENQ.venues.length > 1) {
+        var sel = el("select");
+        sel.setAttribute("aria-label", "Venue");
+        sel.appendChild(new Option("All venues", "all"));
+        ENQ.venues.forEach(function (v) { sel.appendChild(new Option(v.name, v.id)); });
+        sel.value = enqVenue;
+        sel.addEventListener("change", function () { enqVenue = sel.value; drawEnquiries(); });
+        tools.appendChild(sel);
+      }
+    }
+
+    $("noEnq").hidden = !!shown.length;
+    if (!ENQ.items.length) {
+      $("noEnqTitle").textContent = "No enquiries yet";
+      $("noEnqBody").textContent = ENQ.venues.length
+        ? "When couples ask about your venues, their enquiries appear here."
+        : "Add a venue first \u2014 enquiries from couples will appear here.";
+    } else if (!shown.length) {
+      $("noEnqTitle").textContent = "Nothing here";
+      $("noEnqBody").textContent = "No enquiries match this filter.";
+    }
+
+    shown.forEach(function (e) {
+      var row = el("div", "enq" + (e.status === "new" ? " unread" : ""));
+      row.dataset.id = e.id;
+      var top = el("div", "enq-top");
+      var main = el("div", "enq-main");
+      if (ENQ.venues.length > 1 && e.venueName) main.appendChild(el("div", "enq-for", e.venueName));
+      main.appendChild(el("div", "enq-name", e.name || "A couple"));
+      var bits = [];
+      bits.push(e.guests != null ? e.guests + " guests" : "Guests not given");
+      bits.push(e.dates && e.dates.length ? e.dates.map(day).join(", ") : "No dates given");
+      main.appendChild(el("div", "enq-meta", bits.join("  \u00b7  ")));
+
+      var contact = el("div", "enq-contact");
+      if (e.email) {
+        var em = el("a", null, "Email " + e.email);
+        em.href = "mailto:" + e.email + "?subject=" + encodeURIComponent("Your enquiry about " + (e.venueName || "our venue"));
+        contact.appendChild(em);
+      }
+      if (e.phone) {
+        var tl = el("a", null, "Call " + e.phone);
+        tl.href = "tel:" + e.phone;
+        contact.appendChild(tl);
+        var wa = waNumber(e.phone);
+        if (wa) {
+          var w = el("a", null, "WhatsApp");
+          w.href = "https://wa.me/" + wa; w.target = "_blank"; w.rel = "noopener";
+          contact.appendChild(w);
+        }
+      }
+      if (contact.childNodes.length) main.appendChild(contact);
+      top.appendChild(main);
+
+      var acts = el("div", "enq-acts");
+      var s = el("select", "s-" + e.status);
+      s.setAttribute("aria-label", "Status");
+      Object.keys(ENQ_LABEL).forEach(function (k) { s.appendChild(new Option(ENQ_LABEL[k], k)); });
+      s.value = e.status;
+      s.addEventListener("change", function () {
+        e.prev = e.status; e.status = s.value;
+        post({ type: "vd:enquiryStatus", id: e.id, status: e.status });
+        drawEnquiries(); drawStats();
+      });
+      acts.appendChild(s);
+      acts.appendChild(el("span", "enq-when", ago(e.submittedAt)));
+      top.appendChild(acts);
+      row.appendChild(top);
+      if (e.err) row.appendChild(el("p", "rowmsg err", e.err));
+      host.appendChild(row);
+    });
+   
+  }
+
+  /* ---------- claims ---------- */
+  function drawClaims(items) {
+    var host = $("cRows");
+    host.innerHTML = "";
+    if (!items.length) { $("noClaims").hidden = false; return; }
+    $("noClaims").hidden = true;
+
+    items.forEach(function (c) {
+      var row = el("div", "vrow");
+      row.dataset.id = c.id;
+      var top = el("div", "vrow-top");
+      var th = el("div", "vthumb");
+      if (c.image) {
+        var im = document.createElement("img");
+        im.src = c.image; im.alt = ""; im.loading = "lazy";
+        im.addEventListener("error", function () { th.className = "vthumb none"; th.textContent = "No photo"; });
+        th.appendChild(im);
+      } else { th.className = "vthumb none"; th.textContent = "No photo"; }
+      top.appendChild(th);
+      var main = el("div", "vmain");
+      main.appendChild(el("div", "vname", c.name));
+      if (c.city) main.appendChild(el("div", "vmeta", c.city));
+      top.appendChild(main);
+      var acts = el("div", "vacts");
+      var btn = el("button", "act go", "This is my venue");
+      btn.type = "button";
+      btn.addEventListener("click", function () {
+        if (busy[c.id]) return;
+        busy[c.id] = true;
+        btn.disabled = true;
+        row.classList.add("busy");
+        rowMsg(row, "Claiming\u2026", "ok");
+        post({ type: "vd:claim", id: c.id });
+      });
+      acts.appendChild(btn);
+      top.appendChild(acts);
+      row.appendChild(top);
+      var m = el("p", "rowmsg");
+      m.hidden = true;
+      row.appendChild(m);
+      host.appendChild(row);
+    });
+   
+  }
+
+  /* ---------- profile ---------- */
+  var PF = ["name", "position", "phone", "about"];
+  function snapshot() { return JSON.stringify(PF.map(val).concat([$("showImage").checked, $("showPhone").checked, $("showEmail").checked, photo.ref === undefined ? "same" : String(photo.ref)])); }
+  /* ---------- contact card: photo + what couples see ---------- */
+  var photo = { ref: undefined, preview: "" };      // ref: undefined = unchanged, null = removed, string = new upload
+  function drawPhoto(url) {
+    var box = $("ppicImg");
+    box.style.backgroundImage = url ? "url('" + url + "')" : "";
+    box.textContent = url ? "" : "Photo";
+    $("ppicRemove").hidden = !url;
+    $("ppicPick").textContent = url ? "Change photo" : "Upload photo";
+  }
+  function photoStatus(t, bad) { var s = $("ppicSt"); s.textContent = t || ""; s.className = "ppic-st" + (bad ? " err" : ""); }
+  function shrinkPhoto(file, done) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var k = Math.min(1, 600 / Math.max(img.naturalWidth, img.naturalHeight));
+        var c = document.createElement("canvas");
+        c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        done(c.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = function () { done(null); };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+  $("ppicPick").addEventListener("click", function () { $("ppicFile").value = ""; $("ppicFile").click(); });
+  $("ppicFile").addEventListener("change", function () {
+    var f = $("ppicFile").files[0]; if (!f) return;
+    photoStatus("Uploading\u2026");
+    shrinkPhoto(f, function (dataUrl) {
+      if (!dataUrl) { photoStatus("That file isn\u2019t an image we can open.", true); return; }
+      photo.preview = dataUrl; drawPhoto(dataUrl);
+      post({ type: "vd:uploadPhoto", dataUrl: dataUrl, name: f.name });
+    });
+  });
+  $("ppicRemove").addEventListener("click", function () { photo.ref = null; photo.preview = ""; drawPhoto(""); photoStatus(""); tickProfile(); });
+  ["showImage", "showPhone", "showEmail"].forEach(function (id) { $(id).addEventListener("change", tickProfile); });
+
+  function dirty() { return baseline && snapshot() !== baseline; }
+  function tickProfile() {
+    $("profileDirty").innerHTML = dirty() ? "<b>Unsaved changes</b>" : "No unsaved changes";
+    $("aboutCount").textContent = String($("about").value.length);
+   
+  }
+  function wrapOf(n) { return n.closest("label.field") || n.parentNode; }
+  function setErr(n, m) {
+    var w = wrapOf(n); w.classList.add("invalid");
+    var s = w.querySelector(".err-msg");
+    if (s) { s.textContent = m; s.hidden = false; }
+  }
+  function clearErr(n) {
+    var w = wrapOf(n); w.classList.remove("invalid");
+    var s = w.querySelector(".err-msg");
+    if (s) { s.hidden = true; s.textContent = ""; }
+  }
+  $("profileForm").addEventListener("input", function (e) {
+    if (e.target.matches("input, textarea")) { clearErr(e.target); tickProfile(); }
+  });
+  $("profileForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!val("name")) {
+      setErr($("name"), "We need a name for your business.");
+      showStatus("A field needs attention.", "err");
+      $("name").focus();
+      return;
+    }
+    $("saveProfile").classList.add("busy");
+    showStatus("Saving\u2026", "busy");
+    post({
+      type: "vd:saveProfile",
+      patch: { name: val("name"), position: val("position") || null, phone: val("phone") || null, about: val("about") || null,
+               showImage: $("showImage").checked, showPhone: $("showPhone").checked, showEmail: $("showEmail").checked,
+               image: photo.ref }
+    });
+  });
+
+  /* ---------- from Velo ---------- */
+  var answered = false;
+  window.addEventListener("message", function (event) {
+    var d = event.data;
+    if (!d || typeof d !== "object") return;
+
+    if (d.type === "vd:blocked") {
+      answered = true;
+      $("app").hidden = true;
+      $("blocked").hidden = false;
+      $("addVenue").hidden = true;
+      $("sub").textContent = "";
+      $("blockedTitle").textContent = d.title || "One thing first";
+      $("blockedBody").textContent = d.message || "";
+      var a = $("blockedAction");
+      if (d.actionHref) { a.hidden = false; a.textContent = d.actionLabel || "Continue"; a.href = d.actionHref; }
+      else a.hidden = true;
+     
+      return;
+    }
+
+    if (d.type === "vd:data") {
+      answered = true;
+      SITE = d.baseUrl || "";
+      routes = d.routes || {};
+      counts = d.counts || {};
+      $("app").hidden = false;
+      $("blocked").hidden = true;
+
+      $("addVenue").href = routes.add || "#";
+      $("addVenue").hidden = false;
+      $("noVenuesAction").href = routes.add || "#";
+      $("addPackage").href   = routes.addPackage   || "#";
+      $("addPromotion").href = routes.addPromotion || "#";
+      $("addCatering").href  = routes.addCatering  || "#";
+      $("quickAdd").hidden = false;
+      $("quickAddNote").textContent = counts.venuesTotal
+        ? "A package needs a venue and a catering option. A promotion needs a venue and a package."
+        : "Add a venue first \u2014 packages, promotions and catering all attach to one.";
+      if (routes.contact) { $("noClaimsAction").href = routes.contact; $("noClaimsAction").hidden = false; }
+
+      var p = d.profile || {};
+      $("hello").textContent = p.name || "Your Venues";
+      $("claimEmail").textContent = p.email || "your email address";
+      $("sub").textContent = counts.venuesTotal === 0
+        ? "You have not added a venue yet."
+        : counts.venuesLive + " of " + counts.venuesTotal + (counts.venuesTotal === 1 ? " venue" : " venues") + " visible" +
+          (counts.claimsPending ? "  \u00b7  " + counts.claimsPending + " waiting to be claimed" : "");
+      $("nVenues").textContent = " " + (counts.venuesTotal || 0);
+      $("nClaims").textContent = " " + (counts.claimsPending || 0);
+
+      drawStats();
+      drawVenues(d.venues || []);
+      drawClaims(d.claims || []);
+
+      $("name").value = p.name || "";
+      $("position").value = p.position || "";
+      $("phone").value = p.phone || "";
+      $("about").value = p.about || "";
+      $("email").value = p.email || "";
+      $("showImage").checked = p.showImage !== false;
+      $("showPhone").checked = p.showPhone !== false;
+      $("showEmail").checked = p.showEmail !== false;
+      photo = { ref: undefined, preview: "" }; drawPhoto(p.image || ""); photoStatus("");
+      baseline = snapshot();
+      tickProfile();
+     
+    }
+
+    if (d.type === "vd:enquiries") {
+      if (d.ok) { ENQ = d.data || { venues: [], items: [] }; $("enqErr").hidden = true; }
+      else { $("enqErr").textContent = "Enquiries couldn't load: " + (d.error || "please refresh."); $("enqErr").hidden = false; }
+      drawStats();
+      drawEnquiries();
+    }
+
+    if (d.type === "vd:enquiryStatusResult" && ENQ) {
+      var e = ENQ.items.filter(function (x) { return x.id === d.id; })[0];
+      if (e) {
+        if (d.ok) { e.err = ""; }
+        else { if (e.prev) e.status = e.prev; e.err = d.error || "That didn't save. Try again."; }
+        drawStats(); drawEnquiries();
+      }
+    }
+
+    if (d.type === "vd:visResult") {
+      busy[d.id] = false;
+      var row = $("vRows").querySelector('.vrow[data-id="' + d.id + '"]');
+      if (row) row.classList.remove("busy");
+      if (d.ok) { showStatus(d.message, "ok"); post({ type: "vd:refresh" }); }
+      else if (row) {
+        var sw = row.querySelector(".vis");
+        if (sw) sw.disabled = false;
+        rowMsg(row, d.message || "That did not work.", "err");
+      }
+    }
+
+    if (d.type === "vd:claimResult") {
+      busy[d.id] = false;
+      var crow = $("cRows").querySelector('.vrow[data-id="' + d.id + '"]');
+      if (d.ok) {
+        if (crow) rowMsg(crow, d.message, "ok");
+        setTimeout(function () { post({ type: "vd:refresh" }); }, 1400);
+      } else if (crow) {
+        crow.classList.remove("busy");
+        var b2 = crow.querySelector("button");
+        if (b2) b2.disabled = false;
+        rowMsg(crow, d.message || "That did not work.", "err");
+      }
+    }
+
+    if (d.type === "vd:photoUploaded") {
+      if (d.ok) { photo.ref = d.url; photoStatus("Photo ready \u2014 click Save details."); tickProfile(); }
+      else { photoStatus("That photo didn\u2019t upload. Try another. " + (d.error ? "(" + d.error + ")" : ""), true); }
+    }
+
+    if (d.type === "vd:profileSaved") {
+      $("saveProfile").classList.remove("busy");
+      if (d.ok) { baseline = snapshot(); tickProfile(); showStatus(d.message || "Saved.", "ok"); }
+      else showStatus(d.message || "That did not save.", "err");
+    }
+  });
+
+  /* Say "ready" every second until the page answers — the page's listener may
+     attach after this iframe loads, and a single message would be lost. */
+  (function ping(n) {
+    if (answered) return;
+    post({ type: "vd:ready" });
+    if (n < 30) setTimeout(function () { ping(n + 1); }, 1000);
+  })(0);
+ 
+})();
+</script>
+<div class="pp-safe-space" aria-hidden="true"></div>
+<!-- Pixel Pals iframe auto-height reporter v3 (body is the scroll box).
+     Scrolls inside the iframe until the site-wide listener sizes it.
+     Once the site-wide listener sizes the iframe, there is nothing left to scroll. -->
+<script>
+(function () {
+  if (window.__ppReporter) return;
+  window.__ppReporter = true;
+
+  var s = document.createElement('style');
+  s.textContent =
+    'html{height:100%!important;min-height:0!important;overflow:hidden!important}' +
+    'body{height:100%!important;min-height:0!important;margin:0;overflow-x:hidden!important;overflow-y:auto!important;' +
+      '-webkit-overflow-scrolling:touch;overscroll-behavior:auto;scrollbar-width:none;-ms-overflow-style:none;display:flow-root}' +
+    'html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0;display:none}';
+  document.head.appendChild(s);
+
+  var body = document.body, last = -1, raf = 0;
+
+  // Height of the content itself, not the scroll box (so the iframe can shrink as well as grow)
+  function measure() {
+    var top = body.getBoundingClientRect().top - body.scrollTop;
+    var bottom = 0, kids = body.children;
+    for (var i = 0; i < kids.length; i++) {
+      var r = kids[i].getBoundingClientRect();
+      if (!r.height && !r.width) continue; // hidden, scripts, styles
+      var mb = parseFloat(getComputedStyle(kids[i]).marginBottom) || 0;
+      bottom = Math.max(bottom, r.bottom + mb);
+    }
+    var pb = parseFloat(getComputedStyle(body).paddingBottom) || 0;
+    return Math.ceil(bottom - top + pb);
+  }
+
+  function send(force) {
+    var h = measure();
+    if (!force && h === last) return;
+    last = h;
+    window.parent.postMessage({ type: 'setHeight', height: h }, '*');
+  }
+
+  function schedule() {
+    if (raf) return;
+    raf = requestAnimationFrame(function () { raf = 0; send(false); });
+  }
+
+  // Watch the content (the body itself is now a fixed-size scroll box)
+  var ro = 'ResizeObserver' in window ? new ResizeObserver(schedule) : null;
+  function watchKids() {
+    if (!ro) return;
+    ro.observe(body);
+    for (var i = 0; i < body.children.length; i++) ro.observe(body.children[i]);
+  }
+  watchKids();
+  if ('MutationObserver' in window) {
+    new MutationObserver(function () { watchKids(); schedule(); })
+      .observe(body, { childList: true, subtree: true, attributes: true, characterData: true });
+  }
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', function () { send(true); });
+  document.addEventListener('load', schedule, true);
+  document.addEventListener('transitionend', schedule, true);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { send(true); });
+
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'requestHeight') send(true);
+  });
+
+  [0, 300, 1000, 2500, 5000].forEach(function (t) { setTimeout(function () { send(true); }, t); });
+})();
+</script>
+</body>
+</html>

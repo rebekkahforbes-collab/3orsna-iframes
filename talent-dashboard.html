@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://static.wixstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Mulish:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Pixel Pals build standards ─────────────────────────────────────
+   No visible scrollbars anywhere (everything still scrolls), media never
+   wider than its box, 16px form text on phones so iOS doesn't zoom, and a
+   little side padding on phones so nothing touches the screen edge.
+   Height: the reporter at the end of this file (setHeight → site-wide listener). */
+*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{width:0;height:0;display:none}
+img,video,canvas{max-width:100%}
+@media (max-width:760px){input,select,textarea{font-size:16px!important}}
+@media (max-width:600px){.wrap{padding-left:14px!important;padding-right:14px!important}}
+
+  :root {
+    color-scheme: dark;
+    --bg:            #0C0C0B;
+    --surface:       #141413;
+    --field:         #181713;
+    --field-hover:   #1E1C19;
+    --border:        #383733;
+    --border-quiet:  #262625;
+    --gold:          #AA936F;
+    --gold-tint:     rgba(170,147,111,0.10);
+    --gold-line:     rgba(170,147,111,0.28);
+    --gold-soft:     #C4B091;
+    --text:          #FFFFFF;
+    --body:          #ADADAD;
+    --label:         #A8A7A3;
+    --placeholder:   #8C8C8B;
+    --danger:        #C4705A;
+    --danger-tint:   #241713;
+    --r-field:       8px;
+    --r-card:        12px;
+    --font-display:  "Playfair Display", Georgia, serif;
+    --font-body:     "Mulish", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+
+  .wrap { max-width: 1050px; margin: 0 auto; padding: 4px 0 40px; }
+
+
+  h1 { font-family: var(--font-display); font-weight: 400; font-size: 34px; line-height: 1.15; margin: 0 0 6px; }
+  h2.title { font-family: var(--font-display); font-weight: 400; font-size: 28px; line-height: 1.2; margin: 0 0 6px; }
+  .lede { font-size: 15px; line-height: 1.7; color: var(--placeholder); margin: 0 0 26px; }
+
+  fieldset { border: 0; margin: 0 0 34px; padding: 0; min-width: 0; }
+  legend, .group-label { display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--label); margin: 0 0 14px; padding: 0; }
+  .req { color: var(--gold); margin-left: 3px; font-style: normal; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 18px 20px; }
+  .span-all { grid-column: 1 / -1; }
+  label.field { display: block; min-width: 0; }
+  label.field > span.txt { display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--label); margin: 0 0 8px; }
+
+  input[type="text"], input[type="tel"], input[type="email"], input[type="number"], input[type="url"], textarea {
+    width: 100%; background: var(--field); border: 1px solid var(--border); border-radius: var(--r-field);
+    color: var(--text); font-family: var(--font-body); font-size: 15px; padding: 12px 14px; min-height: 45px;
+    transition: border-color 140ms ease, background 140ms ease;
+  }
+  textarea { min-height: 108px; resize: vertical; line-height: 1.65; }
+  input::placeholder, textarea::placeholder { color: var(--placeholder); }
+  input:hover, textarea:hover { background: var(--field-hover); }
+  input[disabled] { opacity: 0.6; cursor: not-allowed; }
+  input:focus-visible, textarea:focus-visible, .chip:focus-visible, button:focus-visible {
+    outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(170,147,111,0.22);
+  }
+  select {
+    width: 100%; background: var(--field); border: 1px solid var(--border); border-radius: var(--r-field);
+    color: var(--text); font-family: var(--font-body); font-size: 15px; padding: 12px 38px 12px 14px; min-height: 45px; appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238E8E8B' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+  }
+  select:focus-visible { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(170,147,111,0.22); }
+
+  .hint { font-style: normal; display: block; font-size: 13px; color: var(--placeholder); margin: 7px 0 0; line-height: 1.5; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; }
+  .chip { background: var(--field); border: 1px solid var(--border-quiet); border-radius: 999px; color: var(--placeholder); cursor: pointer; font-family: var(--font-body); font-size: 14px; padding: 8px 16px; transition: background 140ms ease, color 140ms ease, border-color 140ms ease; }
+  .chip:hover { color: var(--gold-soft); border-color: var(--border); }
+  .chip[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #1A1509; font-weight: 600; }
+  .chips[data-single="true"] .chip[aria-pressed="true"]::before { content: "\2713\00a0"; font-weight: 700; }
+
+  .empty { background: var(--surface); border: 1px solid var(--border-quiet); border-radius: var(--r-card); padding: 22px; }
+  .empty h2 { font-family: var(--font-display); font-size: 21px; font-weight: 400; margin: 0 0 8px; }
+  .empty p { font-size: 15px; line-height: 1.65; color: var(--placeholder); margin: 0 0 16px; }
+  .empty a, .empty button.cta {
+    background: rgba(170,147,111,0.12); border: 1px solid rgba(170,147,111,0.40); border-radius: var(--r-field);
+    color: var(--gold); display: inline-block; font-family: var(--font-body); font-size: 16px; font-weight: 600; padding: 13px 30px; text-decoration: none; cursor: pointer;
+  }
+  .empty a:hover, .empty button.cta:hover { background: rgba(170,147,111,0.18); }
+
+  button.primary, button.ghost { border-radius: var(--r-field); cursor: pointer; font-family: var(--font-body); font-size: 16px; font-weight: 600; padding: 13px 30px; transition: filter 140ms ease, background 140ms ease; }
+  button.primary { background: var(--gold); border: 1px solid var(--gold); color: #1A1509; }
+  button.primary:hover { filter: brightness(1.08); }
+  button.primary[disabled] { opacity: 0.55; cursor: not-allowed; filter: none; }
+  button.ghost { background: rgba(170,147,111,0.12); border: 1px solid rgba(170,147,111,0.40); color: var(--gold); }
+  button.ghost:hover { background: rgba(170,147,111,0.18); }
+  button.primary .spin { display: none; width: 14px; height: 14px; margin-right: 9px; border: 2px solid rgba(26,21,9,0.3); border-top-color: #1A1509; border-radius: 50%; vertical-align: -2px; }
+  button.primary.busy .spin { display: inline-block; }
+  button.primary.busy { pointer-events: none; }
+
+  .status { border-radius: var(--r-card); font-size: 15px; line-height: 1.6; margin: 22px 0 0; padding: 13px 16px; }
+  .status.ok   { background: rgba(170,147,111,0.12); border: 1px solid rgba(170,147,111,0.40); color: var(--gold-soft); }
+  .status.err  { background: var(--danger-tint); border: 1px solid rgba(196,112,90,0.45); color: var(--danger); }
+  .status.busy { background: var(--surface); border: 1px solid var(--border-quiet); color: var(--label); }
+  .status.top { margin: 0 0 22px; }
+
+  .err-msg { font-style: normal; display: block; font-size: 13px; color: var(--danger); margin: 7px 0 0; }
+  .invalid input, .invalid textarea, .invalid select { border-color: var(--danger); }
+  .invalid .chip, .invalid .drop { border-color: var(--danger); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse { 0%,100% { opacity: 0.45; } 50% { opacity: 0.75; } }
+    button.primary .spin { animation: spin 700ms linear infinite; }
+    .skelrow i { animation: pulse 1.5s ease-in-out infinite; }
+  }
+
+  /* Switches */
+  .switches { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); gap: 10px; }
+  button.sw { background: var(--field); border: 1px solid var(--border-quiet); border-radius: var(--r-field); cursor: pointer; display: flex; align-items: center; gap: 12px; font-family: var(--font-body); font-size: 15px; color: var(--text); padding: 12px 14px; text-align: left; width: 100%; }
+  button.sw:hover { background: var(--field-hover); }
+  button.sw .track { flex: 0 0 auto; width: 38px; height: 21px; border-radius: 999px; background: #2C2B27; border: 1px solid var(--border); position: relative; }
+  button.sw .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 13px; height: 13px; border-radius: 50%; background: var(--placeholder); transition: transform 140ms ease, background 140ms ease; }
+  button.sw[aria-checked="true"] .track { background: var(--gold-tint); border-color: var(--gold); }
+  button.sw[aria-checked="true"] .track::after { transform: translateX(17px); background: var(--gold); }
+  button.sw .lbl { flex: 1 1 auto; }
+  button.sw .state { font-size: 12px; color: var(--placeholder); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  button.sw[aria-checked="true"] .state { color: var(--gold); }
+
+  /* Save bar */
+  .savebar { position: sticky; bottom: 0; z-index: 5; background: var(--bg); border-top: 1px solid var(--border-quiet); display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 34px; padding: 16px 0; }
+  .savebar .spacer { flex: 1 1 auto; }
+  .dirty { font-size: 13px; color: var(--placeholder); }
+  .dirty b { color: var(--gold); font-weight: 600; }
+
+  /* Header */
+  .top { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; margin: 0 0 26px; }
+  .top .who { flex: 1 1 240px; min-width: 0; }
+  .top h1 { margin: 0 0 4px; }
+  .top .sub { font-size: 14px; color: var(--placeholder); margin: 0; line-height: 1.6; }
+  button.newbtn { background: var(--gold); border: 1px solid var(--gold); border-radius: var(--r-field); color: #1A1509; font-family: var(--font-body); font-size: 15px; font-weight: 600; padding: 12px 22px; white-space: nowrap; cursor: pointer; }
+  button.newbtn:hover { filter: brightness(1.08); }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 0 0 26px; }
+  .stats div { background: var(--surface); border: 1px solid var(--border-quiet); border-radius: var(--r-field); padding: 14px 16px; min-width: 0; }
+  .stats .n { font-family: var(--font-display); font-size: 26px; line-height: 1; }
+  .stats .n.alert { color: var(--gold); }
+  .stats .k { font-size: 10px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: var(--placeholder); margin: 7px 0 0; }
+
+  /* Tabs */
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 26px; }
+  .tab { background: var(--field); border: 1px solid var(--border-quiet); border-radius: 999px; color: var(--placeholder); cursor: pointer; font-family: var(--font-body); font-size: 14px; font-weight: 600; padding: 9px 17px; transition: background 140ms ease, color 140ms ease, border-color 140ms ease; }
+  .tab:hover { color: var(--gold-soft); border-color: var(--border); }
+  .tab[aria-selected="true"] { background: var(--gold); border-color: var(--gold); color: #1A1509; }
+  .tab .n { opacity: 0.75; margin-left: 5px; font-variant-numeric: tabular-nums; }
+
+  /* Listing cards */
+  .mine { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 14px; }
+  .card2 { background: var(--surface); border: 1px solid var(--border-quiet); border-radius: var(--r-card); overflow: hidden; display: flex; flex-direction: column; }
+  .card2 .m { aspect-ratio: 16 / 10; background: var(--field); }
+  .card2 .m img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card2 .m.none { display: grid; place-items: center; color: var(--border); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .card2 .b { padding: 16px; display: flex; flex-direction: column; gap: 8px; flex: 1 1 auto; }
+  .card2 .cg { font-size: 10px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--gold); }
+  .card2 .nm { font-family: var(--font-display); font-size: 19px; line-height: 1.25; overflow-wrap: anywhere; }
+  .card2 .mt { font-size: 13px; color: var(--placeholder); line-height: 1.55; }
+  .card2 .acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 4px; }
+
+  .flags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .pill { border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 10px; }
+  .pill.live    { background: var(--gold-tint); border: 1px solid var(--gold-line); color: var(--gold); }
+  .pill.mute    { background: var(--field); border: 1px solid var(--border-quiet); color: var(--placeholder); }
+  .pill.warn    { background: var(--danger-tint); border: 1px solid rgba(196,112,90,0.45); color: var(--danger); }
+  .why { background: var(--danger-tint); border: 1px solid rgba(196,112,90,0.45); border-radius: var(--r-field); color: var(--danger); font-size: 13px; line-height: 1.55; padding: 10px 12px; }
+
+  .act { border-radius: var(--r-field); cursor: pointer; white-space: nowrap; font-family: var(--font-body); font-size: 13px; font-weight: 600; padding: 9px 15px; text-decoration: none; display: inline-block; }
+  .act.go { background: var(--gold); border: 1px solid var(--gold); color: #1A1509; }
+  .act.q  { background: transparent; border: 1px solid var(--border); color: var(--body); }
+  .act.q:hover { border-color: var(--gold); color: var(--gold); }
+  .act[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+  /* Enquiries */
+  .enq { background: var(--surface); border: 1px solid var(--border-quiet); border-radius: var(--r-card); margin: 0 0 12px; padding: 16px; }
+  .enq.unread { border-color: var(--gold-line); }
+  .enq-top { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; }
+  .enq-main { flex: 1 1 240px; min-width: 0; }
+  .enq-name { font-family: var(--font-display); font-size: 19px; line-height: 1.25; }
+  .enq-for { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 3px; }
+  .enq-meta { font-size: 13px; color: var(--placeholder); line-height: 1.6; margin-top: 6px; }
+  .enq-msg { background: var(--field); border-radius: var(--r-field); color: var(--body); font-size: 14px; line-height: 1.65; margin: 12px 0 0; padding: 12px 14px; overflow-wrap: anywhere; }
+  .enq-contact { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+  .enq-contact a { background: transparent; border: 1px solid var(--border); border-radius: var(--r-field); color: var(--gold-soft); font-size: 13px; font-weight: 600; padding: 8px 14px; text-decoration: none; overflow-wrap: anywhere; }
+  .enq-contact a:hover { border-color: var(--gold); color: var(--gold); }
+  .enq-acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }
+  .warn { background: var(--danger-tint); border: 1px solid rgba(196,112,90,0.45); border-radius: var(--r-field); color: var(--danger); font-size: 13px; line-height: 1.55; margin: 12px 0 0; padding: 10px 13px; }
+  .morewrap { display: flex; justify-content: center; margin-top: 24px; }
+  .skelrow { display: grid; gap: 12px; }
+  .skelrow i { display: block; height: 112px; background: var(--surface); border: 1px solid var(--border-quiet); border-radius: var(--r-card); opacity: 0.6; }
+
+  /* New listing */
+  .backlink { background: none; border: 0; color: var(--gold-soft); cursor: pointer; font-family: var(--font-body); font-size: 14px; padding: 0; margin: 0 0 14px; }
+  .backlink:hover { color: var(--gold); }
+  .steps { font-size: 13px; color: var(--placeholder); margin: -12px 0 30px; line-height: 1.6; }
+  .steps b { color: var(--gold-soft); font-weight: 600; }
+  .drop { background: var(--field); border: 1.5px dashed var(--border); border-radius: var(--r-card); cursor: pointer; display: block; width: 100%; padding: 28px 20px; text-align: center; transition: background 140ms ease, border-color 140ms ease; }
+  .drop:hover, .drop.over { background: var(--field-hover); border-color: var(--gold); }
+  .drop svg { width: 26px; height: 26px; stroke: var(--gold); fill: none; stroke-width: 1.5; margin: 0 auto 10px; display: block; }
+  .drop .big { display: block; font-size: 15px; font-weight: 600; color: var(--text); }
+  .drop .small { display: block; font-size: 13px; color: var(--placeholder); margin-top: 5px; line-height: 1.5; }
+  .shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin: 14px 0 0; }
+  .shots:empty { display: none; }
+  .shot-t { position: relative; aspect-ratio: 4 / 3; background: var(--surface); border: 1px solid var(--border-quiet); border-radius: var(--r-field); overflow: hidden; }
+  .shot-t img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .shot-t.cover { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+  .shot-t .tag { position: absolute; top: 6px; left: 6px; background: var(--gold); color: #1A1509; border-radius: 999px; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; }
+  .shot-t .bar { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: 2px; padding: 5px; background: linear-gradient(to top, rgba(12,12,11,0.94), rgba(12,12,11,0)); }
+  .shot-t .bar button { background: rgba(12,12,11,0.72); border: 1px solid var(--border); border-radius: 5px; color: var(--body); cursor: pointer; font-family: var(--font-body); font-size: 11px; line-height: 1; padding: 5px 7px; }
+  .shot-t .bar button:hover { border-color: var(--gold); color: var(--gold); }
+  .shot-t .bar .grow { flex: 1 1 auto; }
+  .shot-t .size { position: absolute; top: 6px; right: 6px; background: rgba(12,12,11,0.78); border-radius: 4px; color: var(--placeholder); font-size: 9px; padding: 3px 6px; }
+  .shot-t .prog { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(12,12,11,0.8); color: var(--gold-soft); font-size: 11px; font-weight: 600; }
+  .savedbytes { font-size: 13px; color: var(--gold-soft); margin: 12px 0 0; }
+</style>
+<style id="pp-layout">
+/* ── Pixel Pals layout safeguards ─────────────────────────────────────
+   Transparent page so the Wix section shows through seamlessly, sturdy form
+   controls on phones, long words wrap instead of widening the page, and a
+   safety space at the end so nothing is ever cut off. */
+html,body{background:transparent!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-wrap:break-word}
+input,select,textarea,button{max-width:100%}
+table{max-width:100%}
+/* iOS draws date fields wider and taller than other inputs; make them behave. */
+input[type=date],input[type=time],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;display:block}
+input[type=date]::-webkit-date-and-time-value{text-align:start;min-height:1.4em}
+/* Save bars sit in the flow: a sticky bar needs a solid background, and the page has none. */
+.savebar{position:static!important;background:transparent!important}
+/* Width: 80% of the frame on wide screens, never narrower than before (1050px). */
+.wrap{width:max(80%, min(100%, 1050px))!important;max-width:none!important;margin-left:auto!important;margin-right:auto!important}
+@media (max-width:1100px){.wrap{padding-left:20px!important;padding-right:20px!important}}
+@media (max-width:600px){.wrap{padding-left:14px!important;padding-right:14px!important}}
+/* Safety space under the content (counted by the height reporter). */
+.pp-safe-space{display:block;height:140px}
+@media (max-width:760px){.pp-safe-space{height:calc(180px + env(safe-area-inset-bottom, 0px))}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="who">
+      <h1 id="hello">Your Dashboard</h1>
+      <p class="sub" id="sub">Loading&hellip;</p>
+    </div>
+    <button type="button" class="newbtn" id="newListing" hidden>+ New listing</button>
+  </div>
+
+  <div class="empty" id="blocked" hidden>
+    <h2 id="blockedTitle">One thing first</h2>
+    <p id="blockedBody"></p>
+    <a id="blockedAction" href="#" target="_top">Continue</a>
+  </div>
+
+  <div id="app" hidden>
+    <div class="status top" id="topStatus" role="status" aria-live="polite" hidden></div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="tabs" id="tabs" role="tablist">
+      <button type="button" class="tab" role="tab" data-tab="listings"  aria-selected="true">Listings<span class="n" id="nListings"></span></button>
+      <button type="button" class="tab" role="tab" data-tab="enquiries" aria-selected="false">Enquiries<span class="n" id="nEnq"></span></button>
+      <button type="button" class="tab" role="tab" data-tab="profile"   aria-selected="false">Account</button>
+    </div>
+
+    <!-- Listings -->
+    <div class="panel" id="panelListings">
+      <div class="mine" id="mine"></div>
+      <div class="empty" id="noListings" hidden>
+        <h2>No listings yet</h2>
+        <p>Create one and couples will be able to find and book you.</p>
+        <button type="button" class="cta" id="noListingsAction">Create your listing</button>
+      </div>
+    </div>
+
+    <!-- Enquiries -->
+    <div class="panel" id="panelEnquiries" hidden>
+      <div class="tabs" id="enqFilter" role="tablist" style="margin-bottom:18px">
+        <button type="button" class="tab" role="tab" data-filter="all"      aria-selected="true">All</button>
+        <button type="button" class="tab" role="tab" data-filter="new"      aria-selected="false">Unread</button>
+        <button type="button" class="tab" role="tab" data-filter="upcoming" aria-selected="false">Upcoming dates</button>
+        <button type="button" class="tab" role="tab" data-filter="closed"   aria-selected="false">Closed</button>
+      </div>
+      <div class="skelrow" id="enqSkel" aria-hidden="true" hidden><i></i><i></i></div>
+      <div id="enqRows"></div>
+      <div class="empty" id="noEnq" hidden>
+        <h2 id="noEnqTitle">No requests yet</h2>
+        <p id="noEnqBody">When a couple asks about one of your listings it will appear here.</p>
+      </div>
+      <div class="morewrap" id="enqMoreWrap" hidden>
+        <button type="button" class="ghost" id="enqMore">Show more</button>
+      </div>
+    </div>
+
+    <!-- Account -->
+    <div class="panel" id="panelProfile" hidden>
+      <form id="profileForm" novalidate>
+        <fieldset>
+          <legend>Your details</legend>
+          <em class="hint" style="margin:0 0 16px">Private. Couples never see any of this &mdash; what they see lives on each listing.</em>
+          <div class="grid">
+            <label class="field" data-for="displayName">
+              <span class="txt">Your name<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="text" id="displayName" maxlength="90" autocomplete="name">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="field" data-for="phone">
+              <span class="txt">Phone<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="tel" id="phone" autocomplete="tel">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="field" data-for="whatsapp">
+              <span class="txt">WhatsApp</span>
+              <input type="tel" id="whatsapp">
+            </label>
+            <label class="field" data-for="city">
+              <span class="txt">Where you are based</span>
+              <input type="text" id="city">
+            </label>
+            <label class="field span-all" data-for="loginEmail">
+              <span class="txt">Sign-in email</span>
+              <input type="email" id="loginEmail" disabled>
+              <em class="hint">This is how your account is identified, so it cannot be changed here. Contact us if it needs to move.</em>
+            </label>
+          </div>
+        </fieldset>
+        <div class="savebar">
+          <button type="submit" class="primary" id="saveProfile"><span class="spin" aria-hidden="true"></span>Save details</button>
+          <span class="spacer"></span>
+          <span class="dirty" id="profileDirty"></span>
+        </div>
+      </form>
+      <div class="status" id="profileStatus" role="status" aria-live="polite" hidden></div>
+    </div>
+
+    <!-- New listing (was the separate "Become a wedding talent" page) -->
+    <div class="panel" id="panelNew" hidden>
+      <button type="button" class="backlink" id="backToListings">&larr; Back to your listings</button>
+      <h2 class="title" id="newTitle">New listing</h2>
+      <p class="lede" id="newLede">Publish it and couples can find and book you straight away.</p>
+      <p class="steps" id="steps"></p>
+
+      <form id="newForm" novalidate>
+
+        <fieldset id="accountBlock" hidden>
+          <legend>About you</legend>
+          <em class="hint" style="margin:0 0 14px">We only need this once. It stays private &mdash; couples never see it.</em>
+          <div class="grid">
+            <label class="field" data-for="n-displayName">
+              <span class="txt">Your name<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="text" id="n-displayName" maxlength="90" autocomplete="name">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="field" data-for="n-phone">
+              <span class="txt">Your phone<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="tel" id="n-phone" autocomplete="tel" placeholder="+962 79 000 0000">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="field" data-for="n-whatsapp">
+              <span class="txt">WhatsApp</span>
+              <input type="tel" id="n-whatsapp" placeholder="+962 79 000 0000">
+              <em class="hint">How we reach you about bookings.</em>
+            </label>
+            <label class="field" data-for="n-accountCity">
+              <span class="txt">Where you are based</span>
+              <input type="text" id="n-accountCity" placeholder="Amman">
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>What you do<em class="req" aria-hidden="true">*</em></legend>
+          <div class="chips" id="n-category" role="group" aria-label="Category" data-single="true"></div>
+          <em class="err-msg" hidden></em>
+        </fieldset>
+
+        <fieldset>
+          <legend>Your listing</legend>
+          <div class="grid">
+            <label class="field span-all" data-for="n-title">
+              <span class="txt">Business or professional name<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="text" id="n-title" maxlength="120" placeholder="Hanin Odeh Photography">
+              <em class="hint" id="n-slugHint"></em>
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="field span-all" data-for="n-headline">
+              <span class="txt">One line about you<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="text" id="n-headline" maxlength="80" placeholder="Documentary wedding photography, no posing">
+              <em class="hint"><span id="n-headlineCount">0</span> of 80. This is what couples read first.</em>
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="field span-all" data-for="n-bio">
+              <span class="txt">The longer version<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <textarea id="n-bio" maxlength="1500" placeholder="How you work, what is included, what makes a booking with you different."></textarea>
+              <em class="hint"><span id="n-bioCount">0</span> of 1500 characters.</em>
+              <em class="err-msg" hidden></em>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Where you work</legend>
+          <div class="grid">
+            <label class="field" data-for="n-city">
+              <span class="txt">Base city<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="text" id="n-city" placeholder="Amman">
+              <em class="err-msg" hidden></em>
+            </label>
+          </div>
+          <div class="field span-all" style="margin-top:18px">
+            <span class="group-label" id="lblAreas">Cities you cover</span>
+            <div class="chips" role="group" aria-labelledby="lblAreas" id="n-serviceAreas"></div>
+          </div>
+          <div class="switches" id="travelSwitch" style="margin-top:18px"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Pricing</legend>
+          <em class="hint" style="margin:0 0 14px">Numbers only &mdash; no &ldquo;JOD&rdquo; in the box. Couples filter by budget, so a listing without a starting price gets skipped.</em>
+          <div class="grid">
+            <label class="field" data-for="n-priceFrom">
+              <span class="txt">Starting from (JOD)<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="number" id="n-priceFrom" min="0" step="10" placeholder="900">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="field" data-for="n-priceTo">
+              <span class="txt">Up to (JOD)</span>
+              <input type="number" id="n-priceTo" min="0" step="10" placeholder="1800">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="field" data-for="n-priceUnit">
+              <span class="txt">Priced<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <select id="n-priceUnit">
+                <option value="">Choose one</option>
+                <option value="per event">per event</option>
+                <option value="per hour">per hour</option>
+                <option value="per day">per day</option>
+                <option value="per person">per person</option>
+              </select>
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="field" data-for="n-depositPercent">
+              <span class="txt">Deposit (%)</span>
+              <input type="number" id="n-depositPercent" min="0" max="100" step="5" placeholder="30">
+              <em class="err-msg" hidden></em>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Experience</legend>
+          <div class="grid">
+            <label class="field" data-for="n-yearsExperience">
+              <span class="txt">Years working</span>
+              <input type="number" id="n-yearsExperience" min="0" max="70" step="1" placeholder="9">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="field" data-for="n-eventsCompleted">
+              <span class="txt">Weddings so far</span>
+              <input type="number" id="n-eventsCompleted" min="0" max="100000" step="1" placeholder="214">
+              <em class="err-msg" hidden></em>
+            </label>
+          </div>
+          <div class="field span-all" style="margin-top:18px">
+            <span class="group-label" id="lblLangs">Languages you work in</span>
+            <div class="chips" role="group" aria-labelledby="lblLangs" id="n-languages"></div>
+          </div>
+        </fieldset>
+
+        <fieldset id="mediaBlock">
+          <legend>Photos<em class="req" aria-hidden="true">*</em></legend>
+          <input type="file" id="n-filePick" accept="image/jpeg,image/png,image/webp" multiple hidden>
+          <div class="drop" id="n-drop" role="button" tabindex="0" aria-label="Choose photos, or drag them here">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+            <span class="big">Choose photos, or drag them here</span>
+            <span class="small">JPEG, PNG or WebP. At least two: the first becomes your cover photo, the rest are your portfolio. You can reorder them below. Up to 13 in total.</span>
+          </div>
+          <div class="shots" id="n-shots"></div>
+          <p class="savedbytes" id="n-saved" hidden></p>
+          <em class="err-msg" hidden></em>
+        </fieldset>
+
+        <fieldset>
+          <legend>Links and public contact</legend>
+          <div class="grid">
+            <label class="field" data-for="n-instagram">
+              <span class="txt">Instagram handle</span>
+              <input type="text" id="n-instagram" placeholder="haninodeh">
+              <em class="hint">Without the @.</em>
+            </label>
+            <label class="field" data-for="n-website">
+              <span class="txt">Website</span>
+              <input type="text" id="n-website" placeholder="www.yoursite.jo">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="field" data-for="n-publicPhone">
+              <span class="txt">Public phone number</span>
+              <input type="tel" id="n-publicPhone" placeholder="+962 79 000 0000">
+              <em class="hint">Only shown if you switch it on below. Can differ from your account number.</em>
+            </label>
+          </div>
+          <div class="switches" id="phoneSwitch" style="margin-top:18px"></div>
+        </fieldset>
+
+        <div class="savebar">
+          <button type="submit" class="primary" id="publishBtn"><span class="spin" aria-hidden="true"></span>Publish listing</button>
+          <span class="spacer"></span>
+          <span class="dirty" id="newProgress"></span>
+        </div>
+      </form>
+      <div class="status" id="newStatus" role="status" aria-live="polite" hidden></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var $ = function (id) { return document.getElementById(id); };
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+  function post(m) { try { window.parent.postMessage(m, "*"); } catch (e) {} }
+  function val(id) { return $(id).value.trim(); }
+  function numOf(id) { var raw = val(id); if (raw === "") return null; var n = Number(raw); return isNaN(n) ? null : n; }
+
+  var D = null, routes = {}, SITE = "";
+  var view = "listings", firstData = true, publishing = false;
+  var enqFilter = "all", enqLoaded = 0, busy = {}, baseline = null;
+
+  /* The body is the scroll box (see the reporter at the end). While the iframe
+     is a fixed height it scrolls itself; once the site-wide listener sizes it to
+     its content there is nothing to scroll inside, so the page scrolls instead. */
+  function scrollToEl(node, gap) {
+    var b = document.body;
+    var top = Math.max(0, Math.round(node.getBoundingClientRect().top - b.getBoundingClientRect().top + b.scrollTop - (gap || 24)));
+    if (b.scrollHeight > b.clientHeight + 2) b.scrollTo({ top: top, behavior: "smooth" });
+    else post({ type: "dash:scrollTo", y: top });
+  }
+
+  /* A relative href inside the iframe resolves against Wix's sandbox domain,
+     so the page navigates instead. Velo sends the real site base for _blank links. */
+  function abs(u) {
+    if (!u || /^[a-z][a-z0-9+.\-]*:/i.test(u) || !SITE) return u;
+    return SITE.replace(/\/+$/, "") + (u.charAt(0) === "/" ? u : "/" + u);
+  }
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a) return;
+    var href = a.getAttribute("href");
+    if (!href || href.charAt(0) === "#") return;
+    if (/^(mailto:|tel:|sms:|https?:)/i.test(href)) return;
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    post({ type: "iframe:navigate", url: href });
+  });
+
+  function fmtDate(v) { if (!v) return null; var d = new Date(v); return isNaN(d.getTime()) ? null : d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }); }
+  function daysUntil(v) { if (!v) return null; var d = new Date(v); if (isNaN(d.getTime())) return null; d.setHours(0,0,0,0); var t = new Date(); t.setHours(0,0,0,0); return Math.round((d - t) / 86400000); }
+  function status(id, text, kind) { var s = $(id); s.textContent = text; s.className = "status" + (id === "topStatus" ? " top " : " ") + kind; s.hidden = !text; }
+
+  /* ═════════════ views ═════════════
+     listings · enquiries · profile are tabs; "new" is the listing form, opened
+     from "+ New listing", and the first thing a talent with no listings sees. */
+  function showView(v) {
+    view = v;
+    Array.prototype.forEach.call($("tabs").querySelectorAll(".tab"), function (t) { t.setAttribute("aria-selected", String(t.dataset.tab === v)); });
+    $("panelListings").hidden  = v !== "listings";
+    $("panelEnquiries").hidden = v !== "enquiries";
+    $("panelProfile").hidden   = v !== "profile";
+    $("panelNew").hidden       = v !== "new";
+    $("newListing").hidden     = v === "new" || !D;
+    if (v === "enquiries" && !enqLoaded) loadEnq(0);
+    if (v === "new") prepareForm();
+  }
+  $("tabs").addEventListener("click", function (e) {
+    var b = e.target.closest(".tab");
+    if (!b || b.dataset.tab === view) return;
+    status("topStatus", "", "ok");
+    showView(b.dataset.tab);
+  });
+  function openNew() { status("topStatus", "", "ok"); showView("new"); scrollToEl($("app"), 0); }
+  $("newListing").addEventListener("click", openNew);
+  $("noListingsAction").addEventListener("click", openNew);
+  $("backToListings").addEventListener("click", function () { showView("listings"); scrollToEl($("app"), 0); });
+
+  /* ═════════════ listings ═════════════ */
+  function drawListings(items) {
+    var host = $("mine");
+    host.innerHTML = "";
+    $("noListings").hidden = items.length > 0;
+    items.forEach(function (t) {
+      var c = el("div", "card2");
+      var m = el("div", "m");
+      if (t.image) {
+        var im = document.createElement("img");
+        im.src = t.image; im.alt = ""; im.loading = "lazy";
+        im.addEventListener("error", function () { m.className = "m none"; m.textContent = "No photo"; });
+        m.appendChild(im);
+      } else { m.className = "m none"; m.textContent = "No photo"; }
+      c.appendChild(m);
+
+      var b = el("div", "b");
+      b.appendChild(el("div", "cg", t.category));
+      b.appendChild(el("div", "nm", t.title));
+      var bits = [];
+      if (t.priceFrom != null) bits.push("From JOD " + t.priceFrom + (t.priceUnit ? " " + t.priceUnit : ""));
+      bits.push(t.portfolioCount + (t.portfolioCount === 1 ? " photo" : " photos"));
+      b.appendChild(el("div", "mt", bits.join("  \u00b7  ")));
+
+      var flags = el("div", "flags");
+      flags.appendChild(t.state === "live" ? el("span", "pill live", "Live")
+        : t.state === "rejected" ? el("span", "pill warn", "Taken down by our team")
+        : el("span", "pill mute", "Hidden"));
+      if (t.featured) flags.appendChild(el("span", "pill live", "Featured"));
+      b.appendChild(flags);
+      if (t.state === "rejected" && t.rejectionReason) b.appendChild(el("div", "why", t.rejectionReason));
+
+      var acts = el("div", "acts");
+      if (t.editLink) { var ed = el("a", "act q", "Edit"); ed.href = t.editLink; acts.appendChild(ed); }
+      if (t.state === "live" && t.slug) {
+        var vw = el("a", "act q", "View");
+        vw.href = abs((routes.profile || "/talent") + "/" + t.slug);
+        vw.target = "_blank"; vw.rel = "noopener";
+        acts.appendChild(vw);
+      }
+      b.appendChild(acts);
+      c.appendChild(b);
+      host.appendChild(c);
+    });
+  }
+
+  /* ═════════════ enquiries ═════════════ */
+  $("enqFilter").addEventListener("click", function (e) {
+    var b = e.target.closest(".tab");
+    if (!b || b.dataset.filter === enqFilter) return;
+    enqFilter = b.dataset.filter;
+    Array.prototype.forEach.call($("enqFilter").querySelectorAll(".tab"), function (t) { t.setAttribute("aria-selected", String(t === b)); });
+    loadEnq(0);
+  });
+  function loadEnq(skip) {
+    if (!skip) { $("enqRows").innerHTML = ""; $("enqSkel").hidden = false; $("noEnq").hidden = true; $("enqMoreWrap").hidden = true; }
+    post({ type: "dash:enquiries", filter: enqFilter, skip: skip || 0 });
+  }
+  $("enqMore").addEventListener("click", function () { $("enqMore").disabled = true; $("enqMore").textContent = "Loading\u2026"; loadEnq(enqLoaded); });
+  function setEnqStatus(id, st, btn) { if (busy[id]) return; busy[id] = true; if (btn) btn.disabled = true; post({ type: "dash:enqStatus", id: id, status: st }); }
+
+  function drawEnq(items, append) {
+    var host = $("enqRows");
+    $("enqSkel").hidden = true;
+    if (!append) host.innerHTML = "";
+    items.forEach(function (e2) {
+      var row = el("div", "enq" + (e2.status === "new" ? " unread" : ""));
+      row.dataset.id = e2.id;
+      var top = el("div", "enq-top"), main = el("div", "enq-main");
+      main.appendChild(el("div", "enq-for", e2.listing));
+      main.appendChild(el("div", "enq-name", e2.name));
+      var bits = [], dl = daysUntil(e2.eventDate);
+      if (e2.eventDate) bits.push(fmtDate(e2.eventDate) + (dl !== null && dl >= 0 ? " (in " + dl + " day" + (dl === 1 ? "" : "s") + ")" : " (past)"));
+      if (e2.guestCount != null) bits.push(e2.guestCount + " guests");
+      if (e2.budget != null) bits.push("Budget JOD " + e2.budget);
+      if (e2.submittedAt) bits.push("Asked " + fmtDate(e2.submittedAt));
+      main.appendChild(el("div", "enq-meta", bits.join("  \u00b7  ")));
+      var fl = el("div", "flags");
+      fl.appendChild(el("span", "pill " + (e2.status === "new" ? "warn" : e2.status === "closed" ? "mute" : "live"),
+        e2.status === "new" ? "New" : e2.status === "read" ? "Read" : e2.status === "replied" ? "Replied" : "Closed"));
+      main.appendChild(fl);
+      top.appendChild(main);
+
+      var acts = el("div", "enq-acts");
+      if (e2.status !== "replied" && e2.status !== "closed") {
+        var rp = el("button", "act go", "Mark replied"); rp.type = "button";
+        rp.addEventListener("click", function () { setEnqStatus(e2.id, "replied", rp); }); acts.appendChild(rp);
+      }
+      if (e2.status !== "closed") {
+        var cl = el("button", "act q", "Close"); cl.type = "button";
+        cl.addEventListener("click", function () { setEnqStatus(e2.id, "closed", cl); }); acts.appendChild(cl);
+      } else {
+        var re = el("button", "act q", "Reopen"); re.type = "button";
+        re.addEventListener("click", function () { setEnqStatus(e2.id, "read", re); }); acts.appendChild(re);
+      }
+      top.appendChild(acts);
+      row.appendChild(top);
+      if (e2.message) row.appendChild(el("div", "enq-msg", e2.message));
+      var con = el("div", "enq-contact");
+      if (e2.email) { var a1 = el("a", null, e2.email); a1.href = "mailto:" + e2.email + "?subject=" + encodeURIComponent("Re: your enquiry about " + e2.listing); con.appendChild(a1); }
+      if (e2.phone) {
+        var a2 = el("a", null, e2.phone); a2.href = "tel:" + e2.phone.replace(/\s+/g, ""); con.appendChild(a2);
+        var wa = el("a", null, "WhatsApp"); wa.href = "https://wa.me/" + e2.phone.replace(/[^0-9]/g, ""); wa.target = "_blank"; wa.rel = "noopener"; con.appendChild(wa);
+      }
+      row.appendChild(con);
+      if (!e2.emailSent) row.appendChild(el("div", "warn", "We could not email you about this one, so you are seeing it here first."));
+      host.appendChild(row);
+    });
+  }
+
+  /* ═════════════ account ═════════════ */
+  var PFIELDS = ["displayName", "phone", "whatsapp", "city"];
+  function profileSnapshot() { return JSON.stringify(PFIELDS.map(val)); }
+  function tickProfile() { $("profileDirty").innerHTML = baseline && profileSnapshot() !== baseline ? "<b>Unsaved changes</b>" : "No unsaved changes"; }
+
+  function wrapOf(n) { return n.closest("label.field") || n.closest("fieldset") || n.parentNode; }
+  function setErr(n, m) { var w = wrapOf(n); w.classList.add("invalid"); var s = w.querySelector(".err-msg"); if (s) { s.textContent = m; s.hidden = false; } }
+  function clearErr(n) { var w = wrapOf(n); w.classList.remove("invalid"); var s = w.querySelector(".err-msg"); if (s) { s.hidden = true; s.textContent = ""; } }
+  function clearAllIn(form) {
+    Array.prototype.forEach.call(form.querySelectorAll(".invalid"), function (w) { w.classList.remove("invalid"); });
+    Array.prototype.forEach.call(form.querySelectorAll(".err-msg"), function (s) { s.hidden = true; s.textContent = ""; });
+  }
+
+  $("profileForm").addEventListener("input", function (e) { if (e.target.matches("input")) { clearErr(e.target); tickProfile(); } });
+  $("profileForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    clearAllIn($("profileForm"));
+    var first = null;
+    if (!val("displayName")) { setErr($("displayName"), "We need a name."); first = $("displayName"); }
+    if (!val("phone")) { setErr($("phone"), "We need a number to reach you on."); if (!first) first = $("phone"); }
+    if (first) { status("profileStatus", "A couple of fields need attention.", "err"); first.focus({ preventScroll: true }); scrollToEl(first, 120); return; }
+    $("saveProfile").classList.add("busy");
+    status("profileStatus", "Saving\u2026", "busy");
+    post({ type: "dash:saveProfile", patch: { displayName: val("displayName"), phone: val("phone"), whatsapp: val("whatsapp") || null, city: val("city") || null } });
+  });
+
+  /* ═════════════ new listing ═════════════ */
+  var CITIES = ["Amman","Zarqa","Irbid","Madaba","Salt","Jerash","Aqaba","Dead Sea","Petra","Ajloun","Mafraq"];
+  var LANGS  = ["Arabic","English","French","Turkish","Russian","German"];
+  var NUMS   = ["n-priceFrom","n-priceTo","n-depositPercent","n-yearsExperience","n-eventsCompleted"];
+  var MAX_SHOTS = 13, MIN_SHOTS = 2, MAX_SOURCE_BYTES = 12 * 1024 * 1024, RESIZE_TO = 1600, JPEG_Q = 0.82;
+  var shots = [], nextId = 1, uploadIndex = -1, needsAccount = false, FORM = {}, formBuilt = false;
+  var catGroup = $("n-category");
+
+  function buildChips(group, values) {
+    group.innerHTML = "";
+    values.forEach(function (v) { var b = el("button", "chip", v); b.type = "button"; b.setAttribute("aria-pressed", "false"); b.dataset.value = v; group.appendChild(b); });
+    if (group.dataset.wired) return;
+    group.dataset.wired = "1";
+    group.addEventListener("click", function (e) {
+      var chip = e.target.closest(".chip"); if (!chip) return;
+      if (group.dataset.single === "true") {
+        var was = chip.getAttribute("aria-pressed") === "true";
+        Array.prototype.forEach.call(group.querySelectorAll(".chip"), function (c) { c.setAttribute("aria-pressed", "false"); });
+        if (!was) chip.setAttribute("aria-pressed", "true");
+      } else chip.setAttribute("aria-pressed", chip.getAttribute("aria-pressed") === "true" ? "false" : "true");
+      clearErr(group); tick();
+    });
+  }
+  function readChips(group) { return Array.prototype.slice.call(group.querySelectorAll('.chip[aria-pressed="true"]')).map(function (c) { return c.dataset.value; }); }
+  function buildSwitch(hostId, label, onText, offText) {
+    var host = $(hostId); if (host.children.length) return;
+    var b = el("button", "sw"); b.type = "button"; b.setAttribute("role", "switch"); b.setAttribute("aria-checked", "false");
+    b.appendChild(el("span", "track")); b.appendChild(el("span", "lbl", label)); b.appendChild(el("span", "state", offText));
+    host.appendChild(b);
+    b.addEventListener("click", function () { var on = b.getAttribute("aria-checked") !== "true"; b.setAttribute("aria-checked", String(on)); b.querySelector(".state").textContent = on ? onText : offText; tick(); });
+  }
+  function switchOn(hostId) { var b = $(hostId).querySelector(".sw"); return b ? b.getAttribute("aria-checked") === "true" : false; }
+  function setSwitch(hostId, on, onText, offText) { var b = $(hostId).querySelector(".sw"); if (!b) return; b.setAttribute("aria-checked", String(on)); b.querySelector(".state").textContent = on ? onText : offText; }
+
+  /* Builds the form once; each time it opens, refreshes the parts that depend on the account. */
+  function prepareForm() {
+    if (!formBuilt) {
+      buildChips(catGroup, FORM.categories || []);
+      buildChips($("n-serviceAreas"), FORM.cities || CITIES);
+      buildChips($("n-languages"), FORM.languages || LANGS);
+      buildSwitch("travelSwitch", "I will travel outside those cities", "Yes", "No");
+      buildSwitch("phoneSwitch", "Show my public number on my listing", "Shown", "Hidden");
+      formBuilt = true;
+    }
+    var count = (D && D.counts && D.counts.listingsTotal) || 0;
+    $("newTitle").textContent = count ? "New listing" : "Create your first listing";
+    $("backToListings").hidden = !count;
+    needsAccount = !!FORM.needsAccount;
+    $("accountBlock").hidden = !needsAccount;
+    if (needsAccount && !val("n-displayName")) $("n-displayName").value = (D && D.profile && D.profile.displayName) || FORM.suggestedName || "";
+    $("steps").innerHTML = needsAccount
+      ? "Add a few private details about you and your first listing, then publish."
+      : "You have " + count + (count === 1 ? " listing" : " listings") + " already. This adds <b>another one</b> to your account.";
+    tick();
+  }
+
+  /* slug preview — must match backend/talentSubmit.jsw */
+  var AR_MAP = {"\u0627":"a","\u0623":"a","\u0625":"i","\u0622":"a","\u0621":"","\u0624":"w","\u0626":"y","\u0628":"b","\u062a":"t","\u062b":"th","\u062c":"j","\u062d":"h","\u062e":"kh","\u062f":"d","\u0630":"dh","\u0631":"r","\u0632":"z","\u0633":"s","\u0634":"sh","\u0635":"s","\u0636":"d","\u0637":"t","\u0638":"z","\u0639":"a","\u063a":"gh","\u0641":"f","\u0642":"q","\u0643":"k","\u0644":"l","\u0645":"m","\u0646":"n","\u0647":"h","\u0648":"w","\u064a":"y","\u0649":"a","\u0629":"h","\u0640":"","\u0660":"0","\u0661":"1","\u0662":"2","\u0663":"3","\u0664":"4","\u0665":"5","\u0666":"6","\u0667":"7","\u0668":"8","\u0669":"9"};
+  function slugify(s) {
+    return String(s).replace(/[\u064b-\u0652\u0670\u0640]/g, "").split("").map(function (ch) { return AR_MAP[ch] !== undefined ? AR_MAP[ch] : ch; }).join("")
+      .toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+  }
+  $("n-title").addEventListener("input", function () { var s = slugify(val("n-title")); $("n-slugHint").textContent = s ? "Your page will be 3orsna.com/talent/" + s : ""; });
+  $("n-headline").addEventListener("input", function () { $("n-headlineCount").textContent = String($("n-headline").value.length); });
+  $("n-bio").addEventListener("input", function () { $("n-bioCount").textContent = String($("n-bio").value.length); });
+
+  /* photos: checked, resized and previewed in the browser; uploaded only on publish */
+  function fmtBytes(n) { return n < 1024 ? n + " B" : n < 1048576 ? Math.round(n / 1024) + " KB" : (n / 1048576).toFixed(1) + " MB"; }
+  function readAsDataUrl(file) { return new Promise(function (res, rej) { var r = new FileReader(); r.onload = function () { res(r.result); }; r.onerror = function () { rej(new Error("read")); }; r.readAsDataURL(file); }); }
+  function loadImage(src) { return new Promise(function (res, rej) { var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { rej(new Error("decode")); }; im.src = src; }); }
+  /* Canvas re-encode — also strips EXIF (phone photos carry GPS coordinates). */
+  async function shrink(file) {
+    var img = await loadImage(await readAsDataUrl(file));
+    var scale = Math.min(1, RESIZE_TO / Math.max(img.naturalWidth, img.naturalHeight));
+    var c = document.createElement("canvas"); c.width = Math.max(1, Math.round(img.naturalWidth * scale)); c.height = Math.max(1, Math.round(img.naturalHeight * scale));
+    var ctx = c.getContext("2d"); ctx.imageSmoothingQuality = "high"; ctx.drawImage(img, 0, 0, c.width, c.height);
+    var out = c.toDataURL("image/jpeg", JPEG_Q), b64 = out.slice(out.indexOf(",") + 1);
+    return { base64: b64, bytes: Math.floor(b64.length * 3 / 4), preview: out };
+  }
+  function drawShots() {
+    var host = $("n-shots"); host.innerHTML = "";
+    shots.forEach(function (sh, i) {
+      var t = el("div", "shot-t" + (i === 0 ? " cover" : ""));
+      var im = document.createElement("img"); im.src = sh.preview; im.alt = i === 0 ? "Cover photo preview" : "Portfolio image " + i + " preview"; t.appendChild(im);
+      if (i === 0) t.appendChild(el("span", "tag", "Cover"));
+      t.appendChild(el("span", "size", fmtBytes(sh.bytes)));
+      var prog = el("div", "prog"); prog.hidden = true; t.appendChild(prog);
+      var bar = el("div", "bar");
+      if (i > 0) { var mk = el("button", null, "Make cover"); mk.type = "button"; mk.addEventListener("click", function () { shots.unshift(shots.splice(i, 1)[0]); drawShots(); tick(); }); bar.appendChild(mk); }
+      bar.appendChild(el("span", "grow"));
+      var rm = el("button", null, "\u00d7"); rm.type = "button"; rm.setAttribute("aria-label", "Remove this photo");
+      rm.addEventListener("click", function () { shots.splice(i, 1); drawShots(); tick(); updateSaved(); });
+      bar.appendChild(rm); t.appendChild(bar); host.appendChild(t);
+    });
+  }
+  function updateSaved() {
+    var before = shots.reduce(function (a, s) { return a + s.originalBytes; }, 0), after = shots.reduce(function (a, s) { return a + s.bytes; }, 0);
+    var node = $("n-saved");
+    if (!shots.length || before <= after) { node.hidden = true; return; }
+    node.textContent = shots.length + (shots.length === 1 ? " photo" : " photos") + ", resized from " + fmtBytes(before) + " to " + fmtBytes(after) + " so your page loads quickly.";
+    node.hidden = false;
+  }
+  async function addFiles(list) {
+    var files = Array.prototype.slice.call(list || []); if (!files.length) return;
+    clearErr($("mediaBlock"));
+    var rejected = [];
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      if (shots.length >= MAX_SHOTS) { rejected.push("only " + MAX_SHOTS + " photos allowed"); break; }
+      if (!/^image\/(jpeg|png|webp)$/i.test(f.type)) { rejected.push(f.name + " is not a JPEG, PNG or WebP"); continue; }
+      if (f.size > MAX_SOURCE_BYTES) { rejected.push(f.name + " is over " + fmtBytes(MAX_SOURCE_BYTES)); continue; }
+      try { var out = await shrink(f); shots.push({ id: nextId++, name: f.name, preview: out.preview, base64: out.base64, bytes: out.bytes, originalBytes: f.size, uploaded: null }); drawShots(); }
+      catch (err) { rejected.push(f.name + " could not be read"); }
+    }
+    tick(); updateSaved();
+    if (rejected.length) setErr($("mediaBlock"), rejected.join(". ") + ".");
+  }
+  $("n-drop").addEventListener("click", function () { $("n-filePick").click(); });
+  $("n-drop").addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("n-filePick").click(); } });
+  $("n-filePick").addEventListener("change", function (e) { addFiles(e.target.files); e.target.value = ""; });
+  ["dragenter", "dragover"].forEach(function (ev) { $("n-drop").addEventListener(ev, function (e) { e.preventDefault(); $("n-drop").classList.add("over"); }); });
+  ["dragleave", "drop"].forEach(function (ev) { $("n-drop").addEventListener(ev, function (e) { e.preventDefault(); $("n-drop").classList.remove("over"); }); });
+  $("n-drop").addEventListener("drop", function (e) { if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files); });
+  ["dragover", "drop"].forEach(function (ev) { window.addEventListener(ev, function (e) { if (!e.target.closest || !e.target.closest("#n-drop")) e.preventDefault(); }); });
+
+  function required() {
+    var need = [
+      ["Category", readChips(catGroup).length > 0], ["Name", !!val("n-title")], ["One-liner", !!val("n-headline")],
+      ["Description", !!val("n-bio")], ["Base city", !!val("n-city")], ["Starting price", numOf("n-priceFrom") !== null],
+      ["Pricing unit", !!val("n-priceUnit")], ["Photos", shots.length >= MIN_SHOTS]
+    ];
+    if (needsAccount) { need.unshift(["Your phone", !!val("n-phone")]); need.unshift(["Your name", !!val("n-displayName")]); }
+    return need;
+  }
+  function tick() {
+    var need = required(), done = need.filter(function (n) { return n[1]; }).length;
+    $("newProgress").innerHTML = done === need.length ? "<b>Ready to publish</b>" : "<b>" + done + "</b> of " + need.length + " required fields done";
+  }
+  function validate() {
+    clearAllIn($("newForm"));
+    var first = null;
+    function bad(node, m) { setErr(node, m); if (!first) first = node; }
+    function badId(id, m) { bad($(id), m); }
+    if (needsAccount) {
+      if (!val("n-displayName")) badId("n-displayName", "We need your name.");
+      if (!val("n-phone")) badId("n-phone", "We need a number to reach you on.");
+    }
+    if (!readChips(catGroup).length) bad(catGroup, "Pick what you do.");
+    if (!val("n-title")) badId("n-title", "Give your listing a name.");
+    if (!val("n-headline")) badId("n-headline", "One line couples will read first.");
+    if (!val("n-bio")) badId("n-bio", "Tell couples how you work.");
+    if (!val("n-city")) badId("n-city", "Which city are you based in?");
+    if (numOf("n-priceFrom") === null) badId("n-priceFrom", "A starting price is required.");
+    if (!val("n-priceUnit")) badId("n-priceUnit", "Priced per what?");
+    var lo = numOf("n-priceFrom"), hi = numOf("n-priceTo");
+    if (lo !== null && hi !== null && lo > hi) badId("n-priceTo", "Upper figure is below " + lo + ".");
+    var dep = numOf("n-depositPercent");
+    if (dep !== null && (dep < 0 || dep > 100)) badId("n-depositPercent", "Between 0 and 100.");
+    NUMS.forEach(function (k) { var raw = val(k); if (raw !== "" && (isNaN(Number(raw)) || Number(raw) < 0)) badId(k, "Enter a number, or leave it blank."); });
+    if (shots.length < MIN_SHOTS) bad($("mediaBlock"), shots.length === 0
+      ? "Add at least " + MIN_SHOTS + " photos. The first becomes your cover, the rest are your portfolio."
+      : "Add at least one more photo. Couples browse your portfolio before they get in touch.");
+    return first;
+  }
+
+  $("newForm").addEventListener("input", function (e) { if (e.target.matches("input, textarea, select")) { clearErr(e.target); tick(); } });
+  $("newForm").addEventListener("change", function (e) { if (e.target.matches("select")) tick(); });
+  $("newForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (publishing) return;
+    var bad = validate();
+    if (bad) {
+      status("newStatus", "A few fields need attention before this can be published.", "err");
+      var f = bad.matches("input, textarea, select") ? bad : bad.querySelector("input, textarea, select, .chip");
+      if (f) f.focus({ preventScroll: true });
+      scrollToEl(bad, 120);
+      return;
+    }
+    publishing = true;
+    $("publishBtn").classList.add("busy");
+    uploadIndex = -1;
+    uploadNext();
+  });
+
+  /* Photos go up one at a time, then the listing is written. Anything already
+     uploaded on an earlier attempt is skipped, so a retry resumes. */
+  function uploadNext() {
+    uploadIndex += 1;
+    while (uploadIndex < shots.length && shots[uploadIndex].uploaded) uploadIndex += 1;
+    if (uploadIndex >= shots.length) return sendListing();
+    var sh = shots[uploadIndex], tile = $("n-shots").children[uploadIndex];
+    if (tile) { var p = tile.querySelector(".prog"); p.textContent = "Uploading"; p.hidden = false; }
+    status("newStatus", "Uploading photo " + (uploadIndex + 1) + " of " + shots.length + "\u2026", "busy");
+    post({ type: "dash:upload", index: uploadIndex, base64: sh.base64, name: sh.name });
+  }
+  function sendListing() {
+    status("newStatus", "Publishing your listing\u2026", "busy");
+    post({
+      type: "dash:submit",
+      account: needsAccount ? { displayName: val("n-displayName"), phone: val("n-phone"), whatsapp: val("n-whatsapp") || null, city: val("n-accountCity") || null } : null,
+      media: {
+        heroImage: shots[0] ? shots[0].uploaded : null,
+        portfolio: shots.slice(1).map(function (sh, i) { return { type: "image", itemId: String(i), src: sh.uploaded, title: "", description: "" }; })
+      },
+      listing: {
+        category: readChips(catGroup)[0], title: val("n-title"), headline: val("n-headline"), bio: val("n-bio"), city: val("n-city"),
+        serviceAreas: readChips($("n-serviceAreas")), willTravel: switchOn("travelSwitch"),
+        priceFrom: numOf("n-priceFrom"), priceTo: numOf("n-priceTo"), priceUnit: val("n-priceUnit"), depositPercent: numOf("n-depositPercent"),
+        yearsExperience: numOf("n-yearsExperience"), eventsCompleted: numOf("n-eventsCompleted"), languages: readChips($("n-languages")),
+        instagram: val("n-instagram") || null, website: val("n-website") || null, publicPhone: val("n-publicPhone") || null, showPhone: switchOn("phoneSwitch")
+      }
+    });
+  }
+  function resetForm() {
+    $("newForm").reset();
+    clearAllIn($("newForm"));
+    [catGroup, $("n-serviceAreas"), $("n-languages")].forEach(function (g) { Array.prototype.forEach.call(g.querySelectorAll(".chip"), function (c) { c.setAttribute("aria-pressed", "false"); }); });
+    setSwitch("travelSwitch", false, "Yes", "No"); setSwitch("phoneSwitch", false, "Shown", "Hidden");
+    shots = []; drawShots(); updateSaved();
+    $("n-slugHint").textContent = ""; $("n-headlineCount").textContent = "0"; $("n-bioCount").textContent = "0";
+    $("newStatus").hidden = true;
+    tick();
+  }
+
+  /* ═════════════ from Velo ═════════════ */
+  var answered = false;
+  window.addEventListener("message", function (event) {
+    var d = event.data;
+    if (!d || typeof d !== "object") return;
+
+    if (d.type === "dash:blocked") {
+      answered = true;
+      $("app").hidden = true; $("blocked").hidden = false; $("newListing").hidden = true; $("sub").textContent = "";
+      $("blockedTitle").textContent = d.title || "One thing first";
+      $("blockedBody").textContent = d.message || "";
+      var a = $("blockedAction");
+      if (d.actionHref) { a.hidden = false; a.textContent = d.actionLabel || "Continue"; a.href = d.actionHref; } else a.hidden = true;
+      return;
+    }
+
+    if (d.type === "dash:data") {
+      answered = true;
+      D = d; SITE = d.baseUrl || SITE; routes = d.routes || {}; FORM = d.form || FORM;
+      $("app").hidden = false; $("blocked").hidden = true;
+
+      var p = d.profile || {}, c = d.counts || {};
+      $("hello").textContent = p.displayName ? "Hello, " + p.displayName.split(" ")[0] : "Your Dashboard";
+      $("sub").textContent = !c.listingsTotal
+        ? "Welcome. Create your first listing below and couples can find you straight away."
+        : c.listingsLive + " of " + c.listingsTotal + (c.listingsTotal === 1 ? " listing" : " listings") + " live" +
+          (c.enquiriesUnread ? "  \u00b7  " + c.enquiriesUnread + " new request" + (c.enquiriesUnread === 1 ? "" : "s") : "");
+
+      var st = $("stats"); st.innerHTML = "";
+      st.hidden = !c.listingsTotal;                 // a row of zeros says nothing to a new talent
+      [[c.listingsLive || 0, "Live listings", false], [c.enquiriesUnread || 0, "New requests", (c.enquiriesUnread || 0) > 0],
+       [c.enquiriesUpcoming || 0, "Upcoming dates", false], [c.enquiriesTotal || 0, "Requests all time", false]
+      ].forEach(function (x) { var box = el("div"); box.appendChild(el("div", "n" + (x[2] ? " alert" : ""), String(x[0]))); box.appendChild(el("p", "k", x[1])); st.appendChild(box); });
+
+      $("nListings").textContent = " " + (c.listingsTotal || 0);
+      $("nEnq").textContent = " " + (c.enquiriesUnread || 0);
+      drawListings(d.listings || []);
+
+      PFIELDS.forEach(function (k) { $(k).value = p[k] == null ? "" : String(p[k]); });
+      $("loginEmail").value = p.loginEmail || "";
+      baseline = profileSnapshot(); tickProfile();
+
+      if (firstData) { firstData = false; showView(c.listingsTotal ? "listings" : "new"); }
+      else showView(view);
+    }
+
+    if (d.type === "dash:enquiries") {
+      $("enqMore").disabled = false; $("enqMore").textContent = "Show more";
+      if (!d.skip) enqLoaded = 0;
+      drawEnq(d.items || [], d.skip > 0);
+      enqLoaded += (d.items || []).length;
+      if (d.unavailable || (D && D.enquiriesAvailable === false)) {
+        $("noEnq").hidden = false; $("noEnqTitle").textContent = "Requests are not set up yet";
+        $("noEnqBody").textContent = "The TalentEnquiries collection has not been created, so booking requests cannot be shown here yet. Your listings are unaffected.";
+        $("enqMoreWrap").hidden = true; return;
+      }
+      if (!d.total) {
+        $("noEnq").hidden = false;
+        $("noEnqTitle").textContent = enqFilter === "new" ? "Nothing unread" : enqFilter === "upcoming" ? "No upcoming dates" : enqFilter === "closed" ? "Nothing closed" : "No requests yet";
+        $("noEnqBody").textContent = enqFilter === "all" ? "When a couple asks about one of your listings it will appear here." : "Try a different filter.";
+        $("enqMoreWrap").hidden = true;
+      } else { $("noEnq").hidden = true; $("enqMoreWrap").hidden = !d.hasMore; }
+    }
+
+    if (d.type === "dash:enqResult") {
+      busy[d.id] = false;
+      if (d.ok) { loadEnq(0); post({ type: "dash:refresh" }); }
+      else {
+        var row = $("enqRows").querySelector('.enq[data-id="' + d.id + '"]');
+        if (row) Array.prototype.forEach.call(row.querySelectorAll("button"), function (b) { b.disabled = false; });
+        status("topStatus", d.message || "That did not work.", "err");
+      }
+    }
+
+    if (d.type === "dash:profileSaved") {
+      $("saveProfile").classList.remove("busy");
+      if (d.ok) { baseline = profileSnapshot(); tickProfile(); status("profileStatus", d.message || "Saved.", "ok"); post({ type: "dash:refresh" }); }
+      else status("profileStatus", d.message || "That did not save.", "err");
+    }
+
+    if (d.type === "dash:uploaded") {
+      var tile = $("n-shots").children[d.index];
+      if (d.ok) {
+        if (shots[d.index]) shots[d.index].uploaded = d.url;
+        if (tile) tile.querySelector(".prog").hidden = true;
+        uploadNext();
+      } else {
+        publishing = false;
+        $("publishBtn").classList.remove("busy");
+        if (tile) { var pr = tile.querySelector(".prog"); pr.textContent = "Failed"; pr.hidden = false; }
+        status("newStatus", d.message || ("Photo " + (d.index + 1) + " would not upload. Remove it, or press Publish to try again."), "err");
+      }
+    }
+
+    if (d.type === "dash:submitted") {
+      publishing = false;
+      $("publishBtn").classList.remove("busy");
+      if (d.ok) {
+        resetForm();
+        // The page reloads the dashboard data next; land on Listings with the news on top.
+        view = "listings";
+        status("topStatus", d.message || "Your listing is live. Couples can find you in the directory now.", "ok");
+        showView("listings");
+        scrollToEl($("app"), 0);
+      } else {
+        status("newStatus", d.message || "That did not save. Try again in a moment.", "err");
+      }
+    }
+  });
+
+  /* Say "ready" every second until the page answers — its listener may attach
+     after this iframe loads, and a single message would be lost. */
+  (function ping(n) {
+    if (answered) return;
+    post({ type: "dash:ready" });
+    if (n < 30) setTimeout(function () { ping(n + 1); }, 1000);
+  })(0);
+})();
+</script>
+<div class="pp-safe-space" aria-hidden="true"></div>
+<!-- Pixel Pals iframe auto-height reporter v3 (body is the scroll box).
+     Scrolls inside the iframe until the site-wide listener sizes it.
+     Once the site-wide listener sizes the iframe, there is nothing left to scroll. -->
+<script>
+(function () {
+  if (window.__ppReporter) return;
+  window.__ppReporter = true;
+
+  var s = document.createElement('style');
+  s.textContent =
+    'html{height:100%!important;min-height:0!important;overflow:hidden!important}' +
+    'body{height:100%!important;min-height:0!important;margin:0;overflow-x:hidden!important;overflow-y:auto!important;' +
+      '-webkit-overflow-scrolling:touch;overscroll-behavior:auto;scrollbar-width:none;-ms-overflow-style:none;display:flow-root}' +
+    'html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0;display:none}';
+  document.head.appendChild(s);
+
+  var body = document.body, last = -1, raf = 0;
+
+  // Height of the content itself, not the scroll box (so the iframe can shrink as well as grow)
+  function measure() {
+    var top = body.getBoundingClientRect().top - body.scrollTop;
+    var bottom = 0, kids = body.children;
+    for (var i = 0; i < kids.length; i++) {
+      var r = kids[i].getBoundingClientRect();
+      if (!r.height && !r.width) continue; // hidden, scripts, styles
+      var mb = parseFloat(getComputedStyle(kids[i]).marginBottom) || 0;
+      bottom = Math.max(bottom, r.bottom + mb);
+    }
+    var pb = parseFloat(getComputedStyle(body).paddingBottom) || 0;
+    return Math.ceil(bottom - top + pb);
+  }
+
+  function send(force) {
+    var h = measure();
+    if (!force && h === last) return;
+    last = h;
+    window.parent.postMessage({ type: 'setHeight', height: h }, '*');
+  }
+
+  function schedule() {
+    if (raf) return;
+    raf = requestAnimationFrame(function () { raf = 0; send(false); });
+  }
+
+  // Watch the content (the body itself is now a fixed-size scroll box)
+  var ro = 'ResizeObserver' in window ? new ResizeObserver(schedule) : null;
+  function watchKids() {
+    if (!ro) return;
+    ro.observe(body);
+    for (var i = 0; i < body.children.length; i++) ro.observe(body.children[i]);
+  }
+  watchKids();
+  if ('MutationObserver' in window) {
+    new MutationObserver(function () { watchKids(); schedule(); })
+      .observe(body, { childList: true, subtree: true, attributes: true, characterData: true });
+  }
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', function () { send(true); });
+  document.addEventListener('load', schedule, true);
+  document.addEventListener('transitionend', schedule, true);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { send(true); });
+
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'requestHeight') send(true);
+  });
+
+  [0, 300, 1000, 2500, 5000].forEach(function (t) { setTimeout(function () { send(true); }, t); });
+})();
+</script>
+</body>
+</html>

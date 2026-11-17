@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add listing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Cormorant+Garamond:wght@600&display=swap" rel="stylesheet">
+<style>
+/* ── Pixel Pals build standards ─────────────────────────────────────
+   No visible scrollbars anywhere (everything still scrolls), media never
+   wider than its box, 16px form text on phones so iOS doesn't zoom.
+   Height: the reporter at the end of this file (setHeight → site-wide listener). */
+*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{width:0;height:0;display:none}
+img,video,canvas{max-width:100%}
+@media (max-width:760px){input,select,textarea{font-size:16px!important}}
+
+:root{
+  --ink:#14161A; --panel:#1C1F25; --panel-2:#232730; --line:#2A2E36; --line-soft:#22252C;
+  --text:#E8E6E1; --dim:#9298A3; --dimmer:#6B7280;
+  --gold:#BD9B68; --gold-hi:#CDB184; --gold-soft:rgba(189,155,104,.15);
+  --ok:#7FB496; --ok-soft:rgba(127,180,150,.14); --no:#D9736B; --no-soft:rgba(217,115,107,.13);
+  --r:12px; --ui:'Manrope',system-ui,-apple-system,sans-serif; --disp:'Cormorant Garamond',Georgia,serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;padding:0}
+body{background:var(--ink);color:var(--text);font:14px/1.5 var(--ui);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.wrap{max-width:880px;margin:0 auto;padding:22px 20px 40px}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.top h1{font:600 clamp(28px,4vw,38px)/1.1 var(--disp);margin:0;flex:1;min-width:200px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);background:var(--panel);
+  padding:9px 15px;border-radius:10px;cursor:pointer;font-weight:600;font-size:13px;min-height:40px;white-space:nowrap}
+.btn:hover:not([disabled]){background:var(--panel-2);border-color:#353A44}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:#17130A}
+.btn.primary:hover:not([disabled]){background:var(--gold-hi);border-color:var(--gold-hi)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:6px 11px;min-height:34px;font-size:12.5px}
+
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:5px;margin-bottom:16px}
+@media(max-width:520px){.tabs{grid-template-columns:repeat(2,1fr)}}
+.tab{border:0;background:transparent;border-radius:8px;padding:10px 8px;font-weight:700;font-size:13.5px;color:var(--dim);cursor:pointer}
+.tab[aria-selected=true]{background:var(--gold-soft);color:var(--text);box-shadow:inset 0 0 0 1px rgba(189,155,104,.55)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:14px}
+.card h2{font-size:15px;margin:0 0 4px;font-weight:700}
+.card .sub{color:var(--dim);font-size:13px;margin:0 0 14px}
+.more{display:flex;width:100%;justify-content:space-between;align-items:center;background:none;border:0;padding:0;cursor:pointer;font-weight:700;font-size:15px;color:var(--text)}
+.more small{color:var(--dim);font-weight:500;font-size:13px}
+.more span:last-child{font-size:20px;color:var(--gold);line-height:1}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+.fld label,.fld .lab{display:block;font-size:12.5px;color:var(--dim);font-weight:600;margin-bottom:6px}
+.fld .req{color:var(--gold)}
+.fld input,.fld select,.fld textarea{width:100%;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:42px;font-size:16px}
+.fld textarea{min-height:96px;resize:vertical;line-height:1.5}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--gold)}
+.fld.bad input,.fld.bad select,.fld.bad textarea,.fld.bad .chips,.fld.bad .drop{border-color:var(--no)}
+.fld .hint{font-size:12px;color:var(--dimmer);margin:5px 0 0}
+
+.chips{display:flex;flex-wrap:wrap;gap:7px;border:1px solid transparent;border-radius:10px}
+.chip{border:1px solid var(--line);background:var(--ink);border-radius:99px;padding:6px 12px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--dim)}
+.chip[aria-pressed=true]{border-color:var(--gold);background:var(--gold-soft);color:var(--text)}
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;border:1px solid transparent;border-radius:10px}
+.check{display:flex;gap:9px;align-items:center;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--ink);cursor:pointer;font-weight:600;font-size:13px}
+.check input{width:17px;height:17px;accent-color:var(--gold);margin:0;flex:none}
+.fld label.check{display:flex;margin:0;color:var(--text);font-size:13px}
+.fld .check input{width:17px;height:17px;min-height:0;padding:0;border:0;background:none}
+:root{color-scheme:dark}
+.empty{color:var(--dim);font-size:13px;padding:10px 12px;border:1px dashed var(--line);border-radius:10px}
+.empty button{background:none;border:0;padding:0;color:var(--gold);font-weight:700;cursor:pointer;text-decoration:underline}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:var(--ink);padding:9px 14px;font-weight:600;font-size:13px;cursor:pointer;color:var(--dim)}
+.seg button[aria-pressed=true]{background:var(--gold-soft);color:var(--text)}
+
+.drop{border:1.5px dashed var(--line);border-radius:10px;padding:16px;text-align:center;cursor:pointer;color:var(--dim);font-size:13px;background:var(--ink)}
+.drop b{display:block;color:var(--text);margin-bottom:2px}
+.drop:hover{border-color:var(--gold)}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:9px;margin-top:10px}
+.ph{position:relative;aspect-ratio:1;border-radius:9px;overflow:hidden;border:1px solid var(--line);background:var(--panel-2)}
+.ph.hero{aspect-ratio:4/3;max-width:260px}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph.up img{opacity:.45}
+.ph .x{position:absolute;top:5px;right:5px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;cursor:pointer;font-size:15px;line-height:1}
+.ph .st{position:absolute;left:0;right:0;bottom:0;padding:4px;font-size:11px;font-weight:700;text-align:center;background:rgba(0,0,0,.66);color:#fff}
+.ph .st.fail{background:rgba(150,42,36,.92);cursor:pointer;border:0;width:100%;font:inherit;font-size:11px;font-weight:700}
+
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.msg{flex:1 1 100%;margin:4px 0 0;padding:11px 14px;border-radius:10px;font-size:13.5px}
+.msg.bad{background:var(--no-soft);border:1px solid rgba(217,115,107,.35);color:#F0B8B2}
+.done{text-align:center;padding:34px 18px}
+.done .ic{width:52px;height:52px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;background:var(--ok-soft);color:#A9D6BB;font-size:24px}
+.done h2{font:600 26px/1.2 var(--disp);margin:0 0 6px}
+.done p{color:var(--dim);margin:0 0 18px}
+.done .bar{justify-content:center}
+.skel{height:420px;border-radius:var(--r);background:linear-gradient(90deg,var(--panel) 0%,var(--panel-2) 50%,var(--panel) 100%);background-size:200% 100%;animation:sh 1.4s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+</style>
+<style id="pp-layout">
+/* ── Pixel Pals layout safeguards ─────────────────────────────────────
+   Transparent page so the Wix section shows through seamlessly, sturdy form
+   controls on phones, long words wrap instead of widening the page, and a
+   safety space at the end so nothing is ever cut off. */
+html,body{background:transparent!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-wrap:break-word}
+input,select,textarea,button{max-width:100%}
+table{max-width:100%}
+/* iOS draws date fields wider and taller than other inputs; make them behave. */
+input[type=date],input[type=time],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;display:block}
+input[type=date]::-webkit-date-and-time-value{text-align:start;min-height:1.4em}
+/* Save bars sit in the flow: a sticky bar needs a solid background, and the page has none. */
+.savebar{position:static!important;background:transparent!important}
+/* Width: 80% of the frame on wide screens, never narrower than before (880px). */
+.wrap{width:max(80%, min(100%, 880px))!important;max-width:none!important;margin-left:auto!important;margin-right:auto!important}
+@media (max-width:1100px){.wrap{padding-left:20px!important;padding-right:20px!important}}
+@media (max-width:600px){.wrap{padding-left:14px!important;padding-right:14px!important}}
+/* Safety space under the content (counted by the height reporter). */
+.pp-safe-space{display:block;height:140px}
+@media (max-width:760px){.pp-safe-space{height:calc(180px + env(safe-area-inset-bottom, 0px))}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="skel"></div></div>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const post = m => { try{ window.parent.postMessage(m,"*"); }catch(e){} };
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+let D = null, tab = "venue", busy = false, error = "", done = null, loadError = "", moreOpen = false;
+const vals = { venue:{}, catering:{}, package:{}, promotion:{} };   // what's been typed, kept across tabs
+const extra = {};                                                   // chips the vendor added themselves
+const photos = { hero:null, gallery:[], catHero:null };             // {preview, url, status}
+let badFields = [];
+
+/* ── the four forms ──────────────────────────────────────────── */
+const FORMS = {
+  venue: { label:"Venue", save:"Publish venue", sections:[
+    { h:"Your venue", items:[
+      {k:"venueName", t:"text", l:"Venue name", req:1},
+      {k:"city", t:"text", l:"City", list:"cities"},
+      {k:"address", t:"text", l:"Address"},
+      {k:"locationType", t:"select", l:"Indoor or outdoor", opts:"locationTypes"},
+      {k:"description", t:"textarea", l:"Description", full:1, hint:"What makes it special for a wedding — the hall, the view, the style."}]},
+    { h:"Photos", items:[ {k:"hero", t:"hero", l:"Cover photo", req:1, full:1}, {k:"gallery", t:"gallery", l:"Gallery", full:1} ]},
+    { h:"Guests and price", items:[
+      {k:"maxGuests", t:"number", l:"Maximum guests"}, {k:"pricePerGuest", t:"number", l:"Price per guest (JOD)"},
+      {k:"venueTypes", t:"chips", l:"Venue type", opts:"venueTypes", full:1}]},
+    { h:"More details", more:1, items:[
+      {k:"minGuests", t:"number", l:"Minimum guests"}, {k:"prepSuites", t:"text", l:"Bridal preparation suite"},
+      {k:"eventTypes", t:"chips", l:"Celebrations you host", opts:"eventTypes", full:1},
+      {k:"amenities", t:"chips", l:"Amenities", opts:"amenities", full:1},
+      {k:"popularMonths", t:"chips", l:"Popular wedding months", opts:"months", full:1},
+      {k:"startingPrice", t:"number", l:"Starting price (JOD)"}, {k:"pricePerPackage", t:"number", l:"Price per package (JOD)"},
+      {k:"depositToHold", t:"number", l:"Deposit to hold the date (JOD)"}, {k:"cancellationNotice", t:"text", l:"Cancellation notice"},
+      {k:"cateringPolicy", t:"text", l:"Catering policy"}, {k:"alcoholPolicy", t:"text", l:"Alcohol policy"},
+      {k:"parking", t:"text", l:"Parking"}, {k:"distance", t:"number", l:"Distance from 7th Circle (km)"},
+      {k:"phoneContact", t:"tel", l:"Mobile"}, {k:"venueLandline", t:"tel", l:"Landline"},
+      {k:"emailContact", t:"email", l:"Email", full:1}]}
+  ]},
+  catering: { label:"Catering", save:"Publish catering option", needs:"venues", sections:[
+    { h:"Catering option", items:[
+      {k:"cuisineName", t:"text", l:"Cuisine or menu name", req:1},
+      {k:"price", t:"number", l:"Price per person (JOD)", req:1},
+      {k:"description", t:"textarea", l:"Description", req:1, full:1},
+      {k:"catHero", t:"hero", l:"Photo", req:1, full:1},
+      {k:"venueIds", t:"owned", l:"Available at", from:"venues", req:1, full:1}]}
+  ]},
+  package: { label:"Package", save:"Publish package", needs:"catering", sections:[
+    { h:"Package", items:[
+      {k:"packageName", t:"text", l:"Package name", req:1},
+      {k:"price", t:"number", l:"Price (JOD)", req:1},
+      {k:"guestMin", t:"number", l:"Minimum guests"}, {k:"guestMax", t:"number", l:"Maximum guests"},
+      {k:"validUntil", t:"date", l:"Valid until", req:1},
+      {k:"description", t:"textarea", l:"What's included", req:1, full:1},
+      {k:"venueIds", t:"owned", l:"Venues", from:"venues", req:1, full:1},
+      {k:"cateringIds", t:"owned", l:"Catering options", from:"catering", req:1, full:1}]}
+  ]},
+  promotion: { label:"Promotion", save:"Publish promotion", needs:"packages", sections:[
+    { h:"Promotion", items:[
+      {k:"promotionName", t:"text", l:"Promotion name", req:1},
+      {k:"discount", t:"discount", l:"Discount", req:1},
+      {k:"startDate", t:"date", l:"Starts", req:1}, {k:"endDate", t:"date", l:"Ends", req:1},
+      {k:"description", t:"textarea", l:"Details", req:1, full:1},
+      {k:"venueIds", t:"owned", l:"Venues", from:"venues", req:1, full:1},
+      {k:"packageIds", t:"owned", l:"Packages", from:"packages", req:1, full:1}]}
+  ]}
+};
+const NEEDS = { venues:["a venue","venue"], catering:["a catering option","catering"], packages:["a package","package"] };
+
+/* ── sizing ──────────────────────────────────────────────────── */
+/* Height: the Pixel Pals reporter at the end of this file (setHeight → site-wide listener). */
+
+/* The body is the scroll box (see the reporter), so scroll it rather than the window. */
+function scrollToEl(el){
+  const sc = document.body;
+  const top = Math.round(el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 80);
+  sc.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+}
+
+/* ── rendering ───────────────────────────────────────────────── */
+const options = key => key==="months" ? MONTHS : [...new Set([...((D.choices||{})[key]||[]), ...(extra[key]||[])])];
+function field(it){
+  const v = vals[tab][it.k], bad = badFields.includes(it.k) ? " bad" : "";
+  const lab = `<label for="f-${it.k}">${esc(it.l)}${it.req?' <span class="req">*</span>':""}</label>`;
+  const hint = it.hint ? `<p class="hint">${esc(it.hint)}</p>` : "";
+  const wrap = (inner, labOverride) => `<div class="fld${it.full?" full":""}${bad}" data-f="${it.k}">${labOverride||lab}${inner}${hint}</div>`;
+  switch (it.t){
+    case "textarea": return wrap(`<textarea id="f-${it.k}" maxlength="4000">${esc(v||"")}</textarea>`);
+    case "select": return wrap(`<select id="f-${it.k}"><option value="">Choose…</option>${options(it.opts).map(o=>`<option${o===v?" selected":""}>${esc(o)}</option>`).join("")}</select>`);
+    case "chips": {
+      const sel = v || [];
+      return wrap(`<div class="chips" role="group">${options(it.opts).map(o=>`<button type="button" class="chip" data-chip="${it.k}" data-v="${esc(o)}" aria-pressed="${sel.includes(o)}">${esc(o)}</button>`).join("")}</div>
+`,
+        `<span class="lab">${esc(it.l)}</span>`);
+    }
+    case "owned": {
+      const list = D[it.from] || [], sel = v || [];
+      if (!list.length) return wrap(`<div class="empty">You don't have ${NEEDS[it.from][0]} yet. <button type="button" data-tab="${NEEDS[it.from][1]==="catering"?"catering":NEEDS[it.from][1]==="package"?"package":"venue"}">Add ${NEEDS[it.from][0]} first</button></div>`, `<span class="lab">${esc(it.l)}${it.req?' <span class="req">*</span>':""}</span>`);
+      return wrap(`<div class="checks">${list.map(o=>`<label class="check"><input type="checkbox" data-own="${it.k}" value="${esc(o.id)}"${sel.includes(o.id)?" checked":""}>${esc(o.label)}</label>`).join("")}</div>`,
+        `<span class="lab">${esc(it.l)}${it.req?' <span class="req">*</span>':""}</span>`);
+    }
+    case "discount": {
+      const type = vals[tab].discountType || "percent";
+      return wrap(`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="seg">
+        <button type="button" data-dtype="percent" aria-pressed="${type==="percent"}">% off</button>
+        <button type="button" data-dtype="fixed" aria-pressed="${type==="fixed"}">JOD off</button></div>
+        <input id="f-discountValue" type="number" min="0" step="any" inputmode="decimal" style="max-width:140px" value="${esc(vals[tab].discountValue||"")}"></div>`,
+        `<span class="lab">Discount <span class="req">*</span></span>`);
+    }
+    case "hero": {
+      const p = photos[it.k];
+      return wrap(p ? `<div class="photos"><div class="ph hero${p.status==="up"?" up":""}"><img src="${esc(p.preview||p.url)}" alt="">
+          <button type="button" class="x" data-rm="${it.k}" aria-label="Remove">×</button>${badge(p, it.k)}</div></div>`
+        : `<div class="drop" data-pick="${it.k}"><b>Upload a photo</b>JPG or PNG — click to choose</div>`,
+        `<span class="lab">${esc(it.l)}${it.req?' <span class="req">*</span>':""}</span>`);
+    }
+    case "gallery": {
+      const g = photos.gallery;
+      return wrap(`${g.length<24?`<div class="drop" data-pick="gallery"><b>Add photos</b>Up to 24 — you can choose several at once</div>`:""}
+        ${g.length?`<div class="photos">${g.map((p,i)=>`<div class="ph${p.status==="up"?" up":""}"><img src="${esc(p.preview||p.url)}" alt="">
+          <button type="button" class="x" data-rmg="${i}" aria-label="Remove">×</button>${badge(p,"g"+i)}</div>`).join("")}</div>`:""}`,
+        `<span class="lab">${esc(it.l)}</span>`);
+    }
+    default: {
+      const type = it.t==="number" ? `number" min="0" step="any" inputmode="decimal` : it.t;
+      return wrap(`<input id="f-${it.k}" type="${type}" value="${esc(v||"")}"${it.list?` list="dl-${it.k}"`:""} maxlength="${it.t==="number"?"":"300"}">
+        ${it.list?`<datalist id="dl-${it.k}">${options(it.list).map(o=>`<option value="${esc(o)}">`).join("")}</datalist>`:""}`);
+    }
+  }
+}
+function badge(p, key){
+  if (p.status==="up") return `<span class="st">Uploading…</span>`;
+  if (p.status==="fail") return `<button type="button" class="st fail" data-retry="${key}" title="${esc(p.reason||"")}">Failed · retry</button>`;
+  return "";
+}
+
+function render(){
+  const app = $("#app");
+  if (!D){ app.innerHTML = loadError ? `<div class="card"><h2>We couldn't open this page</h2><p class="sub">${esc(loadError)}</p></div>` : `<div class="skel"></div>`; return; }
+  collect();
+  const F = FORMS[tab];
+  const head = `<div class="top"><h1>Add a listing</h1><button class="btn ghost sm" type="button" data-nav="dashboard">Back to dashboard</button></div>
+    <div class="tabs" role="tablist">${Object.entries(FORMS).map(([k,f])=>`<button class="tab" type="button" role="tab" data-tab="${k}" aria-selected="${k===tab}">${f.label}</button>`).join("")}</div>`;
+  if (done){
+    app.innerHTML = head + `<div class="card done" role="status"><div class="ic">✓</div><h2>${esc(done.title)}</h2><p>It's live now. You can switch it off any time from your dashboard.</p>
+      <div class="bar"><button class="btn primary" type="button" data-again>Add another ${esc(FORMS[done.kind].label.toLowerCase())}</button>
+      <button class="btn" type="button" data-nav="dashboard">Back to dashboard</button></div></div>`;
+    return wire();
+  }
+  app.innerHTML = head + `<form id="form" novalidate>${F.sections.map(sec=> sec.more
+      ? `<section class="card"><button type="button" class="more" id="moreBtn" aria-expanded="${moreOpen}"><span>${esc(sec.h)} <small>(optional)</small></span><span aria-hidden="true">${moreOpen?"−":"+"}</span></button>
+         ${moreOpen?`<div class="grid" style="margin-top:14px">${sec.items.map(field).join("")}</div>`:""}</section>`
+      : `<section class="card"><h2>${esc(sec.h)}</h2><div class="grid" style="margin-top:12px">${sec.items.map(field).join("")}</div></section>`).join("")}
+    <div class="bar"><button class="btn primary" type="submit" ${busy||uploading()?"disabled":""}>${busy?"Publishing…":uploading()?"Waiting for photos…":esc(F.save)}</button>
+    ${error?`<p class="msg bad" role="alert">${esc(error)}</p>`:""}</div></form>
+    <input type="file" id="picker" accept="image/jpeg,image/png,image/webp,image/*" hidden>`;
+  wire();
+}
+
+/* keep typed values when re-rendering or switching tabs */
+function collect(){
+  const f = $("#form"); if (!f) return;
+  const V = vals[f.dataset.formTab || tab];
+  $$("#form [id^=f-]").forEach(el=>{ V[el.id.slice(2)] = el.value; });
+  const owned = {}; $$("#form [data-own]").forEach(cb=>{ (owned[cb.dataset.own] ||= []); if (cb.checked) owned[cb.dataset.own].push(cb.value); });
+  Object.assign(V, owned);
+}
+
+/* ── interaction ─────────────────────────────────────────────── */
+let pickFor = null;
+function wire(){
+  const form = $("#form"); if (form) form.dataset.formTab = tab;
+  $$("[data-tab]").forEach(b=> b.onclick = ()=>{ collect(); tab=b.dataset.tab; error=""; badFields=[]; done=null; render(); });
+  $$("[data-nav]").forEach(b=> b.onclick = ()=> post({type:"al:nav", to:b.dataset.nav}));
+  const again=$("[data-again]"); if (again) again.onclick = ()=>{ done=null; render(); };
+  $$("[data-chip]").forEach(b=> b.onclick = ()=>{
+    collect(); const V=vals[tab], k=b.dataset.chip, v=b.dataset.v; V[k] = V[k]||[];
+    V[k] = V[k].includes(v) ? V[k].filter(x=>x!==v) : [...V[k], v]; render(); });
+  $$("[data-dtype]").forEach(b=> b.onclick = ()=>{ collect(); vals[tab].discountType=b.dataset.dtype; render(); });
+  const picker=$("#picker");
+  $$("[data-pick]").forEach(d=> d.onclick = ()=>{ pickFor=d.dataset.pick; picker.multiple = pickFor==="gallery"; picker.value=""; picker.click(); });
+  if (picker) picker.onchange = ()=> addFiles([...picker.files]);
+  $$("[data-rm]").forEach(b=> b.onclick = ()=>{ photos[b.dataset.rm]=null; render(); });
+  $$("[data-rmg]").forEach(b=> b.onclick = ()=>{ photos.gallery.splice(+b.dataset.rmg,1); render(); });
+  $$("[data-retry]").forEach(b=> b.onclick = ()=>{ const k=b.dataset.retry; const p = k[0]==="g" && !photos[k] ? photos.gallery[+k.slice(1)] : photos[k]; if (p){ p.status="up"; queue.push(p); pump(); render(); } });
+  const mb=$("#moreBtn"); if (mb) mb.onclick = ()=>{ collect(); moreOpen=!moreOpen; render(); };
+  if (form) form.onsubmit = e=>{ e.preventDefault(); submit(); };
+ 
+}
+
+/* ── photos: shrink, then upload one at a time ───────────────── */
+const queue = []; let pumping = false, seq = 0;
+const uploading = () => [photos.hero, photos.catHero, ...photos.gallery].some(p=>p && p.status==="up");
+function shrink(file){
+  return new Promise((res, rej)=>{
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = ()=>{ const s=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight));
+      const c=document.createElement("canvas"); c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s);
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(url);
+      let q=.82, out=c.toDataURL("image/jpeg",q); while(out.length>900000 && q>.45){ q-=.08; out=c.toDataURL("image/jpeg",q); } res(out); };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); rej(new Error("That file isn't an image we can open. Try a JPG or PNG.")); };
+    img.src = url;
+  });
+}
+async function addFiles(files){
+  const target = pickFor; error="";
+  for (const f of (target==="gallery" ? files.slice(0, 24-photos.gallery.length) : files.slice(0,1))){
+    try{
+      const preview = await shrink(f);
+      const p = { uid:"p"+(++seq), preview, name:f.name, status:"up", url:"" };
+      if (target==="gallery") photos.gallery.push(p); else photos[target] = p;
+      queue.push(p);
+    }catch(e){ error = e.message; }
+  }
+  render(); pump();
+}
+function pump(){
+  if (pumping) return; const p = queue.shift(); if (!p) return;
+  pumping = true; p.tries=(p.tries||0)+1;
+  post({type:"al:upload", uid:p.uid, dataUrl:p.preview, name:p.name});
+  p.timer = setTimeout(()=>uploaded(p.uid, null, "Timed out"), 60000);
+}
+function findPhoto(uid){ return [photos.hero, photos.catHero, ...photos.gallery].find(p=>p && p.uid===uid); }
+function uploaded(uid, url, reason){
+  const p = findPhoto(uid); pumping = false;
+  if (p){ clearTimeout(p.timer);
+    if (url){ p.url=url; p.status="ok"; }
+    else if (p.tries < 2) { queue.unshift(p); }
+    else { p.status="fail"; p.reason=reason||""; } }
+  render(); pump();
+}
+
+/* ── saving ──────────────────────────────────────────────────── */
+function submit(){
+  if (busy) return;
+  collect(); error=""; badFields=[];
+  const F = FORMS[tab], V = vals[tab];
+  const missing = [];
+  F.sections.forEach(s=>s.items.forEach(it=>{
+    if (!it.req) return;
+    const v = it.t==="hero" ? (photos[it.k] && photos[it.k].url) : it.t==="discount" ? V.discountValue : V[it.k];
+    if (!v || (Array.isArray(v) && !v.length)){ missing.push(it.l.toLowerCase()); badFields.push(it.k); }
+  }));
+  if (missing.length){ error = "Still needed: " + missing.join(", ") + "."; render(); const el=$(".fld.bad"); if (el) scrollToEl(el); return; }
+  const payload = Object.assign({}, V);
+  if (tab==="promotion") payload.discountType = V.discountType || "percent";
+  busy = true; render();
+  post({ type:"al:save", kind:tab, payload,
+         hero: tab==="venue" ? photos.hero.url : tab==="catering" ? photos.catHero.url : null,
+         gallery: tab==="venue" ? photos.gallery.filter(p=>p.url).map(p=>p.url) : [] });
+  clearTimeout(window.__t); window.__t = setTimeout(()=>{ if (busy){ busy=false; error="That's taking too long. Check your connection and try again."; render(); } }, 45000);
+}
+
+window.addEventListener("message", e=>{
+  const d = e.data; if (!d || typeof d!=="object") return;
+  if (d.type==="al:data"){
+    if (!d.ok){ loadError = d.error || "Please refresh the page."; return render(); }
+    D = d.data; if (d.kind && FORMS[d.kind] && !lastKindApplied){ tab = d.kind; lastKindApplied = true; }
+    render();
+  }
+  if (d.type==="al:uploaded") uploaded(d.uid, d.url);
+  if (d.type==="al:uploadFailed") uploaded(d.uid, null, d.error);
+  if (d.type==="al:saved"){
+    clearTimeout(window.__t); busy=false;
+    if (!d.ok){ error = d.error || "That didn't publish. Please try again."; return render(); }
+    const name = vals[d.kind].venueName || vals[d.kind].cuisineName || vals[d.kind].packageName || vals[d.kind].promotionName || "";
+    done = { kind:d.kind, title: (name ? `“${name}”` : FORMS[d.kind].label) + " is published" };
+    vals[d.kind] = {}; if (d.kind==="venue"){ photos.hero=null; photos.gallery=[]; } if (d.kind==="catering") photos.catHero=null;
+    render();
+  }
+});
+let lastKindApplied = false;
+/* Say "ready" every second until the page answers — the page's listener may
+   attach after this iframe loads, and a single message would be lost. */
+let __answered = false;
+window.addEventListener("message", e => { if (e.data && e.data.type === "al:data") __answered = true; });
+(function ping(n){
+  if (__answered) return;
+  try{ window.parent.postMessage({type:"al:ready"}, "*"); }catch(e){}
+    if (n === 20 && !D){ loadError = "This page isn't connected yet. Check the HTML element's ID is addFrame, that the ADD LISTING page code is pasted in, and that the site is published."; render(); }
+  if (n < 30) setTimeout(() => ping(n + 1), 1000);
+})(0);
+
+</script>
+<div class="pp-safe-space" aria-hidden="true"></div>
+<!-- Pixel Pals iframe auto-height reporter v3 (body is the scroll box).
+     Scrolls inside the iframe until the site-wide listener sizes it.
+     Once the site-wide listener sizes the iframe, there is nothing left to scroll. -->
+<script>
+(function () {
+  if (window.__ppReporter) return;
+  window.__ppReporter = true;
+
+  var s = document.createElement('style');
+  s.textContent =
+    'html{height:100%!important;min-height:0!important;overflow:hidden!important}' +
+    'body{height:100%!important;min-height:0!important;margin:0;overflow-x:hidden!important;overflow-y:auto!important;' +
+      '-webkit-overflow-scrolling:touch;overscroll-behavior:auto;scrollbar-width:none;-ms-overflow-style:none;display:flow-root}' +
+    'html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0;display:none}';
+  document.head.appendChild(s);
+
+  var body = document.body, last = -1, raf = 0;
+
+  // Height of the content itself, not the scroll box (so the iframe can shrink as well as grow)
+  function measure() {
+    var top = body.getBoundingClientRect().top - body.scrollTop;
+    var bottom = 0, kids = body.children;
+    for (var i = 0; i < kids.length; i++) {
+      var r = kids[i].getBoundingClientRect();
+      if (!r.height && !r.width) continue; // hidden, scripts, styles
+      var mb = parseFloat(getComputedStyle(kids[i]).marginBottom) || 0;
+      bottom = Math.max(bottom, r.bottom + mb);
+    }
+    var pb = parseFloat(getComputedStyle(body).paddingBottom) || 0;
+    return Math.ceil(bottom - top + pb);
+  }
+
+  function send(force) {
+    var h = measure();
+    if (!force && h === last) return;
+    last = h;
+    window.parent.postMessage({ type: 'setHeight', height: h }, '*');
+  }
+
+  function schedule() {
+    if (raf) return;
+    raf = requestAnimationFrame(function () { raf = 0; send(false); });
+  }
+
+  // Watch the content (the body itself is now a fixed-size scroll box)
+  var ro = 'ResizeObserver' in window ? new ResizeObserver(schedule) : null;
+  function watchKids() {
+    if (!ro) return;
+    ro.observe(body);
+    for (var i = 0; i < body.children.length; i++) ro.observe(body.children[i]);
+  }
+  watchKids();
+  if ('MutationObserver' in window) {
+    new MutationObserver(function () { watchKids(); schedule(); })
+      .observe(body, { childList: true, subtree: true, attributes: true, characterData: true });
+  }
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', function () { send(true); });
+  document.addEventListener('load', schedule, true);
+  document.addEventListener('transitionend', schedule, true);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { send(true); });
+
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'requestHeight') send(true);
+  });
+
+  [0, 300, 1000, 2500, 5000].forEach(function (t) { setTimeout(function () { send(true); }, t); });
+})();
+</script>
+</body>
+</html>

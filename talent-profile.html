@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talent profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://static.wixstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Mulish:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Pixel Pals build standards ─────────────────────────────────────
+   No visible scrollbars anywhere (everything still scrolls), media never
+   wider than its box, 16px form text on phones so iOS doesn't zoom, and a
+   little side padding on phones so nothing touches the screen edge.
+   Height: the reporter at the end of this file (setHeight → site-wide listener). */
+*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{width:0;height:0;display:none}
+img,video,canvas{max-width:100%}
+@media (max-width:760px){input,select,textarea{font-size:16px!important}}
+@media (max-width:600px){.wrap,.page{padding-left:14px!important;padding-right:14px!important}}
+
+  :root {
+    color-scheme: dark;
+    --bg:            #0C0C0B;
+    --surface:       #141413;
+    --field:         #181713;
+    --field-hover:   #1E1C19;
+    --border:        #383733;
+    --border-quiet:  #262625;
+    --gold:          #AA936F;
+    --gold-tint:     rgba(170,147,111,0.10);
+    --gold-line:     rgba(170,147,111,0.28);
+    --gold-soft:     #C4B091;
+    --text:          #FFFFFF;
+    --body:          #ADADAD;
+    --label:         #A8A7A3;
+    --placeholder:   #8C8C8B;
+    --danger:        #C4705A;
+    --danger-tint:   #241713;
+    --r-field:       8px;
+    --r-card:        12px;
+    --font-display:  "Playfair Display", Georgia, serif;
+    --font-body:     "Mulish", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page { max-width: 1050px; margin: 0 auto; }
+
+  .eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--gold); margin: 0 0 8px;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    border-radius: var(--r-card);
+    overflow: hidden;
+    min-height: 360px;
+    display: flex; align-items: flex-end;
+    background: var(--surface);
+  }
+  .hero img {
+    position: absolute; inset: 0; z-index: 0;
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  /* Two scrims: the horizontal one protects the text column; the vertical one
+     grounds the card into the page below it. Explicit z-index because ::after
+     is the last child of .hero and would otherwise paint over the text. */
+  .hero::after {
+    content: ""; position: absolute; inset: 0; z-index: 1;
+    background:
+      linear-gradient(to right,  rgba(8,8,7,0.88) 0%, rgba(8,8,7,0.62) 38%, rgba(8,8,7,0.20) 78%, rgba(8,8,7,0.10) 100%),
+      linear-gradient(to bottom, rgba(8,8,7,0.30) 0%, rgba(8,8,7,0.34) 38%, rgba(12,12,11,0.96) 100%);
+  }
+  .hero-in { position: relative; z-index: 2; padding: 32px 30px; width: 100%; }
+  @media (max-width: 600px) { .hero-in { padding: 24px 18px; } .hero { min-height: 300px; } }
+
+  .hero h1, .hero .tagline, .hero .herometa, .hero .back {
+    text-shadow: 0 1px 3px rgba(0,0,0,0.55), 0 2px 22px rgba(0,0,0,0.5);
+  }
+
+  .back {
+    display: inline-block;
+    color: #D2D2D0; font-size: 14px; text-decoration: none;
+    margin: 0 0 14px; transition: color 140ms ease;
+  }
+  .back:hover { color: var(--gold); }
+
+  .hero h1 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(28px, 4.6vw, 44px); line-height: 1.1;
+    margin: 0 0 6px; max-width: 20ch; overflow-wrap: anywhere;
+  }
+  .tagline { color: var(--gold); font-size: 16px; margin: 0 0 12px; }
+
+  .herometa { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; font-size: 14px; color: #D2D2D0; }
+  .herometa .rating { color: var(--gold); font-weight: 600; }
+  .herometa svg { width: 14px; height: 14px; vertical-align: -2px; margin-right: 5px; stroke: var(--gold); fill: none; stroke-width: 1.6; }
+  .herometa .star { fill: var(--gold); stroke: none; }
+
+  /* ---------- Layout ---------- */
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 26px; margin: 30px 0 0; }
+  @media (min-width: 820px) {
+    .cols { grid-template-columns: minmax(0, 1.55fr) minmax(280px, 1fr); gap: 30px; }
+    .aside { position: sticky; top: 20px; align-self: start; }
+  }
+
+  .lede { font-size: 16px; line-height: 1.75; color: var(--body); margin: 0 0 22px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-card); padding: 22px;
+  }
+  @media (max-width: 600px) { .card { padding: 18px; } }
+  .card + .card { margin-top: 18px; }
+
+  /* ---------- Aside panel ---------- */
+  .price { font-family: var(--font-display); font-size: 26px; line-height: 1.2; margin: 0 0 20px; }
+  .price small { display: block; font-family: var(--font-body); font-size: 13px; color: var(--placeholder); font-weight: 400; margin-top: 6px; }
+
+  .btn {
+    border-radius: var(--r-card);
+    cursor: pointer; display: block; width: 100%;
+    font-family: var(--font-body); font-size: 15px; font-weight: 600;
+    padding: 14px 20px; text-align: center; text-decoration: none;
+    transition: filter 140ms ease, background 140ms ease;
+  }
+  .btn.solid { background: var(--gold); border: 1px solid var(--gold); color: var(--text); }
+  .btn.solid:hover { filter: brightness(1.08); }
+  .btn[disabled] { opacity: 0.5; cursor: not-allowed; filter: none; }
+  .btn + .btn { margin-top: 10px; }
+
+  .rule { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  .contact { display: grid; gap: 10px; margin: 0 0 20px; }
+  .contact a, .contact span {
+    color: var(--body); font-size: 14px; text-decoration: none;
+    display: flex; align-items: center; gap: 9px; word-break: break-word;
+  }
+  .contact a:hover { color: var(--gold); }
+  .contact svg { flex: 0 0 auto; width: 15px; height: 15px; stroke: var(--gold); fill: none; stroke-width: 1.6; }
+
+  /* ---------- Sections ---------- */
+  .sect { margin: 44px 0 0; }
+  .sect > h2 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: 26px; margin: 0 0 4px;
+  }
+  .sect > p.sub { font-size: 14px; color: var(--placeholder); margin: 0 0 20px; line-height: 1.6; }
+
+  /* ---------- Gallery ---------- */
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 16px; }
+  .shot {
+    position: relative; border-radius: var(--r-card); overflow: hidden;
+    aspect-ratio: 4 / 3; background: var(--field);
+    border: 1px solid var(--border-quiet);
+  }
+  .shot img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 620ms cubic-bezier(0.22,0.61,0.36,1); }
+  .shot:hover img { transform: scale(1.05); }
+  .shot figcaption {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to top, rgba(12,12,11,0.92), rgba(12,12,11,0));
+    color: var(--text); font-size: 13px; padding: 26px 14px 12px;
+  }
+  .shot img[data-broken] { display: none; }
+  .shot.broken { display: grid; place-items: center; }
+  .shot.broken::before {
+    content: "Photo unavailable";
+    color: var(--border); font-size: 12px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+
+  .vidwrap {
+    position: relative; aspect-ratio: 16 / 9;
+    background: var(--field); border: 1px solid var(--border-quiet);
+    border-radius: var(--r-card); overflow: hidden;
+  }
+  .vidwrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+  /* ---------- Enquiry form ---------- */
+  label.f { display: block; margin: 0 0 16px; }
+  label.f > span {
+    display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--body); margin: 0 0 8px;
+  }
+  .req { color: var(--gold); margin-left: 3px; font-style: normal; }
+
+  input[type="text"], input[type="tel"], input[type="email"], input[type="number"], input[type="date"], input[type="url"], input[type="search"], textarea {
+    width: 100%; background: var(--field);
+    border: 1px solid var(--border); border-radius: var(--r-field);
+    color: var(--text); font-family: var(--font-body); font-size: 15px;
+    padding: 12px 14px; min-height: 45px;
+    transition: border-color 140ms ease, background 140ms ease;
+  }
+  textarea { min-height: 108px; resize: vertical; line-height: 1.65; }
+  input[type="date"] { height: 45px; line-height: normal; }   /* iOS ignores min-height on date fields */
+  input::-webkit-calendar-picker-indicator {
+    filter: invert(64%) sepia(18%) saturate(520%) hue-rotate(2deg) brightness(94%);
+    cursor: pointer;
+  }
+
+  input::placeholder, textarea::placeholder { color: var(--placeholder); }
+  input:hover, textarea:hover { background: #1E1C19; }
+  input:focus-visible, textarea:focus-visible, button:focus-visible {
+    outline: none; border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(170,147,111,0.22);
+  }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); gap: 0 18px; }
+
+  .msg { border-radius: var(--r-field); font-size: 14px; line-height: 1.6; margin: 16px 0 0; padding: 12px 15px; }
+  .msg.ok   { background: var(--gold-tint); border: 1px solid var(--gold-line); color: var(--gold-soft); }
+  .msg.err  { background: var(--danger-tint); border: 1px solid rgba(196,112,90,0.45); color: var(--danger); }
+  .msg.busy { background: var(--surface); border: 1px solid var(--border); color: var(--body); }
+
+  .hint { display: block; font-style: normal; font-size: 13px; color: var(--placeholder); margin: 7px 0 0; line-height: 1.5; }
+  .err-msg { font-style: normal; display: block; font-size: 13px; color: var(--danger); margin: 7px 0 0; }
+  .invalid input, .invalid textarea { border-color: var(--danger); }
+
+  .skel { background: var(--surface); border: 1px solid var(--border-quiet); border-radius: var(--r-card); }
+  #loading .skel + .skel { margin-top: 16px; }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes riseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    @keyframes pulse  { 0%,100% { opacity: 0.45; } 50% { opacity: 0.75; } }
+    .anim { opacity: 0; animation: riseIn 520ms cubic-bezier(0.22,0.61,0.36,1) forwards; }
+    .skel { animation: pulse 1.5s ease-in-out infinite; }
+  }
+  @media (prefers-reduced-motion: reduce) { .anim { opacity: 1; } }
+
+  /* Category eyebrow sits above the name in the hero */
+  .hero .cat {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--gold); margin: 0 0 8px;
+  }
+  .hero .badge {
+    display: inline-block; background: var(--gold); color: #1A1509;
+    border-radius: 999px; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 5px 12px; margin: 0 0 12px;
+  }
+
+  /* At-a-glance strip */
+  .glance { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 0 0 24px; }
+  .glance div {
+    background: var(--surface); border: 1px solid var(--border-quiet);
+    border-radius: var(--r-field); padding: 14px 15px; min-width: 0;
+  }
+  .glance .n { font-family: var(--font-display); font-size: 22px; line-height: 1.1; }
+  .glance .k {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.13em;
+    text-transform: uppercase; color: var(--gold); margin: 6px 0 0;
+  }
+
+  /* Plain chip row for languages / service areas */
+  .plainchips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 22px; }
+  .plainchips span {
+    background: var(--field); border: 1px solid var(--border-quiet);
+    border-radius: 999px; color: var(--body);
+    font-size: 13px; padding: 6px 13px;
+  }
+
+  .sociallinks { display: flex; flex-wrap: wrap; gap: 10px; }
+  .sociallinks a {
+    background: transparent; border: 1px solid var(--border);
+    border-radius: var(--r-field); color: var(--body);
+    font-size: 14px; font-weight: 600; padding: 10px 16px;
+    text-decoration: none; transition: border-color 140ms ease, color 140ms ease;
+  }
+  .sociallinks a:hover { border-color: var(--gold); color: var(--gold); }
+</style>
+<style id="pp-layout">
+/* ── Pixel Pals layout safeguards ─────────────────────────────────────
+   Transparent page so the Wix section shows through seamlessly, sturdy form
+   controls on phones, long words wrap instead of widening the page, and a
+   safety space at the end so nothing is ever cut off. */
+html,body{background:transparent!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-wrap:break-word}
+input,select,textarea,button{max-width:100%}
+table{max-width:100%}
+/* iOS draws date fields wider and taller than other inputs; make them behave. */
+input[type=date],input[type=time],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;display:block}
+input[type=date]::-webkit-date-and-time-value{text-align:start;min-height:1.4em}
+/* Save bars sit in the flow: a sticky bar needs a solid background, and the page has none. */
+.savebar{position:static!important;background:transparent!important}
+/* Width: 80% of the frame on wide screens, never narrower than before (1050px). */
+.page{width:max(80%, min(100%, 1050px))!important;max-width:none!important;margin-left:auto!important;margin-right:auto!important}
+@media (max-width:1100px){.page{padding-left:20px!important;padding-right:20px!important}}
+@media (max-width:600px){.page{padding-left:14px!important;padding-right:14px!important}}
+/* Safety space under the content (counted by the height reporter). */
+.pp-safe-space{display:block;height:140px}
+@media (max-width:760px){.pp-safe-space{height:calc(180px + env(safe-area-inset-bottom, 0px))}}
+</style>
+<style id="couples-gate">
+  /* ---------- couples-only pop-up (over the enquiry form) ---------- */
+  .gate-host { position: relative; }
+  .gate {
+    position: absolute; inset: 0; z-index: 20; display: flex; justify-content: center; align-items: flex-start;
+    padding: 40px 16px; background: rgba(12,12,11,0.78); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    border-radius: var(--r-card);
+  }
+  .gate[hidden] { display: none; }
+  .gate-card {
+    width: 100%; max-width: 460px; background: var(--surface); border: 1px solid var(--gold-line);
+    border-radius: var(--r-card); padding: 26px 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  }
+  .gate-card h3 { font-family: var(--font-display); font-weight: 400; font-size: 23px; line-height: 1.25; margin: 0 0 10px; color: var(--text); }
+  .gate-card p { font-size: 15px; line-height: 1.65; color: var(--body); margin: 0 0 20px; }
+  .gate-acts { display: flex; flex-direction: column; gap: 10px; }
+  .gate-acts button {
+    font-family: var(--font-body); font-size: 15px; font-weight: 600; border-radius: var(--r-field);
+    padding: 12px 18px; cursor: pointer; width: 100%;
+  }
+  .gate-go { background: var(--gold); border: 1px solid var(--gold); color: #1A1509; }
+  .gate-go:hover { filter: brightness(1.08); }
+  .gate-alt { background: transparent; border: 1px solid var(--gold-line); color: var(--gold-soft); }
+  .gate-x { background: none; border: 0 !important; color: var(--placeholder); font-weight: 500 !important; padding: 6px !important; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div id="loading">
+    <div class="skel" style="min-height:360px"></div>
+    <div class="skel" style="height:150px"></div>
+  </div>
+
+  <div id="content" hidden>
+
+    <div class="hero anim" id="hero">
+      <img id="heroImg" alt="" hidden>
+      <div class="hero-in">
+        <a class="back" id="backLink" href="#">&larr; Back to talent</a>
+        <span class="badge" id="tFeatured" hidden>Featured</span>
+        <p class="cat" id="tCategory"></p>
+        <h1 id="tTitle">Profile</h1>
+        <p class="tagline" id="tHeadline" hidden></p>
+        <div class="herometa">
+          <span class="rating" id="tRating" hidden></span>
+          <span id="tCity" hidden></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div class="main">
+        <div class="glance" id="glance" hidden></div>
+
+        <p class="lede" id="tBio" hidden></p>
+
+        <div id="areasBlock" hidden>
+          <p class="eyebrow">Where they work</p>
+          <div class="plainchips" id="tAreas"></div>
+        </div>
+
+        <div id="langBlock" hidden>
+          <p class="eyebrow">Languages</p>
+          <div class="plainchips" id="tLangs"></div>
+        </div>
+      </div>
+
+      <aside class="aside">
+        <div class="card">
+          <p class="eyebrow" id="priceLabel">Starting from</p>
+          <p class="price" id="tPrice">On request</p>
+
+          <button type="button" class="btn solid" id="enquiryJump">Request a booking</button>
+
+          <hr class="rule" id="contactRule" hidden>
+          <div class="contact" id="tContact"></div>
+
+          <div class="sociallinks" id="tSocial"></div>
+        </div>
+      </aside>
+    </div>
+
+    <section class="sect" id="videoSect" hidden>
+      <h2>Showreel</h2>
+      <div class="vidwrap"><iframe id="video" title="Showreel" allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
+    </section>
+
+    <section class="sect" id="gallerySect" hidden>
+      <h2>Portfolio</h2>
+      <div class="gallery" id="gallery"></div>
+    </section>
+
+    <section class="sect gate-host" id="enquirySect">
+      <h2>Request a booking</h2>
+      <p class="sub">Goes straight to them. Most reply within a couple of days.</p>
+
+      <div class="card">
+        <form id="enquiryForm" novalidate>
+          <div class="grid2">
+            <label class="f" data-for="name">
+              <span>Your name<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="text" id="name" maxlength="90" autocomplete="name" placeholder="Layla Haddad">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="f" data-for="email">
+              <span>Email<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="email" id="email" autocomplete="email" placeholder="you@example.com">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="f" data-for="phone">
+              <span>Phone<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="tel" id="phone" autocomplete="tel" placeholder="+962 79 000 0000">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="f" data-for="eventDate">
+              <span>Event date<em class="req" aria-hidden="true">*</em><span class="sr"> (required)</span></span>
+              <input type="date" id="eventDate">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="f" data-for="guestCount">
+              <span>Guests</span>
+              <input type="number" id="guestCount" min="1" max="10000" step="1" placeholder="220">
+              <em class="err-msg" hidden></em>
+            </label>
+            <label class="f" data-for="budget">
+              <span>Budget (JOD)</span>
+              <input type="number" id="budget" min="0" step="50" placeholder="1200">
+              <em class="hint" id="budgetHint"></em>
+              <em class="err-msg" hidden></em>
+            </label>
+          </div>
+
+          <label class="f" data-for="message">
+            <span>Anything they should know</span>
+            <textarea id="message" maxlength="800" placeholder="Venue, timings, what you are hoping for on the day."></textarea>
+            <em class="hint"><span id="msgCount">0</span> of 800 characters.</em>
+          </label>
+
+          <button type="submit" class="btn solid" id="submitBtn" style="margin-top:8px">Send request</button>
+          <div class="msg" id="formMsg" hidden></div>
+        </form>
+      </div>
+    
+      <div class="gate" id="gate" hidden role="dialog" aria-modal="true" aria-labelledby="gateT">
+        <div class="gate-card">
+          <h3 id="gateT"></h3>
+          <p id="gateB"></p>
+          <div class="gate-acts">
+            <button type="button" class="gate-go" id="gateGo"></button>
+            <button type="button" class="gate-alt" id="gateAlt"></button>
+            <button type="button" class="gate-x" id="gateX">Not now</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var D = null;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function post(m) { try { window.parent.postMessage(m, "*"); } catch (e) {} }
+  /* Height: the Pixel Pals reporter at the end of this file (setHeight → site-wide listener). */
+
+  /* The body is the scroll box (see the reporter at the end). While the iframe
+     is a fixed height it scrolls itself; once the site-wide listener sizes it to
+     its content there is nothing to scroll inside, so the page scrolls instead. */
+  function scrollToEl(node, gap) {
+    var b = document.body;
+    var top = Math.max(0, Math.round(node.getBoundingClientRect().top - b.getBoundingClientRect().top + b.scrollTop - (gap || 24)));
+    if (b.scrollHeight > b.clientHeight + 2) b.scrollTo({ top: top, behavior: "smooth" });
+    else post({ type: "tp:scrollTo", y: top });
+  }
+
+  /* A Wix HTML component is a sandboxed iframe on a different origin to your
+     site. Same-site links have to navigate the parent window instead. */
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a) return;
+    var href = a.getAttribute("href");
+    if (!href || href.charAt(0) === "#") return;
+    if (/^(mailto:|tel:|sms:)/i.test(href)) return;
+    if (a.target === "_blank") return;                 // new tab is top-level already
+    if (e.defaultPrevented || e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;  // let modified clicks through
+    e.preventDefault();
+    post({ type: "iframe:navigate", url: href });
+  });
+
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+  function svg(d, cls) {
+    var s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    s.setAttribute("viewBox", "0 0 24 24");
+    s.setAttribute("stroke-linecap", "round");
+    s.setAttribute("stroke-linejoin", "round");
+    s.setAttribute("aria-hidden", "true");
+    if (cls) s.setAttribute("class", cls);
+    var p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", d);
+    s.appendChild(p);
+    return s;
+  }
+  var ICON_PHONE = "M4 5a2 2 0 0 1 2-2h2l2 4-2 1.5a11 11 0 0 0 5.5 5.5L15 12l4 2v2a2 2 0 0 1-2 2A13 13 0 0 1 4 5Z";
+  var ICON_PIN   = "M12 21s-6.5-6-6.5-10.5A6.5 6.5 0 0 1 18.5 10.5C18.5 15 12 21 12 21Z M12 8.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z";
+  var STAR       = "M12 3.6l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 10l6-.8z";
+
+  /* ---------- form plumbing ---------- */
+  var msg = $("message");
+  msg.addEventListener("input", function () { $("msgCount").textContent = String(msg.value.length); });
+
+  (function () {
+    var d = new Date();
+    $("eventDate").min = d.getFullYear() + "-" +
+      String(d.getMonth() + 1).padStart(2, "0") + "-" +
+      String(d.getDate()).padStart(2, "0");
+  })();
+
+  function wrapOf(n) { return n.closest("label.f") || n.closest(".f") || n.parentNode; }
+  function setErr(n, m) {
+    var w = wrapOf(n); w.classList.add("invalid");
+    var s = w.querySelector(".err-msg");
+    if (s) { s.textContent = m; s.hidden = false; }
+  }
+  function clearErr(n) {
+    var w = wrapOf(n); w.classList.remove("invalid");
+    var s = w.querySelector(".err-msg");
+    if (s) { s.hidden = true; s.textContent = ""; }
+  }
+  function clearAll() {
+    var f = $("enquiryForm");
+    Array.prototype.forEach.call(f.querySelectorAll(".invalid"), function (w) { w.classList.remove("invalid"); });
+    Array.prototype.forEach.call(f.querySelectorAll(".err-msg"), function (s) { s.hidden = true; s.textContent = ""; });
+  }
+  function showMsg(text, kind) {
+    var m = $("formMsg");
+    m.textContent = text;
+    m.className = "msg " + kind;
+    m.hidden = false;
+  }
+  function val(id) { return $(id).value.trim(); }
+
+  /* ---------- render ---------- */
+  function render(t) {
+    D = t;
+    $("loading").hidden = true;
+    $("content").hidden = false;
+
+    if (t.image) {
+      var hi = $("heroImg");
+      hi.src = t.image; hi.alt = t.title; hi.hidden = false;
+      hi.addEventListener("error", function () { hi.hidden = true; });
+    }
+    if (t.backUrl) $("backLink").href = t.backUrl;
+    if (t.featured) $("tFeatured").hidden = false;
+    $("tCategory").textContent = t.category || "";
+    $("tTitle").textContent = t.title;
+    if (t.headline) { $("tHeadline").textContent = t.headline; $("tHeadline").hidden = false; }
+
+    if (t.rating != null) {
+      var r = $("tRating");
+      r.textContent = "";
+      r.appendChild(svg(STAR, "star"));
+      r.appendChild(document.createTextNode(" " + t.rating + (t.reviewCount ? "  ·  " + t.reviewCount + " reviews" : "")));
+      r.hidden = false;
+    }
+    if (t.city) {
+      var c = $("tCity");
+      c.textContent = "";
+      c.appendChild(svg(ICON_PIN));
+      c.appendChild(document.createTextNode(t.city));
+      c.hidden = false;
+    }
+
+    /* at a glance */
+    var g = [];
+    if (t.yearsExperience != null) g.push([t.yearsExperience, "Years working"]);
+    if (t.eventsCompleted != null) g.push([t.eventsCompleted, "Events"]);
+    if (t.depositPercent != null) g.push([t.depositPercent + "%", "Deposit"]);
+    if (t.willTravel !== null && t.willTravel !== undefined) g.push([t.willTravel ? "Yes" : "No", "Will travel"]);
+    if (g.length) {
+      var gw = $("glance");
+      g.forEach(function (pair) {
+        var box = el("div");
+        box.appendChild(el("div", "n", String(pair[0])));
+        box.appendChild(el("p", "k", pair[1]));
+        gw.appendChild(box);
+      });
+      gw.hidden = false;
+    }
+
+    if (t.bio) { $("tBio").textContent = t.bio; $("tBio").hidden = false; }
+
+    if (t.serviceAreas && t.serviceAreas.length) {
+      var aw = $("tAreas");
+      t.serviceAreas.forEach(function (a) { aw.appendChild(el("span", null, a)); });
+      $("areasBlock").hidden = false;
+    }
+    if (t.languages && t.languages.length) {
+      var lw = $("tLangs");
+      t.languages.forEach(function (l) { lw.appendChild(el("span", null, l)); });
+      $("langBlock").hidden = false;
+    }
+
+    /* price panel */
+    if (t.priceFrom != null) {
+      $("tPrice").textContent = t.priceTo != null
+        ? "JOD " + t.priceFrom + " \u2013 " + t.priceTo
+        : "JOD " + t.priceFrom;
+      if (t.priceUnit) $("tPrice").appendChild(el("small", null, t.priceUnit));
+      $("budgetHint").textContent = "They usually start around JOD " + t.priceFrom + ".";
+    } else {
+      $("tPrice").textContent = "On request";
+      $("priceLabel").textContent = "Pricing";
+    }
+
+    var cw = $("tContact");
+    if (t.publicPhone) {
+      var a1 = el("a");
+      a1.href = "tel:" + t.publicPhone.replace(/\s+/g, "");
+      a1.appendChild(svg(ICON_PHONE));
+      a1.appendChild(document.createTextNode(t.publicPhone));
+      cw.appendChild(a1);
+      $("contactRule").hidden = false;
+    }
+
+    var sw = $("tSocial");
+    if (t.instagram) {
+      var ig = el("a", null, "Instagram");
+      ig.href = "https://instagram.com/" + t.instagram;
+      ig.target = "_blank"; ig.rel = "noopener";
+      sw.appendChild(ig);
+    }
+    if (t.website) {
+      var wb = el("a", null, "Website");
+      wb.href = t.website; wb.target = "_blank"; wb.rel = "noopener";
+      sw.appendChild(wb);
+    }
+
+    if (t.videoUrl) { $("video").src = t.videoUrl; $("videoSect").hidden = false; }
+
+    if (t.gallery && t.gallery.length) {
+      var gal = $("gallery");
+      t.gallery.forEach(function (item) {
+        var fig = el("figure", "shot");
+        fig.style.margin = "0";
+        var img = document.createElement("img");
+        img.src = item.src;
+        img.alt = item.alt || (t.title + " portfolio image");
+        img.loading = "lazy"; img.decoding = "async";
+        img.addEventListener("error", function () {
+          img.dataset.broken = "1";
+          fig.classList.add("broken");
+        });
+        fig.appendChild(img);
+        if (item.caption) fig.appendChild(el("figcaption", null, item.caption));
+        gal.appendChild(fig);
+      });
+      $("gallerySect").hidden = false;
+    }
+
+  }
+
+  /* ---------- actions ---------- */
+  $("enquiryJump").addEventListener("click", function () {
+    scrollToEl($("enquirySect"));
+    setTimeout(function () { $("name").focus({ preventScroll: true }); }, 500);
+  });
+  $("backLink").addEventListener("click", function (e) {
+    if (!D || !D.backUrl) { e.preventDefault(); post({ type: "tp:back" }); }
+  });
+
+
+  /* ---------- couples-only enquiries ----------
+     The page tells us who is viewing ({loggedIn, role, admin}). Only couples
+     (and admins) can send; anyone else gets the pop-up instead. The backend
+     enforces the same rule and answers with a code if it ever gets this far. */
+  var VIEWER = null;
+  var GATE = {
+    login: { t: "Create a couple account to send enquiries",
+             b: "Enquiries are for couples planning their wedding. It\u2019s free and takes a minute \u2014 then you can contact venues and talent, and keep track of every reply on your dashboard.",
+             go: "Create a couple account", alt: "I already have an account \u2014 log in" },
+    type:  { t: "Choose Couple to send enquiries",
+             b: "Your account doesn\u2019t have a type yet. Choose Couple and you can send enquiries straight away.",
+             go: "Choose Couple" },
+    other: { t: "Enquiries are for couples",
+             b: "You\u2019re signed in with a {role} account. To send enquiries, sign out and create a couple account." }
+  };
+  function gateKind(code) {
+    if (code === "LOGIN_REQUIRED") return "login";
+    if (code === "NEEDS_TYPE") return "type";
+    if (code === "COUPLE_ONLY") return "other";
+    if (code) return "";
+    if (!VIEWER || VIEWER.admin || VIEWER.role === "couple") return "";
+    return !VIEWER.loggedIn ? "login" : !VIEWER.role ? "type" : "other";
+  }
+  function openGate(kind) {
+    var g = GATE[kind]; if (!g) return;
+    var roleName = VIEWER && VIEWER.role === "vendor" ? "vendor" : VIEWER && VIEWER.role === "talent" ? "talent" : "business";
+    $("gateT").textContent = g.t;
+    $("gateB").textContent = g.b.replace("{role}", roleName);
+    $("gateGo").hidden = !g.go;  $("gateGo").textContent = g.go || "";
+    $("gateAlt").hidden = !g.alt; $("gateAlt").textContent = g.alt || "";
+    $("gateX").textContent = g.go ? "Not now" : "OK";
+    $("gate").hidden = false;
+    scrollToEl($("enquirySect"));
+    setTimeout(function () { ($(g.go ? "gateGo" : "gateX")).focus({ preventScroll: true }); }, 50);
+  }
+  function closeGate() { $("gate").hidden = true; }
+  $("gateGo").addEventListener("click", function () { post({ type: "tp:signup" }); });
+  $("gateAlt").addEventListener("click", function () { closeGate(); post({ type: "tp:login" }); });
+  $("gateX").addEventListener("click", closeGate);
+  $("gate").addEventListener("click", function (e) { if (e.target === $("gate")) closeGate(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("gate").hidden) closeGate(); });
+
+  $("enquiryForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var gk = gateKind("");
+    if (gk) { openGate(gk); return; }
+    clearAll();
+    var first = null;
+    function bad(id, m) { var n = $(id); setErr(n, m); if (!first) first = n; }
+
+    if (!val("name")) bad("name", "We need a name to pass on.");
+    var em = val("email");
+    if (!em) bad("email", "They reply to this address.");
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)) bad("email", "That does not look like a working email.");
+    if (!val("phone")) bad("phone", "Most vendors call back rather than email.");
+    if (!val("eventDate")) bad("eventDate", "Which date are you asking about?");
+    else if (val("eventDate") < $("eventDate").min) bad("eventDate", "That date has already passed.");
+
+    ["guestCount", "budget"].forEach(function (id) {
+      var raw = val(id);
+      if (raw !== "" && (isNaN(Number(raw)) || Number(raw) < 0)) bad(id, "Enter a number, or leave it blank.");
+    });
+
+    if (first) {
+      showMsg("A few fields need attention before this can be sent.", "err");
+      first.focus({ preventScroll: true });
+      scrollToEl(first, 120);
+      return;
+    }
+
+    $("submitBtn").disabled = true;
+    showMsg("Sending your request\u2026", "busy");
+
+    post({
+      type: "tp:enquiry",
+      payload: {
+        name: val("name"),
+        email: val("email"),
+        phone: val("phone"),
+        eventDate: val("eventDate"),
+        guestCount: val("guestCount") === "" ? null : Number(val("guestCount")),
+        budget: val("budget") === "" ? null : Number(val("budget")),
+        message: val("message")
+      }
+    });
+  });
+
+  $("enquiryForm").addEventListener("input", function (e) {
+    if (e.target.matches("input, textarea")) clearErr(e.target);
+  });
+
+  /* ---------- from Velo ---------- */
+  var answered = false;
+  window.addEventListener("message", function (event) {
+    var d = event.data;
+    if (!d || typeof d !== "object") return;
+
+    if (d.type === "tp:data") { answered = true; render(d.talent); }
+
+    if (d.type === "tp:error") {
+      answered = true;
+      $("loading").hidden = true;
+      $("content").hidden = false;
+      $("tTitle").textContent = "We could not load this profile";
+    }
+
+    if (d.type === "tp:viewer") { VIEWER = d.viewer || null; if (!gateKind("")) closeGate(); }
+
+    if (d.type === "tp:enquiryResult") {
+      if (!d.ok && gateKind(d.code)) { $("formMsg").hidden = true; $("submitBtn").disabled = false; openGate(gateKind(d.code)); return; }
+      if (d.ok) {
+        showMsg(d.message || "Sent. They will be in touch shortly.", "ok");
+        $("enquiryForm").reset();
+        clearAll();
+        $("msgCount").textContent = "0";
+        $("submitBtn").textContent = "Send another request";
+        $("submitBtn").disabled = false;
+      } else {
+        showMsg(d.message || "That did not send. Try again in a moment.", "err");
+        $("submitBtn").disabled = false;
+      }
+    }
+  });
+
+  /* Say "ready" every second until the page answers — its listener may attach
+     after this iframe loads, and a single message would be lost. */
+  (function ping(n) {
+    if (answered) return;
+    post({ type: "tp:ready" });
+    if (n < 30) setTimeout(function () { ping(n + 1); }, 1000);
+  })(0);
+})();
+</script>
+<div class="pp-safe-space" aria-hidden="true"></div>
+<!-- Pixel Pals iframe auto-height reporter v3 (body is the scroll box).
+     Scrolls inside the iframe until the site-wide listener sizes it.
+     Once the site-wide listener sizes the iframe, there is nothing left to scroll. -->
+<script>
+(function () {
+  if (window.__ppReporter) return;
+  window.__ppReporter = true;
+
+  var s = document.createElement('style');
+  s.textContent =
+    'html{height:100%!important;min-height:0!important;overflow:hidden!important}' +
+    'body{height:100%!important;min-height:0!important;margin:0;overflow-x:hidden!important;overflow-y:auto!important;' +
+      '-webkit-overflow-scrolling:touch;overscroll-behavior:auto;scrollbar-width:none;-ms-overflow-style:none;display:flow-root}' +
+    'html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0;display:none}';
+  document.head.appendChild(s);
+
+  var body = document.body, last = -1, raf = 0;
+
+  // Height of the content itself, not the scroll box (so the iframe can shrink as well as grow)
+  function measure() {
+    var top = body.getBoundingClientRect().top - body.scrollTop;
+    var bottom = 0, kids = body.children;
+    for (var i = 0; i < kids.length; i++) {
+      var r = kids[i].getBoundingClientRect();
+      if (!r.height && !r.width) continue; // hidden, scripts, styles
+      var mb = parseFloat(getComputedStyle(kids[i]).marginBottom) || 0;
+      bottom = Math.max(bottom, r.bottom + mb);
+    }
+    var pb = parseFloat(getComputedStyle(body).paddingBottom) || 0;
+    return Math.ceil(bottom - top + pb);
+  }
+
+  function send(force) {
+    var h = measure();
+    if (!force && h === last) return;
+    last = h;
+    window.parent.postMessage({ type: 'setHeight', height: h }, '*');
+  }
+
+  function schedule() {
+    if (raf) return;
+    raf = requestAnimationFrame(function () { raf = 0; send(false); });
+  }
+
+  // Watch the content (the body itself is now a fixed-size scroll box)
+  var ro = 'ResizeObserver' in window ? new ResizeObserver(schedule) : null;
+  function watchKids() {
+    if (!ro) return;
+    ro.observe(body);
+    for (var i = 0; i < body.children.length; i++) ro.observe(body.children[i]);
+  }
+  watchKids();
+  if ('MutationObserver' in window) {
+    new MutationObserver(function () { watchKids(); schedule(); })
+      .observe(body, { childList: true, subtree: true, attributes: true, characterData: true });
+  }
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', function () { send(true); });
+  document.addEventListener('load', schedule, true);
+  document.addEventListener('transitionend', schedule, true);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { send(true); });
+
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'requestHeight') send(true);
+  });
+
+  [0, 300, 1000, 2500, 5000].forEach(function (t) { setTimeout(function () { send(true); }, t); });
+})();
+</script>
+</body>
+</html>

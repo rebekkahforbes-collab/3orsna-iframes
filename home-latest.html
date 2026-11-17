@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Latest venues and talent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://static.wixstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Mulish:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── Pixel Pals build standards ─────────────────────────────────────
+   No visible scrollbars anywhere (everything still scrolls), media never
+   wider than its box, and a little side padding on phones.
+   Height: the reporter at the end of this file (setHeight → site-wide listener). */
+*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{width:0;height:0;display:none}
+img,video,canvas{max-width:100%}
+
+  :root {
+    color-scheme: dark;
+    --surface:       #141413;
+    --field:         #181713;
+    --border:        #383733;
+    --border-quiet:  #262625;
+    --gold:          #AA936F;
+    --gold-line:     rgba(170,147,111,0.28);
+    --gold-soft:     #C4B091;
+    --text:          #FFFFFF;
+    --body:          #ADADAD;
+    --placeholder:   #8C8C8B;
+    --r-card:        12px;
+    --font-display:  "Playfair Display", Georgia, serif;
+    --font-body:     "Mulish", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  /* Transparent, so the Wix section's own background shows through. */
+  html, body { margin: 0; padding: 0; background: transparent; color: var(--text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+
+  .wrap { max-width: 1050px; margin: 0 auto; padding: 8px 0 24px; }
+  @media (max-width: 600px) { .wrap { padding-left: 14px; padding-right: 14px; } }
+
+  /* Tabs: one grid, switched between venues and talent */
+  .tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--surface); border: 1px solid var(--border-quiet); border-radius: 999px; margin: 0 0 22px; max-width: 100%; }
+  .tab {
+    border: 0; background: transparent; color: var(--placeholder); cursor: pointer; border-radius: 999px;
+    font-family: var(--font-body); font-size: 14px; font-weight: 600; padding: 10px 20px; white-space: nowrap;
+    transition: background 160ms ease, color 160ms ease;
+  }
+  .tab:hover { color: var(--gold-soft); }
+  .tab[aria-selected="true"] { background: var(--gold); color: #1A1509; }
+  .tab:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(170,147,111,0.35); }
+  @media (max-width: 420px) { .tabs { display: flex; } .tab { flex: 1 1 0; padding: 10px 12px; } }
+
+  .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 0 0 22px; }
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin: 0 0 8px; }
+  .head h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(26px, 3.4vw, 34px); line-height: 1.15; margin: 0; }
+  .all {
+    color: var(--gold); font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap;
+    border-bottom: 1px solid var(--gold-line); padding-bottom: 2px; transition: color 140ms ease, border-color 140ms ease;
+  }
+  .all:hover { color: var(--gold-soft); border-color: var(--gold-soft); }
+  .all::after { content: " \2192"; }
+
+  /* Three across on wide screens, one per row on phones. */
+  .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+  @media (max-width: 760px) { .cards { grid-template-columns: minmax(0, 1fr); gap: 18px; } }
+
+  a.card {
+    position: relative; background: var(--surface); border: 1px solid var(--border-quiet); border-radius: var(--r-card);
+    color: inherit; display: flex; flex-direction: column; overflow: hidden; text-decoration: none; min-width: 0;
+    transition: border-color 200ms ease, transform 200ms ease;
+  }
+  a.card:hover { border-color: rgba(170,147,111,0.45); }
+  a.card:focus-visible { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(170,147,111,0.22); }
+
+  .media { aspect-ratio: 4 / 3; background: var(--field); overflow: hidden; }
+  .media img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 620ms cubic-bezier(0.22, 0.61, 0.36, 1); }
+  .media.empty { display: grid; place-items: center; color: var(--border); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .badge {
+    position: absolute; top: 12px; left: 12px; background: var(--gold); color: #1A1509; border-radius: 999px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 11px;
+  }
+  .new {
+    position: absolute; top: 12px; right: 12px; background: rgba(12,12,11,0.78); color: var(--gold-soft);
+    border: 1px solid var(--gold-line); border-radius: 999px; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 10px;
+  }
+
+  .body { display: flex; flex-direction: column; gap: 8px; padding: 18px; flex: 1 1 auto; }
+  .cat { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
+  .name { font-family: var(--font-display); font-size: 20px; font-weight: 400; line-height: 1.25; overflow-wrap: anywhere; }
+  .meta { font-size: 13px; color: var(--placeholder); line-height: 1.5; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tags span { background: var(--field); border: 1px solid var(--border-quiet); border-radius: 999px; color: var(--placeholder); font-size: 12px; padding: 4px 10px; white-space: nowrap; }
+  .price { color: var(--gold); font-size: 15px; font-weight: 600; margin-top: auto; padding-top: 4px; }
+  .price span { color: var(--placeholder); font-weight: 400; font-size: 13px; }
+
+  .skel { background: var(--surface); border: 1px solid var(--border-quiet); border-radius: var(--r-card); overflow: hidden; opacity: 0.6; }
+  .skel .m { aspect-ratio: 4 / 3; background: var(--field); }
+  .skel .b { padding: 18px; display: grid; gap: 10px; }
+  .skel .b i { display: block; height: 12px; border-radius: 4px; background: var(--field); }
+  .skel .b i:first-child { height: 18px; width: 70%; }
+  .skel .b i:last-child { width: 40%; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes riseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    @keyframes pulse  { 0%,100% { opacity: 0.45; } 50% { opacity: 0.75; } }
+    a.card { opacity: 0; animation: riseIn 520ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards; }
+    a.card:hover { transform: translateY(-3px); }
+    a.card:hover .media img { transform: scale(1.055); }
+    .skel { animation: pulse 1.5s ease-in-out infinite; }
+  }
+</style>
+<style id="pp-layout">
+/* ── Pixel Pals layout safeguards ─────────────────────────────────────
+   Transparent page so the Wix section shows through seamlessly, sturdy form
+   controls on phones, long words wrap instead of widening the page, and a
+   safety space at the end so nothing is ever cut off. */
+html,body{background:transparent!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-wrap:break-word}
+input,select,textarea,button{max-width:100%}
+table{max-width:100%}
+/* iOS draws date fields wider and taller than other inputs; make them behave. */
+input[type=date],input[type=time],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;display:block}
+input[type=date]::-webkit-date-and-time-value{text-align:start;min-height:1.4em}
+/* Save bars sit in the flow: a sticky bar needs a solid background, and the page has none. */
+.savebar{position:static!important;background:transparent!important}
+/* Width: 80% of the frame on wide screens, never narrower than before (1050px). */
+.wrap{width:max(80%, min(100%, 1050px))!important;max-width:none!important;margin-left:auto!important;margin-right:auto!important}
+@media (max-width:1100px){.wrap{padding-left:20px!important;padding-right:20px!important}}
+@media (max-width:600px){.wrap{padding-left:14px!important;padding-right:14px!important}}
+/* Safety space under the content (counted by the height reporter). */
+.pp-safe-space{display:block;height:140px}
+@media (max-width:760px){.pp-safe-space{height:calc(180px + env(safe-area-inset-bottom, 0px))}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section id="latest">
+    <div class="head">
+      <div><p class="eyebrow">Just added</p><h2>New on the platform</h2></div>
+      <a class="all" id="seeAll" href="/venues">See all venues</a>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Show new venues or new wedding talent">
+      <button class="tab" type="button" role="tab" id="tab-venues" aria-controls="cards" aria-selected="true">Venues</button>
+      <button class="tab" type="button" role="tab" id="tab-talent" aria-controls="cards" aria-selected="false" tabindex="-1">Wedding talent</button>
+    </div>
+    <div class="cards" id="cards" role="tabpanel" aria-labelledby="tab-venues"></div>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var COUNT = 3;
+  var NEW_DAYS = 14;               // the "New" tag shows on anything added in the last two weeks
+  var $ = function (id) { return document.getElementById(id); };
+  function post(m) { try { window.parent.postMessage(m, "*"); } catch (e) {} }
+
+  /* A Wix HTML component is a sandboxed iframe on another origin, so a site
+     link would load inside the box. The page navigates instead. */
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a) return;
+    var href = a.getAttribute("href");
+    if (!href || href.charAt(0) === "#" || a.target === "_blank") return;
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    post({ type: "iframe:navigate", url: href });
+  });
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined && text !== null) n.textContent = text;
+    return n;
+  }
+  function isNew(d) { return d && (Date.now() - new Date(d).getTime()) < NEW_DAYS * 86400000; }
+
+  function skeletons(host) {
+    host.innerHTML = "";
+    for (var i = 0; i < COUNT; i++) {
+      var s = el("div", "skel"); s.appendChild(el("div", "m"));
+      var b = el("div", "b"); b.appendChild(el("i")); b.appendChild(el("i")); b.appendChild(el("i"));
+      s.appendChild(b); host.appendChild(s);
+    }
+  }
+
+  function media(src, alt) {
+    var m = el("div", "media");
+    if (!src) { m.className = "media empty"; m.textContent = "No photo yet"; return m; }
+    var img = document.createElement("img");
+    img.src = src; img.alt = alt; img.loading = "lazy"; img.decoding = "async";
+    img.addEventListener("error", function () { m.className = "media empty"; m.textContent = "No photo yet"; });
+    m.appendChild(img);
+    return m;
+  }
+
+  function venueCard(v, i) {
+    var a = el("a", "card");
+    a.href = v.url || "/venues";
+    a.setAttribute("aria-label", v.name);
+    a.style.animationDelay = (i * 70) + "ms";
+    a.appendChild(media(v.image, v.name));
+    if (isNew(v.created)) a.appendChild(el("span", "new", "New"));
+
+    var b = el("div", "body");
+    b.appendChild(el("div", "name", v.name));
+    var bits = [];
+    if (v.city) bits.push(v.city);
+    if (v.maxGuests) bits.push("Up to " + v.maxGuests + " guests");
+    if (bits.length) b.appendChild(el("div", "meta", bits.join("  \u00b7  ")));
+    if (v.tags && v.tags.length) {
+      var t = el("div", "tags");
+      v.tags.slice(0, 2).forEach(function (x) { t.appendChild(el("span", null, x)); });
+      b.appendChild(t);
+    }
+    if (v.pricePerGuest != null) {
+      var p = el("div", "price", "JOD " + v.pricePerGuest + " "); p.appendChild(el("span", null, "per guest")); b.appendChild(p);
+    } else if (v.startingPrice != null) {
+      b.appendChild(el("div", "price", "From JOD " + v.startingPrice));
+    }
+    a.appendChild(b);
+    return a;
+  }
+
+  function talentCard(t, i) {
+    var a = el("a", "card");
+    a.href = t.url || "/wedding-talent";
+    a.setAttribute("aria-label", t.title + (t.category ? ", " + t.category : ""));
+    a.style.animationDelay = (i * 70) + "ms";
+    a.appendChild(media(t.image, t.title));
+    if (t.featured) a.appendChild(el("span", "badge", "Featured"));
+    if (isNew(t.created)) a.appendChild(el("span", "new", "New"));
+
+    var b = el("div", "body");
+    if (t.category) b.appendChild(el("div", "cat", t.category));
+    b.appendChild(el("div", "name", t.title));
+    if (t.headline) b.appendChild(el("div", "meta", t.headline));
+    if (t.city) b.appendChild(el("div", "meta", t.city));
+    if (t.priceFrom != null) {
+      var p = el("div", "price", "From JOD " + t.priceFrom + " ");
+      if (t.priceUnit) p.appendChild(el("span", null, t.priceUnit));
+      b.appendChild(p);
+    } else {
+      b.appendChild(el("div", "price", "Price on request"));
+    }
+    a.appendChild(b);
+    return a;
+  }
+
+  /* ---------- tabs ---------- */
+  var DATA = { venues: null, talent: null };
+  var LINKS = { venues: "/venues", talent: "/wedding-talent" };
+  var LABEL = { venues: "See all venues", talent: "See all talent" };
+  var current = "venues";
+
+  function draw() {
+    var host = $("cards");
+    var items = DATA[current];
+    host.setAttribute("aria-labelledby", "tab-" + current);
+    $("seeAll").setAttribute("href", LINKS[current]);
+    $("seeAll").textContent = LABEL[current];
+    ["venues", "talent"].forEach(function (k) {
+      var t = $("tab-" + k), on = k === current;
+      t.setAttribute("aria-selected", String(on));
+      t.tabIndex = on ? 0 : -1;
+    });
+    if (!items) { skeletons(host); return; }
+    host.innerHTML = "";
+    items.slice(0, COUNT).forEach(function (x, i) {
+      host.appendChild(current === "venues" ? venueCard(x, i) : talentCard(x, i));
+    });
+  }
+  function select(k) { if (k !== current && !$("tab-" + k).hidden) { current = k; draw(); } }
+
+  $("tab-venues").addEventListener("click", function () { select("venues"); });
+  $("tab-talent").addEventListener("click", function () { select("talent"); });
+  /* Arrow keys move between tabs, as screen-reader users expect from a tablist. */
+  document.querySelector(".tabs").addEventListener("keydown", function (e) {
+    if (["ArrowLeft", "ArrowRight", "Home", "End"].indexOf(e.key) === -1) return;
+    e.preventDefault();
+    var next = current === "venues" ? "talent" : "venues";
+    if (e.key === "Home") next = "venues";
+    if (e.key === "End") next = "talent";
+    select(next);
+    $("tab-" + current).focus();
+  });
+
+  draw();
+
+  var answered = false;
+  window.addEventListener("message", function (e) {
+    var d = e.data;
+    if (!d || typeof d !== "object" || d.type !== "hl:data") return;
+    answered = true;
+    if (d.venuesUrl) LINKS.venues = d.venuesUrl;
+    if (d.talentUrl) LINKS.talent = d.talentUrl;
+    DATA.venues = (d.venues || []).slice(0, COUNT);
+    DATA.talent = (d.talent || []).slice(0, COUNT);
+
+    // A type with nothing published yet loses its tab; with neither, the whole section hides.
+    var hasV = DATA.venues.length > 0, hasT = DATA.talent.length > 0;
+    $("tab-venues").hidden = !hasV;
+    $("tab-talent").hidden = !hasT;
+    document.querySelector(".tabs").hidden = !(hasV && hasT);
+    $("latest").hidden = !hasV && !hasT;
+    if (!hasV && hasT) current = "talent";
+    if (hasV && !hasT) current = "venues";
+    draw();
+  });
+
+  /* Say "ready" every second until the page answers — its listener may attach
+     after this iframe loads, and a single message would be lost. */
+  (function ping(n) {
+    if (answered) return;
+    post({ type: "hl:ready" });
+    if (n < 30) setTimeout(function () { ping(n + 1); }, 1000);
+  })(0);
+})();
+</script>
+<div class="pp-safe-space" aria-hidden="true"></div>
+<!-- Pixel Pals iframe auto-height reporter v3 (body is the scroll box).
+     Scrolls inside the iframe until the site-wide listener sizes it.
+     Once the site-wide listener sizes the iframe, there is nothing left to scroll. -->
+<script>
+(function () {
+  if (window.__ppReporter) return;
+  window.__ppReporter = true;
+
+  var s = document.createElement('style');
+  s.textContent =
+    'html{height:100%!important;min-height:0!important;overflow:hidden!important}' +
+    'body{height:100%!important;min-height:0!important;margin:0;overflow-x:hidden!important;overflow-y:auto!important;' +
+      '-webkit-overflow-scrolling:touch;overscroll-behavior:auto;scrollbar-width:none;-ms-overflow-style:none;display:flow-root}' +
+    'html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0;display:none}';
+  document.head.appendChild(s);
+
+  var body = document.body, last = -1, raf = 0;
+
+  // Height of the content itself, not the scroll box (so the iframe can shrink as well as grow)
+  function measure() {
+    var top = body.getBoundingClientRect().top - body.scrollTop;
+    var bottom = 0, kids = body.children;
+    for (var i = 0; i < kids.length; i++) {
+      var r = kids[i].getBoundingClientRect();
+      if (!r.height && !r.width) continue; // hidden, scripts, styles
+      var mb = parseFloat(getComputedStyle(kids[i]).marginBottom) || 0;
+      bottom = Math.max(bottom, r.bottom + mb);
+    }
+    var pb = parseFloat(getComputedStyle(body).paddingBottom) || 0;
+    return Math.ceil(bottom - top + pb);
+  }
+
+  function send(force) {
+    var h = measure();
+    if (!force && h === last) return;
+    last = h;
+    window.parent.postMessage({ type: 'setHeight', height: h }, '*');
+  }
+
+  function schedule() {
+    if (raf) return;
+    raf = requestAnimationFrame(function () { raf = 0; send(false); });
+  }
+
+  // Watch the content (the body itself is now a fixed-size scroll box)
+  var ro = 'ResizeObserver' in window ? new ResizeObserver(schedule) : null;
+  function watchKids() {
+    if (!ro) return;
+    ro.observe(body);
+    for (var i = 0; i < body.children.length; i++) ro.observe(body.children[i]);
+  }
+  watchKids();
+  if ('MutationObserver' in window) {
+    new MutationObserver(function () { watchKids(); schedule(); })
+      .observe(body, { childList: true, subtree: true, attributes: true, characterData: true });
+  }
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', function () { send(true); });
+  document.addEventListener('load', schedule, true);
+  document.addEventListener('transitionend', schedule, true);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { send(true); });
+
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'requestHeight') send(true);
+  });
+
+  [0, 300, 1000, 2500, 5000].forEach(function (t) { setTimeout(function () { send(true); }, t); });
+})();
+</script>
+</body>
+</html>

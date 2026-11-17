@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign up</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Cormorant+Garamond:wght@600&family=Amiri:wght@700&display=swap" rel="stylesheet">
+<style>
+/* ── Pixel Pals build standards ─────────────────────────────────────
+   No visible scrollbars anywhere (everything still scrolls), media never
+   wider than its box, 16px form text on phones so iOS doesn't zoom.
+   Height: the reporter at the end of this file (setHeight → site-wide listener). */
+*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{width:0;height:0;display:none}
+img,video,canvas{max-width:100%}
+@media (max-width:760px){input,select,textarea{font-size:16px!important}}
+
+/* Same tokens as the dashboards. To sit on a light page, change these. */
+:root{
+  --ink:#14161A; --panel:#1C1F25; --panel-2:#232730; --line:#2A2E36;
+  --text:#E8E6E1; --dim:#9298A3; --dimmer:#6B7280;
+  --gold:#BD9B68; --gold-hi:#CDB184; --gold-soft:rgba(189,155,104,.15);
+  --no:#D9736B; --no-soft:rgba(217,115,107,.13); --ok-soft:rgba(127,180,150,.14);
+  --r:14px;
+  --ui:'Manrope',system-ui,-apple-system,sans-serif; --ui-ar:'IBM Plex Sans Arabic','Manrope',sans-serif;
+  --disp:'Cormorant Garamond',Georgia,serif; --disp-ar:'Amiri',serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;padding:0}
+body{background:var(--ink);color:var(--text);font:15px/1.55 var(--ui);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body[dir=rtl]{font-family:var(--ui-ar)}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:8px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.wrap{max-width:620px;margin:0 auto;padding:28px 20px 36px}
+.bar{display:flex;justify-content:flex-end;margin-bottom:6px}
+.lang{background:none;border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--dim)}
+.lang:hover{color:var(--text);border-color:#353A44}
+h1{font:600 clamp(30px,5.4vw,40px)/1.1 var(--disp);margin:0 0 8px;text-align:center}
+body[dir=rtl] h1{font-family:var(--disp-ar);font-weight:700;line-height:1.35}
+.lede{color:var(--dim);text-align:center;margin:0 auto 24px;max-width:42ch}
+
+fieldset{border:0;margin:0 0 22px;padding:0;min-width:0}
+legend{font-size:13px;font-weight:600;color:var(--dim);margin-bottom:10px;padding:0}
+.types{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:560px){.types{grid-template-columns:1fr}}
+.type{position:relative;display:block;cursor:pointer}
+.type input{position:absolute;opacity:0;pointer-events:none}
+.type .box{display:flex;flex-direction:column;gap:6px;height:100%;padding:16px 14px 15px;border:1px solid var(--line);border-radius:var(--r);
+  background:var(--panel);transition:border-color .15s,background .15s}
+@media(max-width:560px){.type .box{flex-direction:row;align-items:center;gap:14px}}
+.type .ic{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--panel-2);color:var(--gold);flex:none}
+.type .ic svg{width:21px;height:21px}
+.type b{font-size:15.5px;font-weight:700}
+.type small{display:block;color:var(--dim);font-size:12.5px;line-height:1.45}
+.type:hover .box{border-color:#3A3F4A}
+.type input:checked + .box{border-color:var(--gold);background:linear-gradient(0deg,var(--gold-soft),var(--gold-soft)),var(--panel);box-shadow:0 0 0 1px var(--gold) inset}
+.type input:focus-visible + .box{outline:2px solid var(--gold);outline-offset:2px}
+fieldset.bad .box{border-color:rgba(217,115,107,.6)}
+
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.row{grid-template-columns:1fr}}
+.fld{margin-bottom:14px}
+.fld label{display:block;font-size:13px;font-weight:600;color:var(--dim);margin-bottom:6px}
+.fld input{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:11px 13px;min-height:46px;font-size:16px}
+.fld input:focus{outline:none;border-color:var(--gold)}
+.fld input.bad{border-color:var(--no)}
+.pw{position:relative}
+.pw input{padding-inline-end:68px}
+.pw button{position:absolute;inset-inline-end:6px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--dim);font-size:12.5px;font-weight:700;cursor:pointer;padding:6px 8px}
+.hint{font-size:12.5px;color:var(--dimmer);margin:6px 0 0}
+input[type=email]{direction:ltr}
+body[dir=rtl] input[type=email]{text-align:right}
+
+.go{width:100%;min-height:50px;border:0;border-radius:12px;background:var(--gold);color:#17130A;font-weight:700;font-size:15.5px;cursor:pointer;margin-top:6px;transition:background .15s}
+.go:hover:not([disabled]){background:var(--gold-hi)}
+.go[disabled]{opacity:.6;cursor:wait}
+.err{margin:14px 0 0;padding:11px 14px;border-radius:11px;background:var(--no-soft);border:1px solid rgba(217,115,107,.35);color:#F0B8B2;font-size:13.5px}
+.err button{background:none;border:0;color:#fff;text-decoration:underline;font-weight:700;cursor:pointer;padding:0}
+.alt{text-align:center;color:var(--dim);font-size:14px;margin:20px 0 0}
+.alt button{background:none;border:0;color:var(--gold);font-weight:700;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}
+
+.done{text-align:center;padding:30px 18px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+.done .ic{width:52px;height:52px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;background:var(--ok-soft);color:#A9D6BB}
+.done .ic svg{width:26px;height:26px}
+.done h2{font:600 26px/1.2 var(--disp);margin:0 0 8px}
+body[dir=rtl] .done h2{font-family:var(--disp-ar);font-weight:700}
+.done p{color:var(--dim);margin:0 auto;max-width:40ch}
+</style>
+<style id="pp-layout">
+/* ── Pixel Pals layout safeguards ─────────────────────────────────────
+   Transparent page so the Wix section shows through seamlessly, sturdy form
+   controls on phones, long words wrap instead of widening the page, and a
+   safety space at the end so nothing is ever cut off. */
+html,body{background:transparent!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-wrap:break-word}
+input,select,textarea,button{max-width:100%}
+table{max-width:100%}
+/* iOS draws date fields wider and taller than other inputs; make them behave. */
+input[type=date],input[type=time],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;display:block}
+input[type=date]::-webkit-date-and-time-value{text-align:start;min-height:1.4em}
+/* Save bars sit in the flow: a sticky bar needs a solid background, and the page has none. */
+.savebar{position:static!important;background:transparent!important}
+@media (max-width:1100px){.wrap{padding-left:20px!important;padding-right:20px!important}}
+@media (max-width:600px){.wrap{padding-left:14px!important;padding-right:14px!important}}
+/* Sign-up keeps its narrow column: a short form is harder to read stretched to 80%. */
+/* Safety space under the content (counted by the height reporter). */
+.pp-safe-space{display:block;height:140px}
+@media (max-width:760px){.pp-safe-space{height:calc(180px + env(safe-area-inset-bottom, 0px))}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let ui = (()=>{ try{ return localStorage.getItem("3orsna:uiLang") || "en"; }catch(e){ return "en"; } })();
+let mode = "form";              // form · pick (logged in, no account type) · pending
+let role = "", busy = false, err = "", errField = "", showPw = false, ready = false;
+
+const ICON = {
+  couple:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="9" cy="14" r="5.2"/><circle cx="15" cy="14" r="5.2"/><path d="M8 5.5 9 4h6l1 1.5-4 3.2z"/></svg>',
+  vendor:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M5 10v9M9.5 10v9M14.5 10v9M19 10v9"/><path d="M3 20h18"/></svg>',
+  talent:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>'
+};
+/* Account-type descriptions are placeholders — edit freely. */
+const T = {
+ en:{ lang:"العربية", title:"Create your account", lede:"Tell us how you'll use the site — you'll set up the rest in your own dashboard.",
+   pickTitle:"One last step", pickLede:"Choose your account type to open your dashboard.",
+   as:"I'm signing up as", types:{
+     couple:["Couple","Planning our wedding — invitation page and guest list."],
+     vendor:["Vendor","Wedding venues — halls, hotels, gardens and other event spaces."],
+     talent:["Talent","Every other wedding service — photographers, florists, make-up, DJs, singers, planners and more."] },
+   first:"First name", last:"Last name", email:"Email", pw:"Password", pwHint:"At least 8 characters.", show:"Show", hide:"Hide",
+   go:"Create account", going:"Creating your account…", cont:"Continue", conting:"Opening your dashboard…",
+   have:"Already have an account?", login:"Log in",
+   pendTitle:"Check your inbox", pendBody:"Your account is created. Confirm your email (or wait for approval) and then log in — you'll go straight to your dashboard.",
+   e:{ noRole:"Choose an account type.", noName:"Please enter your first name.", badEmail:"That email doesn't look right.",
+     weakPassword:"Use at least 8 characters for your password.", emailTaken:"There's already an account with this email.",
+     registerFailed:"We couldn't create your account. Please try again.", network:"Connection lost. Please try again.",
+     signedOut:"Please log in again.", logIn:"Log in instead" } },
+ ar:{ lang:"English", title:"أنشئوا حسابكم", lede:"أخبرونا كيف ستستخدمون الموقع — وستكملون الباقي من لوحة التحكم الخاصة بكم.",
+   pickTitle:"خطوة أخيرة", pickLede:"اختاروا نوع حسابكم لفتح لوحة التحكم.",
+   as:"أسجّل بصفتي", types:{
+     couple:["عروسان","نخطط لزفافنا — صفحة الدعوة وقائمة المدعوين."],
+     vendor:["قاعات ومواقع","أماكن الأعراس — قاعات، فنادق، حدائق وغيرها من أماكن الحفلات."],
+     talent:["مقدّمو الخدمات","كل خدمات الأعراس الأخرى — تصوير، ورود، مكياج، دي جي، مطربون، منظّمو حفلات وغيرها."] },
+   first:"الاسم الأول", last:"اسم العائلة", email:"البريد الإلكتروني", pw:"كلمة المرور", pwHint:"٨ أحرف على الأقل.", show:"إظهار", hide:"إخفاء",
+   go:"إنشاء الحساب", going:"جارٍ إنشاء حسابكم…", cont:"متابعة", conting:"جارٍ فتح لوحة التحكم…",
+   have:"لديكم حساب؟", login:"تسجيل الدخول",
+   pendTitle:"تفقّدوا بريدكم", pendBody:"تم إنشاء حسابكم. أكّدوا بريدكم الإلكتروني (أو انتظروا الموافقة) ثم سجّلوا الدخول — وستنتقلون مباشرة إلى لوحة التحكم.",
+   e:{ noRole:"اختاروا نوع الحساب.", noName:"من فضلك أدخلوا الاسم الأول.", badEmail:"البريد الإلكتروني غير صحيح.",
+     weakPassword:"استخدموا ٨ أحرف على الأقل لكلمة المرور.", emailTaken:"يوجد حساب بهذا البريد الإلكتروني.",
+     registerFailed:"تعذّر إنشاء حسابكم. حاولوا مرة أخرى.", network:"انقطع الاتصال. حاولوا مرة أخرى.",
+     signedOut:"من فضلك سجّلوا الدخول مجدداً.", logIn:"سجّلوا الدخول بدلاً من ذلك" } }
+};
+const t = () => T[ui];
+const post = m => { try{ window.parent.postMessage(m,"*"); }catch(e){} };
+
+/* Height: the Pixel Pals reporter at the end of this file (setHeight → site-wide listener). */
+
+function typesHtml(L){
+  return `<fieldset id="typeSet" class="${errField==="role"?"bad":""}"><legend>${L.as}</legend><div class="types" role="radiogroup">
+    ${["couple","vendor","talent"].map(k=>`<label class="type"><input type="radio" name="role" value="${k}" ${role===k?"checked":""}>
+      <span class="box"><span class="ic">${ICON[k]}</span><span><b>${L.types[k][0]}</b><small>${L.types[k][1]}</small></span></span></label>`).join("")}
+  </div></fieldset>`;
+}
+
+function render(){
+  const L = t(), app = $("#app");
+  document.documentElement.lang = ui; document.body.dir = ui==="ar" ? "rtl" : "ltr";
+  const keep = {}; ["s-first","s-last","s-email","s-pw"].forEach(id=>{ const el=document.getElementById(id); if (el) keep[id]=el.value; });
+  const focusId = document.activeElement && document.activeElement.id;
+  const lang = `<div class="bar"><button class="lang" type="button" id="langBtn">${L.lang}</button></div>`;
+  const errHtml = err ? `<p class="err" role="alert">${esc(L.e[err]||L.e.registerFailed)}${err==="emailTaken"?` <button type="button" data-login>${L.e.logIn}</button>`:""}</p>` : "";
+
+  if (mode === "pending"){
+    app.innerHTML = lang + `<div class="done" role="status"><div class="ic">${ICON.check}</div><h2>${L.pendTitle}</h2><p>${L.pendBody}</p>
+      <p class="alt" style="margin-top:18px"><button type="button" data-login>${L.login}</button></p></div>`;
+  } else if (mode === "pick"){
+    app.innerHTML = lang + `<h1>${L.pickTitle}</h1><p class="lede">${L.pickLede}</p>
+      <form id="f" novalidate>${typesHtml(L)}
+      <button class="go" type="submit" ${busy?"disabled":""}>${busy?L.conting:L.cont}</button>${errHtml}</form>`;
+  } else {
+    app.innerHTML = lang + `<h1>${L.title}</h1><p class="lede">${L.lede}</p>
+      <form id="f" novalidate>${typesHtml(L)}
+        <div class="row">
+          <div class="fld"><label for="s-first">${L.first}</label><input id="s-first" type="text" autocomplete="given-name" maxlength="60" class="${errField==="first"?"bad":""}"></div>
+          <div class="fld"><label for="s-last">${L.last}</label><input id="s-last" type="text" autocomplete="family-name" maxlength="60"></div>
+        </div>
+        <div class="fld"><label for="s-email">${L.email}</label><input id="s-email" type="email" autocomplete="email" inputmode="email" maxlength="120" class="${errField==="email"?"bad":""}"></div>
+        <div class="fld"><label for="s-pw">${L.pw}</label><div class="pw"><input id="s-pw" type="${showPw?"text":"password"}" autocomplete="new-password" maxlength="100" class="${errField==="pw"?"bad":""}">
+          <button type="button" id="pwBtn" aria-pressed="${showPw}">${showPw?L.hide:L.show}</button></div><p class="hint">${L.pwHint}</p></div>
+        <button class="go" type="submit" ${busy?"disabled":""}>${busy?L.going:L.go}</button>${errHtml}
+      </form>
+      <p class="alt">${L.have} <button type="button" data-login>${L.login}</button></p>`;
+  }
+  Object.entries(keep).forEach(([id,v])=>{ const el=document.getElementById(id); if (el) el.value=v; });
+  if (focusId){ const el=document.getElementById(focusId); if (el) el.focus(); }
+  wire();
+}
+
+function fail(code, field){ err=code; errField=field||""; busy=false; render();
+  const map={first:"s-first",email:"s-email",pw:"s-pw"}; const el=map[field]&&document.getElementById(map[field]); if (el) el.focus(); }
+
+function wire(){
+  $("#langBtn").onclick = ()=>{ ui = ui==="ar" ? "en" : "ar"; try{ localStorage.setItem("3orsna:uiLang",ui); }catch(e){} render(); };
+  document.querySelectorAll("[data-login]").forEach(b=> b.onclick = ()=> post({type:"3orsna:login"}));
+  document.querySelectorAll('input[name=role]').forEach(r=> r.onchange = ()=>{ role=r.value; if (errField==="role"){ err=""; errField=""; render(); } });
+  const pb=$("#pwBtn"); if (pb) pb.onclick = ()=>{ showPw=!showPw; render(); const p=$("#s-pw"); p.focus(); p.setSelectionRange(p.value.length,p.value.length); };
+  const f=$("#f"); if (!f) return;
+  f.onsubmit = e=>{
+    e.preventDefault(); if (busy) return;
+    if (!role) return fail("noRole","role");
+    if (mode === "pick"){ busy=true; err=""; render(); post({type:"3orsna:chooseRole", role}); return; }
+    const v = id => ($("#"+id).value||"").trim();
+    const data = { role, firstName:v("s-first"), lastName:v("s-last"), email:v("s-email"), password:$("#s-pw").value, lang:ui };
+    if (!data.firstName) return fail("noName","first");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(data.email)) return fail("badEmail","email");
+    if (data.password.length < 8) return fail("weakPassword","pw");
+    busy=true; err=""; errField=""; render();
+    post({type:"3orsna:signup", data});
+    clearTimeout(window.__t); window.__t = setTimeout(()=>{ if (busy) fail("network"); }, 30000);
+  };
+}
+
+window.addEventListener("message", e=>{
+  const d=e.data; if (!d || typeof d!=="object") return;
+  if (d.type==="3orsna:signupState"){ mode = d.loggedIn ? "pick" : "form"; busy=false; err=""; if (d.preset && !role && ["couple","vendor","talent"].includes(d.preset)) role=d.preset; render(); }
+  if (d.type==="3orsna:signupFailed"){ clearTimeout(window.__t);
+    const field = {noName:"first",badEmail:"email",emailTaken:"email",weakPassword:"pw",noRole:"role"}[d.reason]||"";
+    fail(d.reason, field); }
+  if (d.type==="3orsna:signupDone"){ clearTimeout(window.__t); busy=false; mode = d.status==="PENDING" ? "pending" : mode; render(); }
+});
+
+render();
+/* Say "ready" every second until the page answers — the page's listener may
+   attach after this iframe loads, and a single message would be lost. */
+let __answered = false;
+window.addEventListener("message", e => { if (e.data && e.data.type === "3orsna:signupState") __answered = true; });
+(function ping(n){
+  if (__answered) return;
+  try{ window.parent.postMessage({type:"3orsna:signupReady"}, "*"); }catch(e){}
+  if (n < 30) setTimeout(() => ping(n + 1), 1000);
+})(0);
+</script>
+<div class="pp-safe-space" aria-hidden="true"></div>
+<!-- Pixel Pals iframe auto-height reporter v3 (body is the scroll box).
+     Scrolls inside the iframe until the site-wide listener sizes it.
+     Once the site-wide listener sizes the iframe, there is nothing left to scroll. -->
+<script>
+(function () {
+  if (window.__ppReporter) return;
+  window.__ppReporter = true;
+
+  var s = document.createElement('style');
+  s.textContent =
+    'html{height:100%!important;min-height:0!important;overflow:hidden!important}' +
+    'body{height:100%!important;min-height:0!important;margin:0;overflow-x:hidden!important;overflow-y:auto!important;' +
+      '-webkit-overflow-scrolling:touch;overscroll-behavior:auto;scrollbar-width:none;-ms-overflow-style:none;display:flow-root}' +
+    'html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0;display:none}';
+  document.head.appendChild(s);
+
+  var body = document.body, last = -1, raf = 0;
+
+  // Height of the content itself, not the scroll box (so the iframe can shrink as well as grow)
+  function measure() {
+    var top = body.getBoundingClientRect().top - body.scrollTop;
+    var bottom = 0, kids = body.children;
+    for (var i = 0; i < kids.length; i++) {
+      var r = kids[i].getBoundingClientRect();
+      if (!r.height && !r.width) continue; // hidden, scripts, styles
+      var mb = parseFloat(getComputedStyle(kids[i]).marginBottom) || 0;
+      bottom = Math.max(bottom, r.bottom + mb);
+    }
+    var pb = parseFloat(getComputedStyle(body).paddingBottom) || 0;
+    return Math.ceil(bottom - top + pb);
+  }
+
+  function send(force) {
+    var h = measure();
+    if (!force && h === last) return;
+    last = h;
+    window.parent.postMessage({ type: 'setHeight', height: h }, '*');
+  }
+
+  function schedule() {
+    if (raf) return;
+    raf = requestAnimationFrame(function () { raf = 0; send(false); });
+  }
+
+  // Watch the content (the body itself is now a fixed-size scroll box)
+  var ro = 'ResizeObserver' in window ? new ResizeObserver(schedule) : null;
+  function watchKids() {
+    if (!ro) return;
+    ro.observe(body);
+    for (var i = 0; i < body.children.length; i++) ro.observe(body.children[i]);
+  }
+  watchKids();
+  if ('MutationObserver' in window) {
+    new MutationObserver(function () { watchKids(); schedule(); })
+      .observe(body, { childList: true, subtree: true, attributes: true, characterData: true });
+  }
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', function () { send(true); });
+  document.addEventListener('load', schedule, true);
+  document.addEventListener('transitionend', schedule, true);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { send(true); });
+
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'requestHeight') send(true);
+  });
+
+  [0, 300, 1000, 2500, 5000].forEach(function (t) { setTimeout(function () { send(true); }, t); });
+})();
+</script>
+</body>
+</html>
